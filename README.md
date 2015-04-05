@@ -11,7 +11,7 @@ This application displays syntax elements of hevc elementary streams. Input file
 Gui
 -----
 
-![alt tag](https://cloud.githubusercontent.com/assets/10683398/6668595/2699a5c4-cc1e-11e4-95f9-1db911c98dce.png)
+![alt tag](https://cloud.githubusercontent.com/assets/10683398/6995983/2f0a3974-db20-11e4-8d8f-cd6db7a954c4.png)
 
 
 Building requirements:
