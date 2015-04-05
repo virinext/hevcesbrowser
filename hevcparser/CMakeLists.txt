@@ -1,6 +1,11 @@
+FIND_PACKAGE(Boost)
+
 include_directories(
 	include/
+	${Boost_INCLUDE_DIR}
 )
+
+
 
 set(SOURCES
 	src/HevcParser.cpp
@@ -21,7 +26,9 @@ set(TEST_SOURCES
   tests/Parsing.cpp
 )
 
-ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)
+if(UNIX)
+	ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)
+endif()
 
 add_executable(hevcparser_test ${TEST_SOURCES}) 
 target_link_libraries(hevcparser_test hevcparser ${Boost_LIBRARIES})

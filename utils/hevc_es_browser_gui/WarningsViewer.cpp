@@ -18,6 +18,15 @@ void WarningsViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const HE
 }
 
 
+void WarningsViewer::onWarning(const std::string &warning, const HEVC::Parser::Info *pInfo)
+{
+  int row = rowCount();
+  insertRow(row);
+
+  setItem(row, 0, new QTableWidgetItem(QString("0x"+ QString::number(pInfo -> m_position, 16) + " (" + QString::number(pInfo -> m_position) + ")")));
+  setItem(row, 1, new QTableWidgetItem(QString(warning.c_str()))); 
+}
+
 void WarningsViewer::clear()
 {
   setRowCount(0);

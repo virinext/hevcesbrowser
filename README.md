@@ -28,6 +28,8 @@ Building:
 
 cd hevcesbrowser
 
+git submodule foreach git pull
+
 mkdir project
 
 cd project

@@ -31,6 +31,8 @@ class Consumer: public Parser::Consumer
       
       m_nalus.push_back(nalu);
     }
+
+    virtual void onWarning(const std::string &warning, const Parser::Info *pInfo) {};
         
     std::vector<NALUInfo>    m_nalus;
 };
@@ -67,7 +69,9 @@ BOOST_AUTO_TEST_CASE(SURFING_FIRST_30)
   BOOST_CHECK_EQUAL(pvps -> vps_max_layers_minus1, 0);
   BOOST_CHECK_EQUAL(pvps -> vps_max_sub_layers_minus1, 0);
   BOOST_CHECK_EQUAL(pvps -> vps_temporal_id_nesting_flag, 1);
-  
+  BOOST_CHECK_EQUAL(pvps -> vps_timing_info_present_flag, 0);
+  BOOST_CHECK_EQUAL(pvps -> vps_extension_flag, 0);
+
   BOOST_CHECK_EQUAL(consumer.m_nalus[1].m_info.m_position, 0x1d);
   BOOST_CHECK_EQUAL(consumer.m_nalus[1].m_pnalu -> getType(), NAL_SPS);
 
@@ -120,6 +124,12 @@ BOOST_AUTO_TEST_CASE(SURFING_FIRST_30)
   BOOST_CHECK_EQUAL(psps -> sample_adaptive_offset_enabled_flag, 0);
   BOOST_CHECK_EQUAL(psps -> pcm_enabled_flag, 0);
   BOOST_CHECK_EQUAL(psps -> num_short_term_ref_pic_sets, 5);
+
+  BOOST_CHECK_EQUAL(psps -> long_term_ref_pics_present_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> sps_temporal_mvp_enabled_flag, 1);
+  BOOST_CHECK_EQUAL(psps -> strong_intra_smoothing_enabled_flag, 1);
+  BOOST_CHECK_EQUAL(psps -> vui_parameters_present_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> sps_extension_flag, 0);
 
   
   BOOST_CHECK_EQUAL(consumer.m_nalus[2].m_info.m_position, 0x49);
@@ -298,6 +308,8 @@ BOOST_AUTO_TEST_CASE(SINTEL_FIRST_30)
   BOOST_CHECK_EQUAL(pvps -> vps_max_layers_minus1, 0);
   BOOST_CHECK_EQUAL(pvps -> vps_max_sub_layers_minus1, 2);
   BOOST_CHECK_EQUAL(pvps -> vps_temporal_id_nesting_flag, 0);
+  BOOST_CHECK_EQUAL(pvps -> vps_timing_info_present_flag, 0);
+  BOOST_CHECK_EQUAL(pvps -> vps_extension_flag, 0);
   
   BOOST_CHECK_EQUAL(consumer.m_nalus[1].m_info.m_position, 0x00000021);
   BOOST_CHECK_EQUAL(consumer.m_nalus[1].m_pnalu -> getType(), NAL_SPS);
@@ -306,7 +318,6 @@ BOOST_AUTO_TEST_CASE(SINTEL_FIRST_30)
   BOOST_CHECK_EQUAL(psps -> sps_video_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(psps -> sps_max_sub_layers_minus1, 2);
   BOOST_CHECK_EQUAL(psps -> sps_temporal_id_nesting_flag, 0);
-
   BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_profile_space, 0);
   BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_tier_flag, 0);
   BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_profile_idc, 0);
@@ -362,6 +373,14 @@ BOOST_AUTO_TEST_CASE(SINTEL_FIRST_30)
   BOOST_CHECK_EQUAL(psps -> sample_adaptive_offset_enabled_flag, 0);
   BOOST_CHECK_EQUAL(psps -> pcm_enabled_flag, 0);
   BOOST_CHECK_EQUAL(psps -> num_short_term_ref_pic_sets, 5);
+  BOOST_CHECK_EQUAL(psps -> short_term_ref_pic_set[0].num_negative_pics, 2);
+  BOOST_CHECK_EQUAL(psps -> short_term_ref_pic_set[0].num_positive_pics, 0);
+
+  BOOST_CHECK_EQUAL(psps -> long_term_ref_pics_present_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> sps_temporal_mvp_enabled_flag, 1);
+  BOOST_CHECK_EQUAL(psps -> strong_intra_smoothing_enabled_flag, 1);
+  BOOST_CHECK_EQUAL(psps -> vui_parameters_present_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> sps_extension_flag, 0);
 
   BOOST_CHECK_EQUAL(consumer.m_nalus[2].m_info.m_position, 0x0000005B);
   BOOST_CHECK_EQUAL(consumer.m_nalus[2].m_pnalu -> getType(), NAL_PPS);

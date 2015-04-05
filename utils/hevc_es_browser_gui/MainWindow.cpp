@@ -89,12 +89,19 @@ void MainWindow::process(const QString &fileName)
 
   pprogressBar -> show();
 
+  QByteArray fullData;
   while(!file.atEnd())
   {
     QByteArray arr = file.read(4 * (1 << 20));
     std::size_t parsed = pparser -> process((const uint8_t *)arr.data(), arr.size(), position);
     position += parsed;
+    if(file.atEnd())
+    {
+      fullData += arr;
+      break;
+    }
 
+    fullData += arr.left(parsed);
     file.seek(position);
     pprogressBar -> setValue(position);
     QCoreApplication::processEvents();
@@ -110,6 +117,8 @@ void MainWindow::process(const QString &fileName)
     std::size_t lastNalUOffset = lastOffset.toULongLong(NULL);
     pcntwgt -> m_pcomInfoViewer -> item(pcntwgt -> m_pcomInfoViewer -> rowCount() - 1, 1) -> setText(QString::number(position - lastNalUOffset));
   }
+
+  pcntwgt -> m_phexViewer -> setData(fullData);
 
   pprogressBar -> close();
   delete pprogressBar;
@@ -134,11 +143,15 @@ void MainWindow::slotOpen()
   {
     CentralWidget *pcntwgt = dynamic_cast<CentralWidget *>(centralWidget());
     pcntwgt -> m_pcomInfoViewer -> clear();
+    pcntwgt -> m_psyntaxViewer -> clear();
     dynamic_cast<WarningsViewer *> (m_pwarnViewer) -> clear();
 
     process(fileName);
     QFileInfo info(fileName);
     settings.setValue("MainWindow/PrevDir", info.absoluteDir().absolutePath());
+
+    setWindowTitle(info.fileName());
+
   }
 }
 

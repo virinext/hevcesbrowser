@@ -39,8 +39,9 @@ namespace HEVC
     NAL_SEI_SUFFIX = 40,
   };
 
-  struct ProfileTierLevel
+  class ProfileTierLevel
   {
+  public:
     uint8_t                general_profile_space;
     uint8_t                general_tier_flag;
     uint8_t                general_profile_idc;
@@ -52,11 +53,85 @@ namespace HEVC
     uint8_t                general_level_idc;
     std::vector<uint8_t>   sub_layer_profile_present_flag;
     std::vector<uint8_t>   sub_layer_level_present_flag;
+    std::vector<uint8_t>   sub_layer_profile_space;
+    std::vector<uint8_t>   sub_layer_tier_flag;
+    std::vector<uint8_t>   sub_layer_profile_idc;
+    std::vector< std::vector< uint8_t> > 
+                           sub_layer_profile_compatibility_flag;
+    std::vector<uint8_t>   sub_layer_progressive_source_flag;
+    std::vector<uint8_t>   sub_layer_interlaced_source_flag;
+    std::vector<uint8_t>   sub_layer_non_packed_constraint_flag;
+    std::vector<uint8_t>   sub_layer_frame_only_constraint_flag;
+    std::vector<uint8_t>   sub_layer_level_idc;
+
+    void toDefault();
+
+    bool operator == (const ProfileTierLevel &) const;
   };
 
-  
-  struct ShortTermRefPicSet
+  class SubLayerHrdParameters
   {
+  public:    
+    std::vector<uint32_t>       bit_rate_value_minus1;
+    std::vector<uint32_t>       cpb_size_value_minus1;
+    std::vector<uint32_t>       cpb_size_du_value_minus1;
+    std::vector<uint32_t>       bit_rate_du_value_minus1;
+    std::vector<uint8_t>        cbr_flag;
+
+    void toDefault();
+
+    bool operator == (const SubLayerHrdParameters &) const;
+  };
+
+
+  class ScalingListData
+  {
+  public:
+    std::vector< std::vector< uint8_t> >    scaling_list_pred_mode_flag;
+    std::vector< std::vector< uint32_t> >   scaling_list_pred_matrix_id_delta;
+    std::vector< std::vector< uint32_t> >   scaling_list_dc_coef_minus8;
+    std::vector<std::vector< std::vector< uint32_t> > >
+                                            scaling_list_delta_coef;
+
+    void toDefault();
+
+    bool operator == (const ScalingListData &) const;
+  };
+
+  class HrdParameters
+  {
+  public:    
+    uint8_t               nal_hrd_parameters_present_flag;
+    uint8_t               vcl_hrd_parameters_present_flag;
+    uint8_t               sub_pic_hrd_params_present_flag;
+    uint8_t               tick_divisor_minus2;
+    uint8_t               du_cpb_removal_delay_increment_length_minus1;
+    uint8_t               sub_pic_cpb_params_in_pic_timing_sei_flag;
+    uint8_t               dpb_output_delay_du_length_minus1;
+    uint8_t               bit_rate_scale;
+    uint8_t               cpb_size_scale;
+    uint8_t               cpb_size_du_scale;
+    uint8_t               initial_cpb_removal_delay_length_minus1;
+    uint8_t               au_cpb_removal_delay_length_minus1;
+    uint8_t               dpb_output_delay_length_minus1;
+    std::vector<uint8_t>  fixed_pic_rate_general_flag;
+    std::vector<uint8_t>  fixed_pic_rate_within_cvs_flag;
+    std::vector<uint32_t> elemental_duration_in_tc_minus1;
+    std::vector<uint8_t>  low_delay_hrd_flag;
+    std::vector<uint32_t> cpb_cnt_minus1;
+    std::vector<SubLayerHrdParameters> 
+                          nal_sub_layer_hrd_parameters;
+    std::vector<SubLayerHrdParameters> 
+                          vcl_sub_layer_hrd_parameters;
+
+    void toDefault();
+
+    bool operator == (const HrdParameters &) const;
+ };
+
+  class ShortTermRefPicSet
+  {
+  public:    
     uint8_t                   inter_ref_pic_set_prediction_flag;
     uint32_t                  delta_idx_minus1;
     uint8_t                   delta_rps_sign;
@@ -69,9 +144,76 @@ namespace HEVC
     std::vector<uint8_t>      used_by_curr_pic_s0_flag;
     std::vector<uint32_t>     delta_poc_s1_minus1;
     std::vector<uint8_t>      used_by_curr_pic_s1_flag;
+
+    void toDefault();
+
+    bool operator == (const ShortTermRefPicSet &) const;    
   };
   
-  
+
+  class VuiParameters
+  {
+  public:    
+    uint8_t          aspect_ratio_info_present_flag;
+    uint8_t          aspect_ratio_idc;
+    uint16_t         sar_width;
+    uint16_t         sar_height;
+    uint8_t          overscan_info_present_flag;
+    uint8_t          overscan_appropriate_flag;
+    uint8_t          video_signal_type_present_flag;
+    uint8_t          video_format;
+    uint8_t          video_full_range_flag;
+    uint8_t          colour_description_present_flag;
+    uint8_t          colour_primaries;
+    uint8_t          transfer_characteristics;
+    uint8_t          matrix_coeffs;
+    uint8_t          chroma_loc_info_present_flag;
+    uint32_t         chroma_sample_loc_type_top_field;
+    uint32_t         chroma_sample_loc_type_bottom_field;
+    uint8_t          neutral_chroma_indication_flag;
+    uint8_t          field_seq_flag;
+    uint8_t          frame_field_info_present_flag;
+    uint8_t          default_display_window_flag;
+    uint32_t         def_disp_win_left_offset;
+    uint32_t         def_disp_win_right_offset;
+    uint32_t         def_disp_win_top_offset;
+    uint32_t         def_disp_win_bottom_offset;
+    uint8_t          vui_timing_info_present_flag;
+    uint32_t         vui_num_units_in_tick;
+    uint32_t         vui_time_scale;
+    uint8_t          vui_poc_proportional_to_timing_flag;
+    uint32_t         vui_num_ticks_poc_diff_one_minus1;
+    uint8_t          vui_hrd_parameters_present_flag;
+    HrdParameters    hrd_parameters;
+    uint8_t          bitstream_restriction_flag;
+    uint8_t          tiles_fixed_structure_flag;
+    uint8_t          motion_vectors_over_pic_boundaries_flag;
+    uint8_t          restricted_ref_pic_lists_flag;
+    uint32_t         min_spatial_segmentation_idc;
+    uint32_t         max_bytes_per_pic_denom;
+    uint32_t         max_bits_per_min_cu_denom;
+    uint32_t         log2_max_mv_length_horizontal;
+    uint32_t         log2_max_mv_length_vertical;
+
+    void toDefault();
+
+    bool operator == (const VuiParameters &) const;    
+
+  };
+
+
+  class SeiMessage
+  {
+  public:
+    uint32_t           num_payload_type_ff_bytes;
+    uint32_t           num_payload_size_ff_bytes;
+    uint8_t            last_payload_type_byte;
+    uint8_t            last_payload_size_byte;
+
+    void toDefault();
+  };
+
+
   class NALUnit
   {
     public:
@@ -89,12 +231,33 @@ namespace HEVC
   class VPS: public NALUnit
   {
     public:
-      VPS(): NALUnit(NAL_VPS) {};
-      uint8_t        vps_video_parameter_set_id;
-      uint8_t        vps_max_layers_minus1;
-      uint8_t        vps_max_sub_layers_minus1;
-      uint8_t        vps_temporal_id_nesting_flag;
+      VPS();
+      uint8_t                   vps_video_parameter_set_id;
+      uint8_t                   vps_max_layers_minus1;
+      uint8_t                   vps_max_sub_layers_minus1;
+      uint8_t                   vps_temporal_id_nesting_flag;
+      ProfileTierLevel          profile_tier_level;
+      uint8_t                   vps_sub_layer_ordering_info_present_flag;
+      std::vector<uint32_t>     vps_max_dec_pic_buffering_minus1;
+      std::vector<uint32_t>     vps_max_num_reorder_pics;
+      std::vector<uint32_t>     vps_max_latency_increase_plus1;
+      uint8_t                   vps_max_layer_id;
+      uint32_t                  vps_num_layer_sets_minus1;
+      std::vector<std::vector<uint8_t> > 
+                                layer_id_included_flag;
+      uint8_t                   vps_timing_info_present_flag;
+      uint32_t                  vps_num_units_in_tick;
+      uint32_t                  vps_time_scale;
+      uint8_t                   vps_poc_proportional_to_timing_flag;
+      uint32_t                  vps_num_ticks_poc_diff_one_minus1;
+      uint32_t                  vps_num_hrd_parameters;
+      std::vector<uint32_t>     hrd_layer_set_idx;
+      std::vector<uint8_t>      cprms_present_flag;
+      std::vector<HrdParameters>
+                                hrd_parameters;
+      uint8_t                   vps_extension_flag;
 
+      void toDefault();
       bool operator == (const VPS &) const;
   };
 
@@ -102,7 +265,7 @@ namespace HEVC
   class SPS: public NALUnit
   {
     public:
-      SPS(): NALUnit(NAL_SPS) {};
+      SPS();
       uint8_t                  sps_video_parameter_set_id;
       uint8_t                  sps_max_sub_layers_minus1;
       uint8_t                  sps_temporal_id_nesting_flag;
@@ -132,10 +295,29 @@ namespace HEVC
       uint32_t                 max_transform_hierarchy_depth_intra;
       uint8_t                  scaling_list_enabled_flag;
       uint8_t                  sps_scaling_list_data_present_flag;
+      ScalingListData          scaling_list_data;
       uint8_t                  amp_enabled_flag;
       uint8_t                  sample_adaptive_offset_enabled_flag;
       uint8_t                  pcm_enabled_flag;
+      uint8_t                  pcm_sample_bit_depth_luma_minus1;
+      uint8_t                  pcm_sample_bit_depth_chroma_minus1;
+      uint32_t                 log2_min_pcm_luma_coding_block_size_minus3;
+      uint32_t                 log2_diff_max_min_pcm_luma_coding_block_size;
+      uint8_t                  pcm_loop_filter_disabled_flag;
       uint32_t                 num_short_term_ref_pic_sets;
+      std::vector<ShortTermRefPicSet>
+                               short_term_ref_pic_set;
+      uint8_t                  long_term_ref_pics_present_flag;
+      uint32_t                 num_long_term_ref_pics_sps;
+      std::vector<uint32_t>    lt_ref_pic_poc_lsb_sps;
+      std::vector<uint8_t>     used_by_curr_pic_lt_sps_flag;
+      uint8_t                  sps_temporal_mvp_enabled_flag;
+      uint8_t                  strong_intra_smoothing_enabled_flag;
+      uint8_t                  vui_parameters_present_flag;
+      VuiParameters            vui_parameters;
+      uint8_t                  sps_extension_flag;
+
+      void toDefault();
 
       bool operator == (const SPS &) const;
   };
@@ -144,7 +326,7 @@ namespace HEVC
   class PPS: public NALUnit
   {
     public:
-    PPS(): NALUnit(NAL_PPS) {};
+    PPS();
 
     uint32_t     pps_pic_parameter_set_id;
     uint32_t     pps_seq_parameter_set_id;
@@ -168,6 +350,22 @@ namespace HEVC
     uint8_t      transquant_bypass_enabled_flag;
     uint8_t      tiles_enabled_flag;
     uint8_t      entropy_coding_sync_enabled_flag;
+    uint32_t     num_tile_columns_minus1;
+    uint32_t     num_tile_rows_minus1;
+    uint8_t      uniform_spacing_flag;
+    std::vector<uint32_t>  
+                 column_width_minus1;
+    std::vector<uint32_t>  
+                 row_height_minus1;
+    uint8_t      loop_filter_across_tiles_enabled_flag;
+    uint8_t      pps_loop_filter_across_slices_enabled_flag;
+    uint8_t      deblocking_filter_control_present_flag;
+    uint8_t      deblocking_filter_override_enabled_flag;
+    uint8_t      pps_deblocking_filter_disabled_flag;
+    uint32_t     pps_beta_offset_div2;
+    uint32_t     pps_tc_offset_div2;
+
+    void toDefault();
 
     bool operator == (const PPS &) const;
   };
@@ -177,7 +375,7 @@ namespace HEVC
   class Slice: public NALUnit
   {
     public:
-      Slice(NALUnitType type): NALUnit(type) {};
+      Slice(NALUnitType type);
       uint8_t                  first_slice_segment_in_pic_flag;
       uint8_t                  no_output_of_prior_pics_flag;
       uint32_t                 slice_pic_parameter_set_id;
@@ -189,8 +387,32 @@ namespace HEVC
       uint8_t                  colour_plane_id;
       uint32_t                 pic_order_cnt_lsb;
       uint8_t                  short_term_ref_pic_set_sps_flag;
+      std::vector<ShortTermRefPicSet>
+                               short_term_ref_pic_set;
       uint8_t                  short_term_ref_pic_set_idx;
+
+      void toDefault();
   };
+
+  class AUD: public NALUnit
+  {
+  public:
+    AUD();
+
+    uint8_t            pic_type;
+    void toDefault();
+  };
+
+
+  class SEI: public NALUnit
+  {
+  public:
+    SEI(NALUnitType);
+    std::vector<SeiMessage>     sei_message;
+
+    void toDefault();
+  };
+
 }
 
 #endif

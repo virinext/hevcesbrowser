@@ -19,6 +19,7 @@ namespace HEVC
       {
         public:
           virtual void onNALUnit(std::shared_ptr<NALUnit> pNALUnit, const Info *pInfo) = 0;
+          virtual void onWarning(const std::string &warning, const Info *pInfo) = 0;
       };
       
       virtual ~Parser();

@@ -11,6 +11,7 @@ class HEVCInfoWriter: public HEVC::Parser::Consumer
 {
   public:
     virtual void onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const HEVC::Parser::Info *pInfo);
+    virtual void onWarning(const std::string &warning, const HEVC::Parser::Info *pInfo) {};
 
     void write(std::ostream &out);
 
@@ -20,6 +21,14 @@ class HEVCInfoWriter: public HEVC::Parser::Consumer
     void writeSPS(std::shared_ptr<HEVC::SPS> pSPS, std::ostream &out);
     void writePPS(std::shared_ptr<HEVC::PPS> pPPS, std::ostream &out);
     void writeSlice(std::shared_ptr<HEVC::Slice> pSlice, std::ostream &out);
+    void writeAUD(std::shared_ptr<HEVC::AUD> pAUD, std::ostream &out);
+    void writeSEI(std::shared_ptr<HEVC::SEI> pSEI, std::ostream &out);
+
+    void writeProfileTierLevel(const HEVC::ProfileTierLevel &ptl, std::ostream &out, const std::string &prefix);
+    void writeHrdParameters(const HEVC::HrdParameters &hrd, uint8_t commonInfPresentFlag, std::ostream &out, const std::string &prefix);
+    void writeSubLayerHrdParameters(const HEVC::SubLayerHrdParameters &slhrd, uint8_t sub_pic_hrd_params_present_flag, std::ostream &out, const std::string &prefix);
+    void writeShortTermRefPicSet(std::size_t stRpsIdx, std::size_t num_short_term_ref_pic_sets, const std::vector<HEVC::ShortTermRefPicSet> &refPicSets, std::ostream &out, const std::string &prefix);
+    void writeVuiParameters(const HEVC::VuiParameters &vui, std::size_t sps_max_sub_layers_minus1, std::ostream &out, const std::string &prefix);
 
     struct NALUInfo
     {

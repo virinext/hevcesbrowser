@@ -19,8 +19,7 @@ class CommonInfoViewer:
   Q_OBJECT
 
   signals:
-    void naluSelected(std::shared_ptr<HEVC::NALUnit>);
-  signals:
+    void naluSelected(std::shared_ptr<HEVC::NALUnit>, ParserInfo info);
     void parameterSetsChanged(const VPSMap &vpsMap,
                           const SPSMap &spsMap,
                           const PPSMap &ppsMap);
@@ -33,6 +32,7 @@ class CommonInfoViewer:
     void clear();
     
     virtual void onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const HEVC::Parser::Info *pInfo);
+    virtual void onWarning(const std::string &warning, const HEVC::Parser::Info *pInfo) {};
     
   private slots:
     void onSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);

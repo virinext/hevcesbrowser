@@ -174,7 +174,7 @@ void CommonInfoViewer::onSelectionChanged(const QItemSelection & selected, const
   QModelIndexList idxs = selected.indexes();
   
   if(!idxs.empty())
-    emit naluSelected(m_nalus[idxs.begin() -> row()].m_pNALUnit);
+    emit naluSelected(m_nalus[idxs.begin() -> row()].m_pNALUnit, m_nalus[idxs.begin() -> row()].m_info);
 }
 
 

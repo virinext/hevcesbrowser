@@ -13,8 +13,11 @@ endif()
 set (EXECUTABLE_OUTPUT_PATH ${BUILD_DIR})
 set (LIBRARY_OUTPUT_PATH ${BUILD_DIR})
 
-ADD_DEFINITIONS(-std=c++0x) 
-
+ADD_DEFINITIONS(-std=c++11) 
+if(MINGW)
+	#for workaround https://github.com/g-truc/glm/issues/300#issue-54185474%C2%A0
+	ADD_DEFINITIONS(-D__NO_INLINE__)
+endif()
 add_subdirectory(hevcparser)
 add_subdirectory(utils)
 enable_testing()

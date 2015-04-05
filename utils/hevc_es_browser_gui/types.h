@@ -10,5 +10,8 @@ Q_DECLARE_METATYPE(SPSMap);
 typedef std::map<uint32_t, std::shared_ptr<HEVC::PPS> > PPSMap;
 Q_DECLARE_METATYPE(PPSMap);
 
+typedef HEVC::Parser::Info ParserInfo;
+Q_DECLARE_METATYPE(ParserInfo);
+
 
 #endif
