@@ -94,6 +94,7 @@ void CommonInfoViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const 
       break;
     }
 
+
     case NAL_IDR_W_RADL:
     case NAL_IDR_N_LP:
     {
@@ -107,27 +108,35 @@ void CommonInfoViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const 
     case NAL_STSA_R:
     case NAL_RADL_R:
     case NAL_RASL_R:
-    {
-      setItem(row, 3, new QTableWidgetItem("P Slice"));
-      break;
-    }
-
     case NAL_TRAIL_N:
     case NAL_TSA_N:
     case NAL_STSA_N:
     case NAL_RADL_N:
     case NAL_RASL_N:
-    {
-      setItem(row, 3, new QTableWidgetItem("B Slice"));
-      break;
-    }
-
     case NAL_BLA_W_LP:
     case NAL_BLA_W_RADL:
     case NAL_BLA_N_LP:
     case NAL_CRA_NUT:
     {
-      setItem(row, 3, new QTableWidgetItem("I Slice"));
+      std::shared_ptr<HEVC::Slice> pSlice = std::dynamic_pointer_cast<HEVC::Slice>(pNALUnit);
+
+      if(pSlice -> dependent_slice_segment_flag)
+        setItem(row, 3, new QTableWidgetItem("Dependent Slice"));
+      else
+      {
+        switch(pSlice -> slice_type)       
+        {
+          case HEVC::Slice::B_SLICE:
+            setItem(row, 3, new QTableWidgetItem("B Slice"));
+            break;
+          case HEVC::Slice::P_SLICE:
+            setItem(row, 3, new QTableWidgetItem("P Slice"));
+            break;
+          case HEVC::Slice::I_SLICE:
+            setItem(row, 3, new QTableWidgetItem("I Slice"));
+            break;
+        };
+      }
       break;
     }
 

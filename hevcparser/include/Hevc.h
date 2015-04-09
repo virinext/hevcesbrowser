@@ -375,6 +375,13 @@ namespace HEVC
   class Slice: public NALUnit
   {
     public:
+      enum SliceType 
+      {
+        B_SLICE = 0,
+        P_SLICE = 1,
+        I_SLICE = 2,
+      };
+
       Slice(NALUnitType type);
       uint8_t                  first_slice_segment_in_pic_flag;
       uint8_t                  no_output_of_prior_pics_flag;
