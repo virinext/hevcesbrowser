@@ -348,7 +348,6 @@ void SyntaxViewer::createPPS(std::shared_ptr<HEVC::PPS> pPPS)
   addTopLevelItem(pppsItem);
 
   QTreeWidgetItem *pitem;
-
   pppsItem -> addChild(new QTreeWidgetItem(QStringList("pps_pic_parameter_set_id = " + QString::number(pPPS -> pps_pic_parameter_set_id))));
   pppsItem -> addChild(new QTreeWidgetItem(QStringList("pps_seq_parameter_set_id = " + QString::number(pPPS -> pps_seq_parameter_set_id))));
   pppsItem -> addChild(new QTreeWidgetItem(QStringList("dependent_slice_segments_enabled_flag = " + QString::number(pPPS -> dependent_slice_segments_enabled_flag))));
@@ -399,27 +398,35 @@ void SyntaxViewer::createPPS(std::shared_ptr<HEVC::PPS> pPPS)
       pitem -> addChild(pitemSecond);
 
       QString str = "column_width_minus1 = {\n\t";
-      for(std::size_t i=0; i<pPPS -> num_tile_columns_minus1 - 1; i++)
+      for(int i=0; i<(int)pPPS -> num_tile_columns_minus1 - 1; i++)
       {
         str += QString::number(pPPS -> column_width_minus1[i]) + ", ";
         if((i+1) % 8 == 0)
           str += "\n\t";
       }
-      str += QString::number(pPPS -> column_width_minus1[pPPS -> num_tile_columns_minus1 - 1]) + " \n}";
+      if(pPPS -> num_tile_columns_minus1 > 0)
+        str += QString::number(pPPS -> column_width_minus1[pPPS -> num_tile_columns_minus1 - 1]) + " \n}";
+      else 
+        str += "}";
+
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList(str)));
 
-      str = "num_tile_rows_minus1 = {\n\t";
-      for(std::size_t i=0; i<pPPS -> num_tile_rows_minus1 - 1; i++)
+      str = "row_height_minus1 = {\n\t";
+      for(int i=0; i<(int)pPPS -> num_tile_rows_minus1 - 1; i++)
       {
         str += QString::number(pPPS -> row_height_minus1[i]) + ", ";
         if((i+1) % 8 == 0)
           str += "\n\t";
       }
-      str += QString::number(pPPS -> row_height_minus1[pPPS -> num_tile_rows_minus1 - 1]) + " \n}";
+      if(pPPS -> num_tile_rows_minus1 > 0)
+        str += QString::number(pPPS -> row_height_minus1[pPPS -> num_tile_rows_minus1 - 1]) + " \n}";
+      else 
+        str += "}";
+
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList(str)));
     }
 
-    pitem -> addChild(new QTreeWidgetItem(QStringList("uniform_spacing_flag = " + QString::number(pPPS -> uniform_spacing_flag))));
+    pitem -> addChild(new QTreeWidgetItem(QStringList("loop_filter_across_tiles_enabled_flag = " + QString::number(pPPS -> loop_filter_across_tiles_enabled_flag))));
   }
 
   pppsItem -> addChild(new QTreeWidgetItem(QStringList("pps_loop_filter_across_slices_enabled_flag = " + QString::number(pPPS -> pps_loop_filter_across_slices_enabled_flag))));
