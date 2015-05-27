@@ -7,7 +7,13 @@
 
 #include <sstream>
 
+#include <assert.h>
+
 using namespace HEVC;
+
+#define SLICE_B 0
+#define SLICE_P 1
+#define SLICE_I 2
 
 void HevcParserImpl::addConsumer(Consumer *pconsumer)
 {
@@ -218,6 +224,9 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
       << ", but PPS with this id not exists";
     for(; itr != m_consumers.end(); itr++)
       (*itr) -> onWarning(ss.str(), &info);
+
+    pslice -> m_processFailed = true;
+
     return;
   }
 
@@ -233,6 +242,9 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
       << ", but SPS with this id not exists";
     for(; itr != m_consumers.end(); itr++)
       (*itr) -> onWarning(ss.str(), &info);
+
+    pslice -> m_processFailed = true;
+
     return;
   }
 
@@ -243,10 +255,21 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
       pslice -> dependent_slice_segment_flag = bs.getBits(1);
     else
       pslice -> dependent_slice_segment_flag = 0;
+    int32_t CtbLog2SizeY = m_spsMap[spsId] -> log2_min_luma_coding_block_size_minus3 + 3 + m_spsMap[spsId] -> log2_diff_max_min_luma_coding_block_size;
+    uint32_t CtbSizeY = 1 << CtbLog2SizeY;
+    uint32_t PicWidthInCtbsY = m_spsMap[spsId] -> pic_width_in_luma_samples / CtbSizeY;
+    if(m_spsMap[spsId] -> pic_width_in_luma_samples % CtbSizeY)
+      PicWidthInCtbsY++;
 
-    int32_t sliceAddrLength = HEVC::log2(
-    	(m_spsMap[spsId] -> pic_width_in_luma_samples * m_spsMap[spsId] -> pic_height_in_luma_samples - 1) << 1);
-      pslice -> slice_segment_address = bs.getBits(sliceAddrLength);
+    uint32_t PicHeightInCtbsY = m_spsMap[spsId] -> pic_height_in_luma_samples / CtbSizeY;
+    if(m_spsMap[spsId] -> pic_height_in_luma_samples % CtbSizeY)
+      PicHeightInCtbsY++;
+
+    int32_t sliceAddrLength = HEVC::log2(PicHeightInCtbsY * PicWidthInCtbsY);
+    if((1 << sliceAddrLength) < PicHeightInCtbsY * PicWidthInCtbsY)
+      sliceAddrLength++;
+
+     pslice -> slice_segment_address = bs.getBits(sliceAddrLength);
   }
 
   if(!pslice -> dependent_slice_segment_flag)
@@ -272,6 +295,9 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
         std::list<Consumer *>::const_iterator itr = m_consumers.begin();
         for(; itr != m_consumers.end(); itr++)
           (*itr) -> onWarning("Slice: pic_order_cnt_lsb size more then 32 bits", &info);
+
+        pslice -> m_processFailed = true;
+
         return;
       }
 
@@ -280,17 +306,193 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
 
       if(!pslice -> short_term_ref_pic_set_sps_flag)
       {
-//short_term_ref_pic_set
+        pslice -> short_term_ref_pic_set = processShortTermRefPicSet(m_spsMap[spsId] -> num_short_term_ref_pic_sets, m_spsMap[spsId] -> num_short_term_ref_pic_sets, m_spsMap[spsId] -> short_term_ref_pic_set, m_spsMap[spsId], bs);
       }
-      else if(pslice -> short_term_ref_pic_set_sps_flag > 1)
+      else if(m_spsMap[spsId] -> num_short_term_ref_pic_sets > 1)
       {
         std::size_t numBits = HEVC::log2(m_spsMap[spsId] -> num_short_term_ref_pic_sets);
+        if(1 << numBits < m_spsMap[spsId] -> num_short_term_ref_pic_sets)
+          numBits++;
+
         if(numBits > 0)
           pslice -> short_term_ref_pic_set_idx = bs.getBits(numBits);
         else
           pslice -> short_term_ref_pic_set_idx = 0;
       }
+
+      if(m_spsMap[spsId] -> long_term_ref_pics_present_flag)
+      {
+        pslice -> num_long_term_sps = 0;
+        if(m_spsMap[spsId] -> num_long_term_ref_pics_sps > 0)
+          pslice -> num_long_term_sps = bs.getGolombU();
+
+        pslice -> num_long_term_pics = bs.getGolombU();
+
+        std::size_t num_long_term = pslice -> num_long_term_sps + pslice -> num_long_term_pics;
+
+        pslice -> lt_idx_sps.resize(num_long_term);
+        pslice -> poc_lsb_lt.resize(num_long_term);
+        pslice -> used_by_curr_pic_lt_flag.resize(num_long_term);
+        pslice -> delta_poc_msb_present_flag.resize(num_long_term);
+        pslice -> delta_poc_msb_cycle_lt.resize(num_long_term);
+
+        for(std::size_t i=0; i < num_long_term; i++)
+        {
+          if(i < pslice -> num_long_term_sps) 
+          {
+            if(m_spsMap[spsId] -> num_long_term_ref_pics_sps > 1)
+            {
+              int32_t ltIdxSpsLength = HEVC::log2(m_spsMap[spsId] -> num_long_term_ref_pics_sps);
+              pslice -> lt_idx_sps[i] = bs.getBits(ltIdxSpsLength);
+            }
+          }
+          else
+          {
+            pslice -> poc_lsb_lt[i] = bs.getBits(m_spsMap[spsId] -> log2_max_pic_order_cnt_lsb_minus4 + 4);
+            pslice -> used_by_curr_pic_lt_flag[i] = bs.getBits(1);
+          }
+
+          pslice -> delta_poc_msb_present_flag[i] = bs.getBits(1);
+          if(pslice -> delta_poc_msb_present_flag[i])
+            pslice -> delta_poc_msb_cycle_lt[i] = bs.getGolombU();
+
+        }
+      }
+
+      if(m_spsMap[spsId] -> sps_temporal_mvp_enabled_flag)
+        pslice -> slice_temporal_mvp_enabled_flag = bs.getBits(1);
     }
+
+    if(m_spsMap[spsId] -> sample_adaptive_offset_enabled_flag)
+    {
+      pslice -> slice_sao_luma_flag = bs.getBits(1);
+      pslice -> slice_sao_chroma_flag = bs.getBits(1);
+    }
+
+    pslice -> num_ref_idx_l1_active_minus1 = ppps -> num_ref_idx_l0_default_active_minus1;
+    pslice -> num_ref_idx_l0_active_minus1 = ppps -> num_ref_idx_l1_default_active_minus1;
+
+    if(pslice -> slice_type == SLICE_B || pslice -> slice_type == SLICE_P)
+    {
+      pslice -> num_ref_idx_active_override_flag = bs.getBits(1);
+      if(pslice -> num_ref_idx_active_override_flag)
+      {
+        pslice -> num_ref_idx_l0_active_minus1 = bs.getGolombU();
+
+        if(pslice -> slice_type == SLICE_B)
+          pslice -> num_ref_idx_l1_active_minus1 = bs.getGolombU();
+      }
+
+      if(ppps -> lists_modification_present_flag)
+      {
+        std::size_t NumPocTotalCurr = calcNumPocTotalCurr(pslice, m_spsMap[spsId]);
+        
+        if(NumPocTotalCurr > 1)
+          pslice -> ref_pic_lists_modification = processRefPicListModification(bs, pslice);
+      }
+
+      if(pslice -> slice_type == SLICE_B)
+        pslice -> mvd_l1_zero_flag = bs.getBits(1);
+
+      if(ppps -> cabac_init_present_flag)
+        pslice -> cabac_init_flag = bs.getBits(1);
+
+      if(pslice -> slice_temporal_mvp_enabled_flag)
+      {
+        if(pslice -> slice_type == SLICE_B)
+          pslice -> collocated_from_l0_flag = bs.getBits(1);
+
+        if(pslice -> collocated_from_l0_flag && pslice -> num_ref_idx_l0_active_minus1 ||
+            !pslice -> collocated_from_l0_flag && pslice -> num_ref_idx_l1_active_minus1)
+        {
+          pslice -> collocated_ref_idx = bs.getGolombU();
+        }
+      }
+
+      if(ppps -> weighted_pred_flag && pslice -> slice_type == SLICE_B ||
+        ppps -> weighted_bipred_flag && pslice -> slice_type == SLICE_P)
+      {
+        pslice -> pred_weight_table = processPredWeightTable(bs, pslice);
+
+        if(pslice -> pred_weight_table.luma_log2_weight_denom > 7)
+        {
+          std::list<Consumer *>::const_iterator itr = m_consumers.begin();
+          std::stringstream ss;
+          ss << "pred_weight_table.luma_log2_weight_denom = " 
+            << (int) pslice -> pred_weight_table.luma_log2_weight_denom 
+            << ", but must be in range (0-7)";
+          for(; itr != m_consumers.end(); itr++)
+            (*itr) -> onWarning(ss.str(), &info);
+        }
+      }
+
+      pslice -> five_minus_max_num_merge_cand = bs.getGolombU();
+    }
+    pslice -> slice_qp_delta = bs.getGolombS();
+
+    if(ppps -> pps_slice_chroma_qp_offsets_present_flag)
+    {
+      pslice -> slice_cb_qp_offset = bs.getGolombS();
+      pslice -> slice_cr_qp_offset = bs.getGolombS();
+    }
+
+    if(ppps -> deblocking_filter_override_enabled_flag)
+      pslice -> deblocking_filter_override_flag = bs.getBits(1);
+
+    if(pslice -> deblocking_filter_override_flag)
+    {
+      pslice -> slice_deblocking_filter_disabled_flag = bs.getBits(1);
+      if(!pslice -> slice_deblocking_filter_disabled_flag)
+      {
+        pslice -> slice_beta_offset_div2 = bs.getGolombS();
+        pslice -> slice_tc_offset_div2 = bs.getGolombS();
+      }
+    }
+    else
+    {
+      pslice -> slice_deblocking_filter_disabled_flag = ppps -> pps_deblocking_filter_disabled_flag;
+    }
+
+    if(ppps -> pps_loop_filter_across_slices_enabled_flag && 
+      (pslice -> slice_sao_luma_flag || pslice -> slice_sao_chroma_flag || !pslice -> slice_deblocking_filter_disabled_flag))
+    {
+      pslice -> slice_loop_filter_across_slices_enabled_flag = bs.getBits(1);
+    }
+
+    if(ppps -> tiles_enabled_flag || ppps -> entropy_coding_sync_enabled_flag)
+    {
+      pslice -> num_entry_point_offsets = bs.getGolombU();
+      if(pslice -> num_entry_point_offsets > 0)
+      {
+        pslice -> offset_len_minus1 = bs.getGolombU();
+        pslice -> entry_point_offset_minus1.resize(pslice -> num_entry_point_offsets);
+
+        if(pslice -> offset_len_minus1 > 31)
+        {
+          std::list<Consumer *>::const_iterator itr = m_consumers.begin();
+          std::stringstream ss;
+          ss << "offset_len_minus1 = " 
+            << (int) pslice -> offset_len_minus1 
+            << ", but must be in range (0-31)";
+          for(; itr != m_consumers.end(); itr++)
+            (*itr) -> onWarning(ss.str(), &info);
+
+          pslice -> m_processFailed = true;
+
+          return;
+        }
+        for(std::size_t i=0; i<pslice -> num_entry_point_offsets; i++)
+          pslice -> entry_point_offset_minus1[i] = bs.getBits(pslice -> offset_len_minus1 + 1);
+      }
+    }
+  }
+
+  if(ppps -> slice_segment_header_extension_present_flag)
+  {
+    pslice -> slice_segment_header_extension_length = bs.getGolombU();
+    pslice -> slice_segment_header_extension_data_byte.resize(pslice -> slice_segment_header_extension_length);
+    for(std::size_t i=0; i<pslice -> slice_segment_header_extension_length; i++)
+      pslice -> slice_segment_header_extension_data_byte[i] = bs.getBits(8);
   }
 }
 
@@ -381,7 +583,7 @@ void HevcParserImpl::processSPS(std::shared_ptr<SPS> psps, BitstreamReader &bs, 
   psps -> profile_tier_level = processProfileTierLevel(psps -> sps_max_sub_layers_minus1, bs, info);
 
   psps -> sps_seq_parameter_set_id = bs.getGolombU();
-  psps -> sps_seq_parameter_set_id = 0;
+//  psps -> sps_seq_parameter_set_id = 0;
   psps -> chroma_format_idc = bs.getGolombU();
 
   if(psps -> chroma_format_idc == 3)
@@ -693,6 +895,17 @@ void HevcParserImpl::processPPS(std::shared_ptr<PPS> ppps, BitstreamReader &bs, 
     ppps -> deblocking_filter_override_enabled_flag = 0;
     ppps -> pps_deblocking_filter_disabled_flag = 0;
   }
+
+  ppps -> pps_scaling_list_data_present_flag = bs.getBits(1);
+  if(ppps -> pps_scaling_list_data_present_flag)
+  {
+    ppps -> scaling_list_data = processScalingListData(bs);
+  }
+
+  ppps -> lists_modification_present_flag = bs.getBits(1);
+  ppps -> log2_parallel_merge_level_minus2 = bs.getGolombU();
+  ppps -> slice_segment_header_extension_present_flag = bs.getBits(1);
+  ppps -> pps_extension_flag = bs.getBits(1);
 }
 
 
@@ -811,7 +1024,6 @@ ShortTermRefPicSet HevcParserImpl::processShortTermRefPicSet(std::size_t stRpsId
 
   rpset.inter_ref_pic_set_prediction_flag = 0;
   rpset.delta_idx_minus1 = 0;
-
   if(stRpsIdx)
   {
     rpset.inter_ref_pic_set_prediction_flag = bs.getBits(1);
@@ -1045,4 +1257,148 @@ ScalingListData HevcParserImpl::processScalingListData(BitstreamReader &bs)
   }
 
   return sc;
+}
+
+
+RefPicListModification HevcParserImpl::processRefPicListModification(BitstreamReader &bs, std::shared_ptr<Slice> pslice)
+{
+  RefPicListModification res;
+  res.toDefault();
+
+
+  if(!m_ppsMap[pslice -> slice_pic_parameter_set_id])
+  {
+    assert(0);
+    return res;
+  }
+
+  int32_t spsId = m_ppsMap[pslice -> slice_pic_parameter_set_id] -> pps_seq_parameter_set_id;
+
+  if(!m_spsMap[spsId])
+  {
+    assert(0);
+    return res;
+  }
+
+  std::size_t numPocTotalCurr = calcNumPocTotalCurr(pslice, m_spsMap[spsId]);
+  int32_t listSize = HEVC::log2(numPocTotalCurr);
+
+  if((1 << listSize) < numPocTotalCurr)
+    listSize++;
+
+
+  res.ref_pic_list_modification_flag_l0 = bs.getBits(1);
+
+  if(res.ref_pic_list_modification_flag_l0)
+  {
+    res.list_entry_l0.resize(pslice -> num_ref_idx_l0_active_minus1);
+
+    for(std::size_t i=0; i<pslice -> num_ref_idx_l0_active_minus1; i++)
+      res.list_entry_l0[i] = bs.getBits(listSize);
+  }
+
+  res.ref_pic_list_modification_flag_l1 = bs.getBits(1);
+
+  if(res.ref_pic_list_modification_flag_l1)
+  {
+    res.list_entry_l1.resize(pslice -> num_ref_idx_l1_active_minus1);
+
+    for(std::size_t i=0; i<pslice -> num_ref_idx_l1_active_minus1; i++)
+      res.list_entry_l1[i] = bs.getBits(listSize);
+  }
+
+  return res;
+}
+
+
+
+PredWeightTable HevcParserImpl::processPredWeightTable(BitstreamReader &bs, std::shared_ptr<Slice> pslice)
+{
+  PredWeightTable pwt;
+  pwt.toDefault();
+
+  std::shared_ptr<PPS> ppps = m_ppsMap[pslice -> slice_pic_parameter_set_id];
+  if(!ppps)
+    return pwt;
+
+  std::shared_ptr<SPS> psps = m_spsMap[ppps -> pps_seq_parameter_set_id];
+
+  if(!psps)
+    return pwt;
+
+  pwt.luma_log2_weight_denom = bs.getGolombU();
+  if(psps -> chroma_format_idc != 0)
+    pwt.delta_chroma_log2_weight_denom = bs.getGolombS();
+
+  pwt.luma_weight_l0_flag.resize(pslice -> num_ref_idx_l0_active_minus1);
+
+  for(std::size_t i=0; i<pslice -> num_ref_idx_l0_active_minus1; i++)
+    pwt.luma_weight_l0_flag[i] = bs.getBits(1);
+
+  pwt.chroma_weight_l0_flag.resize(pslice -> num_ref_idx_l0_active_minus1, 0);
+
+  if(psps -> chroma_format_idc != 0)
+  {
+    for(std::size_t i=0; i<pslice -> num_ref_idx_l0_active_minus1; i++)
+      pwt.chroma_weight_l0_flag[i] = bs.getBits(1);
+  }
+
+  pwt.delta_luma_weight_l0.resize(pslice -> num_ref_idx_l0_active_minus1);
+  pwt.luma_offset_l0.resize(pslice -> num_ref_idx_l0_active_minus1);
+
+  pwt.delta_chroma_weight_l0.resize(pslice -> num_ref_idx_l0_active_minus1);
+  pwt.delta_chroma_offset_l0.resize(pslice -> num_ref_idx_l0_active_minus1);
+
+  for(std::size_t i=0; i<pslice -> num_ref_idx_l0_active_minus1; i++)
+  {
+    if(pwt.luma_weight_l0_flag[i])
+    {
+      pwt.delta_luma_weight_l0[i] = bs.getGolombS();
+      pwt.luma_offset_l0[i] = bs.getGolombS();
+    }
+    if(pwt.chroma_weight_l0_flag[i])
+    {
+      for(std::size_t j=0; j<3; j++)
+      {
+        pwt.delta_chroma_weight_l0[i][j] = bs.getGolombS();
+        pwt.delta_chroma_offset_l0[i][j] = bs.getGolombS();
+      }
+    }
+  }
+
+  if(pslice -> slice_type == SLICE_B)
+  {
+    for(std::size_t i=0; i<pslice -> num_ref_idx_l1_active_minus1; i++)
+      pwt.luma_weight_l1_flag[i] = bs.getBits(1);
+
+    pwt.chroma_weight_l1_flag.resize(pslice -> num_ref_idx_l1_active_minus1, 0);
+
+    if(psps -> chroma_format_idc != 0)
+    {
+      for(std::size_t i=0; i<pslice -> num_ref_idx_l1_active_minus1; i++)
+        pwt.chroma_weight_l1_flag[i] = bs.getBits(1);
+    }
+
+    pwt.delta_luma_weight_l1.resize(pslice -> num_ref_idx_l1_active_minus1);
+    pwt.luma_offset_l1.resize(pslice -> num_ref_idx_l1_active_minus1);
+    pwt.delta_chroma_weight_l1.resize(pslice -> num_ref_idx_l1_active_minus1);
+    pwt.delta_chroma_offset_l1.resize(pslice -> num_ref_idx_l1_active_minus1);
+
+    for(std::size_t i=0; i<pslice -> num_ref_idx_l1_active_minus1; i++)
+    {
+      if(pwt.luma_weight_l1_flag[i])
+      {
+        pwt.delta_luma_weight_l1[i] = bs.getGolombS();
+        pwt.luma_offset_l1[i] = bs.getGolombS();
+      }
+      if(pwt.chroma_weight_l1_flag[i])
+      {
+        for(std::size_t j=0; j<3; j++)
+        {
+          pwt.delta_chroma_weight_l1[i][j] = bs.getGolombS();
+          pwt.delta_chroma_offset_l1[i][j] = bs.getGolombS();
+        }
+      }
+    }
+  } 
 }

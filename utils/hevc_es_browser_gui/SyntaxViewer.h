@@ -45,9 +45,10 @@ private:
     void createVuiParameters(const HEVC::VuiParameters &vui, std::size_t maxNumSubLayersMinus1, QTreeWidgetItem *pItem);
     void createHrdParameters(const HEVC::HrdParameters &hrd, uint8_t commonInfPresentFlag, QTreeWidgetItem *pItem);
     void createSubLayerHrdParameters(const HEVC::SubLayerHrdParameters &slhrd, uint8_t sub_pic_hrd_params_present_flag, QTreeWidgetItem *pItem);
-    void createShortTermRefPicSet(std::size_t stRpsIdx, std::size_t num_short_term_ref_pic_sets, const std::vector<HEVC::ShortTermRefPicSet> &refPicSets, QTreeWidgetItem *pItem);
-    void createScalingListData(const HEVC::ScalingListData&scdata, QTreeWidgetItem *pItem);
-
+    void createShortTermRefPicSet(std::size_t stRpsIdx, const HEVC::ShortTermRefPicSet &rpset, std::size_t num_short_term_ref_pic_sets, const std::vector<HEVC::ShortTermRefPicSet> &refPicSets, QTreeWidgetItem *pItem);
+    void createScalingListData(const HEVC::ScalingListData &scdata, QTreeWidgetItem *pItem);
+    void createRefPicListModification(const HEVC::RefPicListModification &rplModif, QTreeWidgetItem *pItem);
+    void createPredWeightTable(const HEVC::PredWeightTable &pwt, std::shared_ptr<HEVC::Slice> pSlice, QTreeWidgetItem *pItem);
 
     std::map<uint32_t, std::shared_ptr<HEVC::VPS> >          m_vpsMap;
     std::map<uint32_t, std::shared_ptr<HEVC::SPS> >          m_spsMap;

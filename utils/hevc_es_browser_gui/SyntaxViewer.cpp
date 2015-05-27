@@ -8,6 +8,10 @@
 
 #include <HevcUtils.h>
 
+#define SLICE_B 0
+#define SLICE_P 1
+#define SLICE_I 2
+
 SyntaxViewer::SyntaxViewer(QWidget* pwgt):
   QTreeWidget(pwgt)
 {
@@ -201,7 +205,7 @@ void SyntaxViewer::createVPS(std::shared_ptr<HEVC::VPS> pVPS)
     }
   }
 
-  pitem -> addChild(new QTreeWidgetItem(QStringList("vps_extension_flag = " + QString::number(pVPS -> vps_extension_flag))));
+  pvpsItem -> addChild(new QTreeWidgetItem(QStringList("vps_extension_flag = " + QString::number(pVPS -> vps_extension_flag))));
 }
 
 
@@ -298,7 +302,8 @@ void SyntaxViewer::createSPS(std::shared_ptr<HEVC::SPS> pSPS)
       QTreeWidgetItem *pStrpc = new QTreeWidgetItem(QStringList("short_term_ref_pic_set(" + QString::number(i) + ")"));
       pitem -> addChild(pStrpc);
 
-      createShortTermRefPicSet(i, pSPS -> num_short_term_ref_pic_sets, pSPS -> short_term_ref_pic_set, pStrpc);
+      HEVC::ShortTermRefPicSet rpset = pSPS -> short_term_ref_pic_set[i];
+      createShortTermRefPicSet(i, rpset, pSPS -> num_short_term_ref_pic_sets, pSPS -> short_term_ref_pic_set, pStrpc);
     }
   }
 
@@ -452,16 +457,38 @@ void SyntaxViewer::createPPS(std::shared_ptr<HEVC::PPS> pPPS)
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList("pps_beta_offset_div2 = " + QString::number(pPPS -> pps_beta_offset_div2))));
     }
   }
+
+
+  pppsItem -> addChild(new QTreeWidgetItem(QStringList("pps_scaling_list_data_present_flag = " + QString::number(pPPS -> pps_scaling_list_data_present_flag))));
+
+  if(pPPS -> pps_scaling_list_data_present_flag)
+  {
+    pitem = new QTreeWidgetItem(QStringList("if(pps_scaling_list_data_present_flag)"));
+    pppsItem -> addChild(pitem);
+
+    QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("scaling_list_data"));
+    pitem -> addChild(pitemSecond);
+    createScalingListData(pPPS -> scaling_list_data, pitemSecond);
+
+  }
+
+  pppsItem -> addChild(new QTreeWidgetItem(QStringList("lists_modification_present_flag = " + QString::number(pPPS -> lists_modification_present_flag))));
+  pppsItem -> addChild(new QTreeWidgetItem(QStringList("log2_parallel_merge_level_minus2 = " + QString::number(pPPS -> log2_parallel_merge_level_minus2))));
+  pppsItem -> addChild(new QTreeWidgetItem(QStringList("slice_segment_header_extension_present_flag = " + QString::number(pPPS -> slice_segment_header_extension_present_flag))));
+  pppsItem -> addChild(new QTreeWidgetItem(QStringList("pps_extension_flag = " + QString::number(pPPS -> pps_extension_flag))));
 }
 
 void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
 {
+  if(pSlice -> m_processFailed)
+    return;
+
   std::shared_ptr<HEVC::PPS> pPPS = m_ppsMap[pSlice -> slice_pic_parameter_set_id];
   if(!pPPS)
     return;
 
   int32_t spsId = pPPS -> pps_seq_parameter_set_id;
-  QTreeWidgetItem *pitemDepend;
+  QTreeWidgetItem *pitemDepend, *pitemThird;
   QTreeWidgetItem *psliceItem = new QTreeWidgetItem(QStringList("Slice"));
   addTopLevelItem(psliceItem);
 
@@ -483,9 +510,6 @@ void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
     pitem = new QTreeWidgetItem(QStringList("if (!first_slice_segment_in_pic_flag)"));
     psliceItem -> addChild(pitem);
 
-    pitem -> addChild(new QTreeWidgetItem(QStringList("pps -> dependent_slice_segments_enabled_flag = " + QString::number(pPPS -> dependent_slice_segments_enabled_flag))));
-
-
     if(pPPS -> dependent_slice_segments_enabled_flag)
     {
       pitemDepend = new QTreeWidgetItem(QStringList("pps -> dependent_slice_segments_enabled_flag = " + QString::number(pPPS -> dependent_slice_segments_enabled_flag)));
@@ -495,6 +519,7 @@ void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
     }
     pitem -> addChild(new QTreeWidgetItem(QStringList("slice_segment_address = " + QString::number(pSlice -> slice_segment_address))));
   }
+
   if(!pSlice -> dependent_slice_segment_flag)
   {
     pitem = new QTreeWidgetItem(QStringList("if (!dependent_slice_segment_flag)"));
@@ -546,22 +571,268 @@ void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
       pitem -> addChild(pitemDepend);
 
       pitemDepend -> addChild(new QTreeWidgetItem(QStringList("pic_order_cnt_lsb = " + QString::number(pSlice -> pic_order_cnt_lsb))));
-      pitemDepend -> addChild(new QTreeWidgetItem(QStringList("short_term_ref_pic_set_sps_flag = " + QString::number(pSlice -> short_term_ref_pic_set_sps_flag))));
 
-      pitem = new QTreeWidgetItem(QStringList("short_term_ref_pic_set_sps_flag = " + QString::number(pSlice -> short_term_ref_pic_set_sps_flag)));
-      pitemDepend -> addChild(pitem);
+      QTreeWidgetItem *pitemThird = new QTreeWidgetItem(QStringList("short_term_ref_pic_set_sps_flag = " + QString::number(pSlice -> short_term_ref_pic_set_sps_flag)));
+      pitemDepend -> addChild(pitemThird);
       if(!pSlice -> short_term_ref_pic_set_sps_flag)
       {
-        //short_term_ref_pic_set
+        pitemThird = new QTreeWidgetItem(QStringList("if (!short_term_ref_pic_set_sps_flag)"));
+        pitemDepend -> addChild(pitemThird);
+        QTreeWidgetItem *pStrpc = new QTreeWidgetItem(QStringList("short_term_ref_pic_set(" + QString::number(m_spsMap[spsId] -> num_short_term_ref_pic_sets) + ")"));
+        pitemThird -> addChild(pStrpc);
+        createShortTermRefPicSet(m_spsMap[spsId] -> num_short_term_ref_pic_sets, pSlice -> short_term_ref_pic_set, m_spsMap[spsId] -> num_short_term_ref_pic_sets, m_spsMap[spsId] -> short_term_ref_pic_set, pStrpc);
       }
-      else if(pSlice -> short_term_ref_pic_set_sps_flag > 1)
+      else if(m_spsMap[spsId] -> num_short_term_ref_pic_sets > 1)
       {
-        std::size_t numBits = HEVC::log2(m_spsMap[spsId] -> num_short_term_ref_pic_sets);
-        pitemDepend = new QTreeWidgetItem(QStringList("log2(sps -> num_short_term_ref_pic_sets) = " + QString::number(numBits)));
-        pitem -> addChild(pitemDepend);
-        if(numBits > 0)
-          pitemDepend -> addChild(new QTreeWidgetItem(QStringList("short_term_ref_pic_set_idx = " + QString::number(pSlice -> short_term_ref_pic_set_sps_flag))));
+        pitemThird = new QTreeWidgetItem(QStringList("if (short_term_ref_pic_set_sps_flag && num_long_term_ref_pics_sps > 0)"));
+        pitemDepend -> addChild(pitemThird);
+
+        pitemThird -> addChild(new QTreeWidgetItem(QStringList("short_term_ref_pic_set_idx = " + QString::number(pSlice -> short_term_ref_pic_set_idx))));
       }
+
+      if(m_spsMap[spsId] -> long_term_ref_pics_present_flag)
+      {
+        pitemThird = new QTreeWidgetItem(QStringList("if (long_term_ref_pics_present_flag)"));
+        pitemDepend -> addChild(pitemThird);
+
+        if(m_spsMap[spsId] -> num_long_term_ref_pics_sps > 0)
+        {
+          QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if (num_long_term_ref_pics_sps)"));
+          pitemThird -> addChild(pitemSecond);
+
+          pitemSecond -> addChild(new QTreeWidgetItem(QStringList("num_long_term_sps = " + QString::number(pSlice -> num_long_term_sps))));
+        }
+
+        pitemThird -> addChild(new QTreeWidgetItem(QStringList("num_long_term_pics = " + QString::number(pSlice -> num_long_term_pics))));
+
+        std::size_t num_long_term = pSlice -> num_long_term_sps + pSlice -> num_long_term_pics;
+        QTreeWidgetItem *pitemLoop = new QTreeWidgetItem(QStringList("for( i = 0; i < num_long_term_sps + num_long_term_pics; i++ )"));
+        pitemThird -> addChild(pitemLoop);
+
+        for(std::size_t i=0; i < num_long_term; i++)
+        {
+          if(i < pSlice -> num_long_term_sps) 
+          {
+            QTreeWidgetItem *pitem1 = new QTreeWidgetItem(QStringList("if (i < num_long_term_sps)"));
+            pitemLoop -> addChild(pitem1);
+
+            if(m_spsMap[spsId] -> num_long_term_ref_pics_sps > 1)
+            {
+              QTreeWidgetItem *pitem2 = new QTreeWidgetItem(QStringList("if (num_long_term_ref_pics_sps > 1)"));
+              pitem1 -> addChild(pitem2);
+              pitem2 -> addChild(new QTreeWidgetItem(QStringList("lt_idx_sps[" + QString::number(i) + "] = " + QString::number(pSlice -> lt_idx_sps[i]))));
+            }
+          }
+          else
+          {
+            QTreeWidgetItem *pitem1 = new QTreeWidgetItem(QStringList("if (i >= num_long_term_sps)"));
+            pitemLoop -> addChild(pitem1);
+            pitem1 -> addChild(new QTreeWidgetItem(QStringList("poc_lsb_lt[" + QString::number(i) + "] = " + QString::number(pSlice -> poc_lsb_lt[i]))));
+            pitem1 -> addChild(new QTreeWidgetItem(QStringList("used_by_curr_pic_lt_flag[" + QString::number(i) + "] = " + QString::number(pSlice -> used_by_curr_pic_lt_flag[i]))));
+          }
+
+          pitemLoop -> addChild(new QTreeWidgetItem(QStringList("delta_poc_msb_present_flag[" + QString::number(i) + "] = " + QString::number(pSlice -> delta_poc_msb_present_flag[i]))));
+          if(pSlice -> delta_poc_msb_present_flag[i])
+          {
+            QTreeWidgetItem *pitem1 = new QTreeWidgetItem(QStringList("if (delta_poc_msb_present_flag[" + QString::number(i) + "])"));
+            pitemLoop -> addChild(pitem1);
+            pitem1 -> addChild(new QTreeWidgetItem(QStringList("delta_poc_msb_cycle_lt[" + QString::number(i) + "] = " + QString::number(pSlice -> delta_poc_msb_cycle_lt[i]))));
+          }
+        }
+      }
+
+      if(m_spsMap[spsId] -> sps_temporal_mvp_enabled_flag)
+      {
+        QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if (sps_temporal_mvp_enabled_flag)"));
+        pitemDepend -> addChild(pitemSecond);
+        pitemSecond -> addChild(new QTreeWidgetItem(QStringList("slice_temporal_mvp_enabled_flag = " + QString::number(pSlice -> slice_temporal_mvp_enabled_flag))));
+      }
+    }
+
+    if(m_spsMap[spsId] -> sample_adaptive_offset_enabled_flag)
+    {
+      pitemDepend = new QTreeWidgetItem(QStringList("if (sample_adaptive_offset_enabled_flag)"));
+      pitem -> addChild(pitemDepend);
+
+      pitemDepend -> addChild(new QTreeWidgetItem(QStringList("slice_sao_luma_flag = " + QString::number(pSlice -> slice_sao_luma_flag))));
+      pitemDepend -> addChild(new QTreeWidgetItem(QStringList("slice_sao_chroma_flag = " + QString::number(pSlice -> slice_sao_chroma_flag))));
+    }
+
+    if(pSlice -> slice_type == SLICE_B || pSlice -> slice_type == SLICE_P)
+    {
+      pitemDepend = new QTreeWidgetItem(QStringList("if (slice_type == P || slice_type == B)"));
+      pitem -> addChild(pitemDepend);
+
+      pitemDepend -> addChild(new QTreeWidgetItem(QStringList("num_ref_idx_active_override_flag = " + QString::number(pSlice -> num_ref_idx_active_override_flag))));
+
+      if(pSlice -> num_ref_idx_active_override_flag)
+      {
+        QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if (num_ref_idx_active_override_flag)"));
+        pitemDepend -> addChild(pitemSecond);
+
+        pitemSecond -> addChild(new QTreeWidgetItem(QStringList("num_ref_idx_l0_active_minus1 = " + QString::number(pSlice -> num_ref_idx_l0_active_minus1))));
+
+        if(pSlice -> slice_type == SLICE_B)
+        {
+          QTreeWidgetItem *pitemThird = new QTreeWidgetItem(QStringList("if (slice_type == B)"));
+          pitemSecond -> addChild(pitemThird);
+
+          pitemThird -> addChild(new QTreeWidgetItem(QStringList("num_ref_idx_l1_active_minus1 = " + QString::number(pSlice -> num_ref_idx_l1_active_minus1))));
+        }
+      }
+
+      if(pPPS -> lists_modification_present_flag)
+      {
+        std::size_t NumPocTotalCurr = calcNumPocTotalCurr(pSlice, m_spsMap[spsId]);
+
+        if(NumPocTotalCurr > 1)
+        {
+          pitemThird = new QTreeWidgetItem(QStringList("if (lists_modification_present_flag && NumPocTotalCurr > 1 )"));
+          pitemDepend -> addChild(pitemThird);
+          QTreeWidgetItem *pitemRplMod = new QTreeWidgetItem(QStringList("short_term_ref_pic_set(" + QString::number(m_spsMap[spsId] -> num_short_term_ref_pic_sets) + ")"));
+          pitemThird -> addChild(pitemRplMod);
+
+
+          createRefPicListModification(pSlice -> ref_pic_lists_modification, pitemRplMod);
+        }        
+      }
+
+      if(pSlice -> slice_type == SLICE_B)
+      {
+        pitemThird = new QTreeWidgetItem(QStringList("if (slice_type == B)"));
+        pitemDepend -> addChild(pitemThird);
+        pitemThird -> addChild(new QTreeWidgetItem(QStringList("mvd_l1_zero_flag = " + QString::number(pSlice -> mvd_l1_zero_flag))));
+      }
+
+      if(pPPS -> cabac_init_present_flag)
+      {
+        pitemThird = new QTreeWidgetItem(QStringList("if (cabac_init_present_flag)"));
+        pitemDepend -> addChild(pitemThird);
+        pitemThird-> addChild(new QTreeWidgetItem(QStringList("cabac_init_flag = " + QString::number(pSlice -> cabac_init_flag))));
+      }
+
+      if(pSlice -> slice_type == SLICE_B || pSlice -> collocated_from_l0_flag && pSlice -> num_ref_idx_l0_active_minus1 ||
+            !pSlice -> collocated_from_l0_flag && pSlice -> num_ref_idx_l1_active_minus1)
+      {
+        if(pSlice -> slice_temporal_mvp_enabled_flag)
+        {
+          pitemThird = new QTreeWidgetItem(QStringList("if (slice_temporal_mvp_enabled_flag)"));
+          pitem -> addChild(pitemThird);
+
+          if(pSlice -> slice_type == SLICE_B)
+          {
+            QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if (slice_type == B)"));
+            pitemThird -> addChild(pitemSecond);
+            pitemSecond -> addChild(new QTreeWidgetItem(QStringList("collocated_from_l0_flag = " + QString::number(pSlice -> collocated_from_l0_flag))));
+          }
+
+          if(pSlice -> collocated_from_l0_flag && pSlice -> num_ref_idx_l0_active_minus1 ||
+              !pSlice -> collocated_from_l0_flag && pSlice -> num_ref_idx_l1_active_minus1)
+          {
+            QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if ((collocated_from_l0_flag && num_ref_idx_l0_active_minus1 > 0 ) || (!collocated_from_l0_flag && num_ref_idx_l1_active_minus1 > 0))"));
+            pitemThird -> addChild(pitemSecond);
+
+            pitemSecond -> addChild(new QTreeWidgetItem(QStringList("collocated_ref_idx = " + QString::number(pSlice -> collocated_ref_idx))));
+          }
+        }
+      }
+
+      if(pPPS -> weighted_pred_flag && pSlice -> slice_type == SLICE_B ||
+        pPPS -> weighted_bipred_flag && pSlice -> slice_type == SLICE_P)
+      {
+        pitemThird = new QTreeWidgetItem(QStringList("if ((weighted_pred_flag && slice_type == P) || (weighted_bipred_flag && slice_type == B))"));
+        pitemDepend -> addChild(pitemThird);
+
+        QTreeWidgetItem *pitempwt = new QTreeWidgetItem(QStringList("pred_weight_table"));
+        pitemThird -> addChild(pitempwt);
+
+        createPredWeightTable(pSlice -> pred_weight_table, pSlice, pitempwt);
+      }
+
+      pitemDepend -> addChild(new QTreeWidgetItem(QStringList("five_minus_max_num_merge_cand = " + QString::number(pSlice -> five_minus_max_num_merge_cand))));
+    }
+
+    pitem -> addChild(new QTreeWidgetItem(QStringList("slice_qp_delta = " + QString::number(pSlice -> slice_qp_delta))));
+
+
+    if(pPPS -> pps_slice_chroma_qp_offsets_present_flag)
+    {
+      pitemDepend = new QTreeWidgetItem(QStringList("if (pps_slice_chroma_qp_offsets_present_flag)"));
+      pitem -> addChild(pitemDepend);
+
+      pitemDepend -> addChild(new QTreeWidgetItem(QStringList("slice_cb_qp_offset = " + QString::number(pSlice -> slice_cb_qp_offset))));
+      pitemDepend -> addChild(new QTreeWidgetItem(QStringList("slice_cr_qp_offset = " + QString::number(pSlice -> slice_cr_qp_offset))));
+    }
+
+    if(pPPS -> deblocking_filter_override_enabled_flag)
+    {
+      pitemDepend = new QTreeWidgetItem(QStringList("if (deblocking_filter_override_enabled_flag)"));
+      pitem -> addChild(pitemDepend);
+      pitemDepend -> addChild(new QTreeWidgetItem(QStringList("deblocking_filter_override_flag = " + QString::number(pSlice -> deblocking_filter_override_flag))));
+    }
+
+    if(pSlice -> deblocking_filter_override_flag)
+    {
+      pitemDepend = new QTreeWidgetItem(QStringList("if (deblocking_filter_override_flag)"));
+      pitem -> addChild(pitemDepend);
+
+      pitemDepend -> addChild(new QTreeWidgetItem(QStringList("slice_deblocking_filter_disabled_flag = " + QString::number(pSlice -> slice_deblocking_filter_disabled_flag))));
+
+      if(!pSlice -> slice_deblocking_filter_disabled_flag)
+      {
+        pitemThird = new QTreeWidgetItem(QStringList("if (!slice_deblocking_filter_disabled_flag)"));
+        pitemDepend -> addChild(pitemThird);
+
+        pitemThird -> addChild(new QTreeWidgetItem(QStringList("slice_beta_offset_div2 = " + QString::number(pSlice -> slice_beta_offset_div2))));
+        pitemThird -> addChild(new QTreeWidgetItem(QStringList("slice_tc_offset_div2 = " + QString::number(pSlice -> slice_tc_offset_div2))));
+      }
+    }
+
+    if(pPPS -> pps_loop_filter_across_slices_enabled_flag && 
+      (pSlice -> slice_sao_luma_flag || pSlice -> slice_sao_chroma_flag || !pSlice -> slice_deblocking_filter_disabled_flag))
+    {
+      pitemDepend = new QTreeWidgetItem(QStringList("if (pps_loop_filter_across_slices_enabled_flag && (slice_sao_luma_flag || slice_sao_chroma_flag || !slice_deblocking_filter_disabled_flag ))"));
+      pitem -> addChild(pitemDepend);
+
+      pitemDepend -> addChild(new QTreeWidgetItem(QStringList("slice_loop_filter_across_slices_enabled_flag = " + QString::number(pSlice -> slice_loop_filter_across_slices_enabled_flag))));
+    }
+
+    if(pPPS -> tiles_enabled_flag || pPPS -> entropy_coding_sync_enabled_flag)
+    {
+      pitemDepend = new QTreeWidgetItem(QStringList("if (tiles_enabled_flag || entropy_coding_sync_enabled_flag)"));
+      pitem -> addChild(pitemDepend);
+
+      pitemDepend -> addChild(new QTreeWidgetItem(QStringList("num_entry_point_offsets = " + QString::number(pSlice -> num_entry_point_offsets))));
+
+      if(pSlice -> num_entry_point_offsets > 0)
+      {
+        pitemThird = new QTreeWidgetItem(QStringList("if (num_entry_point_offsets > 0)"));
+        pitemDepend -> addChild(pitemThird);
+
+        pitemThird -> addChild(new QTreeWidgetItem(QStringList("offset_len_minus1 = " + QString::number(pSlice -> offset_len_minus1))));
+
+        QTreeWidgetItem *pitemLoop = new QTreeWidgetItem(QStringList("for( i = 0; i < num_entry_point_offsets; i++ )"));
+        pitemThird -> addChild(pitemLoop);
+
+        for(std::size_t i=0; i<pSlice -> num_entry_point_offsets; i++)
+          pitemLoop -> addChild(new QTreeWidgetItem(QStringList("entry_point_offset_minus1[" + QString::number(i) + "] = " + QString::number(pSlice -> entry_point_offset_minus1[i]))));
+      }
+    }
+  }
+
+  if(pPPS -> slice_segment_header_extension_present_flag)
+  {
+    pitem = new QTreeWidgetItem(QStringList("if (slice_segment_header_extension_present_flag)"));
+    psliceItem -> addChild(pitem);
+
+    pitem -> addChild(new QTreeWidgetItem(QStringList("slice_segment_header_extension_length = " + QString::number(pSlice -> slice_segment_header_extension_length))));
+
+    QTreeWidgetItem *pitemLoop = new QTreeWidgetItem(QStringList("for( i = 0; i < slice_segment_header_extension_length; i++ )"));
+    pitem -> addChild(pitemLoop);
+
+    for(std::size_t i=0; i<pSlice -> slice_segment_header_extension_length; i++)
+    {
+      pitemLoop -> addChild(new QTreeWidgetItem(QStringList("slice_segment_header_extension_data_byte[" + QString::number(i) + "] = " + QString::number(pSlice -> slice_segment_header_extension_data_byte[i]))));
     }
   }
 }
@@ -990,9 +1261,9 @@ void SyntaxViewer::createSubLayerHrdParameters(const HEVC::SubLayerHrdParameters
 }
 
 
-void SyntaxViewer::createShortTermRefPicSet(std::size_t stRpsIdx, std::size_t num_short_term_ref_pic_sets, const std::vector<HEVC::ShortTermRefPicSet> &refPicSets, QTreeWidgetItem *pStrpsItem)
+void SyntaxViewer::createShortTermRefPicSet(std::size_t stRpsIdx, const HEVC::ShortTermRefPicSet &rpset, std::size_t num_short_term_ref_pic_sets, const std::vector<HEVC::ShortTermRefPicSet> &refPicSets, QTreeWidgetItem *pStrpsItem)
 {
-  HEVC::ShortTermRefPicSet rpset = refPicSets[stRpsIdx];
+//  HEVC::ShortTermRefPicSet rpset = refPicSets[stRpsIdx];
 
   if(stRpsIdx)
   {
@@ -1117,6 +1388,146 @@ void SyntaxViewer::createScalingListData(const HEVC::ScalingListData &scdata, QT
       }
     }
   }
+}
+
+
+void SyntaxViewer::createRefPicListModification(const HEVC::RefPicListModification &rplModif, QTreeWidgetItem *pRplmItem)
+{
+  pRplmItem -> addChild(new QTreeWidgetItem(QStringList("ref_pic_list_modification_flag_l0 = " + QString::number(rplModif.ref_pic_list_modification_flag_l0))));
+
+  if(rplModif.ref_pic_list_modification_flag_l0)
+  {
+    QTreeWidgetItem *pitem = new QTreeWidgetItem(QStringList("for( i = 0; i <= num_ref_idx_l0_active_minus1; i++ )"));
+    pRplmItem -> addChild(pitem);
+
+    for(std::size_t i=0; i<rplModif.list_entry_l0.size(); i++)
+      pitem -> addChild(new QTreeWidgetItem(QStringList("list_entry_l0[" + QString::number(i) + "] = " + QString::number(rplModif.list_entry_l0[i]))));
+  }
+
+  pRplmItem -> addChild(new QTreeWidgetItem(QStringList("ref_pic_list_modification_flag_l1 = " + QString::number(rplModif.ref_pic_list_modification_flag_l1))));
+
+  if(rplModif.ref_pic_list_modification_flag_l1)
+  {
+    QTreeWidgetItem *pitem = new QTreeWidgetItem(QStringList("for( i = 0; i <= num_ref_idx_l1_active_minus1; i++ )"));
+    pRplmItem -> addChild(pitem);
+
+    for(std::size_t i=0; i<rplModif.list_entry_l1.size(); i++)
+      pitem -> addChild(new QTreeWidgetItem(QStringList("list_entry_l1[" + QString::number(i) + "] = " + QString::number(rplModif.list_entry_l1[i]))));
+  }
+}
+
+
+void SyntaxViewer::createPredWeightTable(const HEVC::PredWeightTable &pwt, std::shared_ptr<HEVC::Slice> pSlice, QTreeWidgetItem *ppwtItem)
+{
+  std::shared_ptr<HEVC::PPS> ppps = m_ppsMap[pSlice -> slice_pic_parameter_set_id];
+  if(!ppps)
+    return ;
+
+  std::shared_ptr<HEVC::SPS> psps = m_spsMap[ppps -> pps_seq_parameter_set_id];
+
+  if(!psps)
+    return ;
+
+  ppwtItem -> addChild(new QTreeWidgetItem(QStringList("luma_log2_weight_denom = " + QString::number(pwt.luma_log2_weight_denom))));
+
+  if(psps -> chroma_format_idc != 0)
+  {
+    QTreeWidgetItem *pitem = new QTreeWidgetItem(QStringList("if (psps -> chroma_format_idc)"));
+    ppwtItem -> addChild(pitem);
+
+    pitem -> addChild(new QTreeWidgetItem(QStringList("delta_chroma_log2_weight_denom = " + QString::number(pwt.delta_chroma_log2_weight_denom))));
+  }
+
+  QTreeWidgetItem *pitemLoop = new QTreeWidgetItem(QStringList("for(i=0; i<=num_ref_idx_l0_active_minus1; i++)"));
+  ppwtItem -> addChild(pitemLoop);
+
+  for(std::size_t i=0; i<pSlice -> num_ref_idx_l0_active_minus1; i++)
+    pitemLoop -> addChild(new QTreeWidgetItem(QStringList("luma_weight_l0_flag[" + QString::number(i) + "] = " + QString::number(pwt.luma_weight_l0_flag[i]))));
+
+  if(psps -> chroma_format_idc != 0)
+  {
+    QTreeWidgetItem *pitem = new QTreeWidgetItem(QStringList("if (psps -> chroma_format_idc)"));
+    ppwtItem -> addChild(pitem);
+
+    pitemLoop = new QTreeWidgetItem(QStringList("for(i=0; i<=num_ref_idx_l0_active_minus1; i++)"));
+    pitem -> addChild(pitemLoop);
+
+    for(std::size_t i=0; i<pSlice -> num_ref_idx_l0_active_minus1; i++)
+      pitemLoop -> addChild(new QTreeWidgetItem(QStringList("chroma_weight_l0_flag[" + QString::number(i) + "] = " + QString::number(pwt.chroma_weight_l0_flag[i]))));
+  }
+
+
+  for(std::size_t i=0; i<pSlice -> num_ref_idx_l0_active_minus1; i++)
+  {
+    pitemLoop = new QTreeWidgetItem(QStringList("for(i=0; i<=num_ref_idx_l0_active_minus1; i++)"));
+    ppwtItem -> addChild(pitemLoop);
+
+    if(pwt.luma_weight_l0_flag[i])
+    {
+      QTreeWidgetItem *pitem = new QTreeWidgetItem(QStringList("if (luma_weight_l0_flag[" + QString::number(i) +"])"));
+      pitemLoop -> addChild(pitem);
+
+      pitem -> addChild(new QTreeWidgetItem(QStringList("delta_luma_weight_l0[" + QString::number(i) + "] = " + QString::number(pwt.delta_luma_weight_l0[i]))));
+      pitem -> addChild(new QTreeWidgetItem(QStringList("luma_offset_l0[" + QString::number(i) + "] = " + QString::number(pwt.luma_offset_l0[i]))));
+    }
+    if(pwt.chroma_weight_l0_flag[i])
+    {
+      QTreeWidgetItem *pitem = new QTreeWidgetItem(QStringList("if (chroma_weight_l0_flag[" + QString::number(i) +"])"));
+      pitemLoop -> addChild(pitem);
+
+      pitem -> addChild(new QTreeWidgetItem(QStringList("delta_chroma_weight_l0[" + QString::number(i) + "] = { " + QString::number(pwt.delta_chroma_weight_l0[i][0]) + ", " + QString::number(pwt.delta_chroma_weight_l0[i][1]) + ", " + QString::number(pwt.delta_chroma_weight_l0[i][2]) + " } ")));
+      pitem -> addChild(new QTreeWidgetItem(QStringList("delta_chroma_offset_l0[" + QString::number(i) + "] = { " + QString::number(pwt.delta_chroma_offset_l0[i][0]) + ", " + QString::number(pwt.delta_chroma_offset_l0[i][1]) + ", " + QString::number(pwt.delta_chroma_offset_l0[i][2]) + " } ")));
+    }
+  }
+
+  if(pSlice -> slice_type == SLICE_B)
+  {
+    QTreeWidgetItem *pitemBSlice = new QTreeWidgetItem(QStringList("slice_type == B"));
+    ppwtItem -> addChild(pitemBSlice);
+
+    QTreeWidgetItem *pitemLoop = new QTreeWidgetItem(QStringList("for(i=0; i<=num_ref_idx_l1_active_minus1; i++)"));
+    pitemBSlice -> addChild(pitemLoop);
+
+    for(std::size_t i=0; i<pSlice -> num_ref_idx_l1_active_minus1; i++)
+      pitemLoop -> addChild(new QTreeWidgetItem(QStringList("luma_weight_l1_flag[" + QString::number(i) + "] = " + QString::number(pwt.luma_weight_l1_flag[i]))));
+
+    if(psps -> chroma_format_idc != 0)
+    {
+      QTreeWidgetItem *pitem = new QTreeWidgetItem(QStringList("if (psps -> chroma_format_idc)"));
+      pitemBSlice -> addChild(pitem);
+
+      pitemLoop = new QTreeWidgetItem(QStringList("for(i=0; i<=num_ref_idx_l1_active_minus1; i++)"));
+      pitem -> addChild(pitemLoop);
+
+      for(std::size_t i=0; i<pSlice -> num_ref_idx_l1_active_minus1; i++)
+        pitemLoop -> addChild(new QTreeWidgetItem(QStringList("chroma_weight_l1_flag[" + QString::number(i) + "] = " + QString::number(pwt.chroma_weight_l1_flag[i]))));
+    }
+
+
+    for(std::size_t i=0; i<pSlice -> num_ref_idx_l1_active_minus1; i++)
+    {
+      pitemLoop = new QTreeWidgetItem(QStringList("for(i=0; i<=num_ref_idx_l1_active_minus1; i++)"));
+      pitemBSlice -> addChild(pitemLoop);
+
+      if(pwt.luma_weight_l0_flag[i])
+      {
+        QTreeWidgetItem *pitem = new QTreeWidgetItem(QStringList("if (luma_weight_l1_flag[" + QString::number(i) +"])"));
+        pitemLoop -> addChild(pitem);
+
+        pitem -> addChild(new QTreeWidgetItem(QStringList("delta_luma_weight_l1[" + QString::number(i) + "] = " + QString::number(pwt.delta_luma_weight_l1[i]))));
+        pitem -> addChild(new QTreeWidgetItem(QStringList("luma_offset_l1[" + QString::number(i) + "] = " + QString::number(pwt.luma_offset_l1[i]))));
+      }
+      if(pwt.chroma_weight_l1_flag[i])
+      {
+        QTreeWidgetItem *pitem = new QTreeWidgetItem(QStringList("if (chroma_weight_l1_flag[" + QString::number(i) +"])"));
+        pitemLoop -> addChild(pitem);
+
+        pitem -> addChild(new QTreeWidgetItem(QStringList("delta_chroma_weight_l1[" + QString::number(i) + "] = { " + QString::number(pwt.delta_chroma_weight_l1[i][0]) + ", " + QString::number(pwt.delta_chroma_weight_l1[i][1]) + ", " + QString::number(pwt.delta_chroma_weight_l1[i][2]) + " } ")));
+        pitem -> addChild(new QTreeWidgetItem(QStringList("delta_chroma_offset_l1[" + QString::number(i) + "] = { " + QString::number(pwt.delta_chroma_offset_l1[i][0]) + ", " + QString::number(pwt.delta_chroma_offset_l1[i][1]) + ", " + QString::number(pwt.delta_chroma_offset_l1[i][2]) + " } ")));
+      }
+    }
+  } 
+
 }
 
 

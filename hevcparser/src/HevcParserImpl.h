@@ -37,6 +37,8 @@ namespace HEVC
       ShortTermRefPicSet processShortTermRefPicSet(std::size_t stRpsIdx, size_t num_short_term_ref_pic_sets, const std::vector<ShortTermRefPicSet> &refPicSets, std::shared_ptr<SPS> psps, BitstreamReader &bs);
       VuiParameters processVuiParameters(std::size_t sps_max_sub_layers_minus1, BitstreamReader &bs);
       ScalingListData processScalingListData(BitstreamReader &bs);
+      RefPicListModification processRefPicListModification(BitstreamReader &bs, std::shared_ptr<Slice> pslice);
+      PredWeightTable processPredWeightTable(BitstreamReader &bs, std::shared_ptr<Slice> pslice);
 
       std::map<uint32_t, std::shared_ptr<VPS> >          m_vpsMap;
       std::map<uint32_t, std::shared_ptr<SPS> >          m_spsMap;

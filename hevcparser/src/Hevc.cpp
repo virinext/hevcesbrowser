@@ -6,6 +6,7 @@ using namespace HEVC;
 
 NALUnit::NALUnit(NALUnitType type):
   m_nalUnitType(type)
+  ,m_processFailed(false)
 {
 }
 
@@ -70,6 +71,7 @@ std::shared_ptr<NALUnit> NALUnit::copy() const
       res = std::shared_ptr<NALUnit>(new NALUnit(*this));
   };
 
+  res -> m_processFailed = m_processFailed;
   return res;
 }
 
@@ -430,6 +432,21 @@ bool HEVC::PPS::operator == (const HEVC::PPS &pps) const
     return false;
 
   if(pps_tc_offset_div2 != pps.pps_tc_offset_div2)
+    return false;
+
+  if(pps_scaling_list_data_present_flag != pps_scaling_list_data_present_flag)
+    return false;
+
+  if(lists_modification_present_flag != lists_modification_present_flag)
+    return false;
+
+  if(log2_parallel_merge_level_minus2 != log2_parallel_merge_level_minus2)
+    return false;
+
+  if(slice_segment_header_extension_present_flag != slice_segment_header_extension_present_flag)
+    return false;
+
+  if(pps_extension_flag != pps_extension_flag)
     return false;
 
   return true;
@@ -797,6 +814,27 @@ bool ScalingListData::operator == (const ScalingListData &obj) const
 }
 
 
+bool RefPicListModification::operator == (const RefPicListModification &obj) const
+{
+  if(this == &obj)
+    return true;
+
+  if(ref_pic_list_modification_flag_l0 != ref_pic_list_modification_flag_l0)
+    return false;
+
+  if(list_entry_l0 != obj.list_entry_l0)
+    return false;
+
+  if(ref_pic_list_modification_flag_l1 != obj.ref_pic_list_modification_flag_l1)
+    return false;
+
+  if(list_entry_l1 != obj.list_entry_l1)
+    return false;
+
+  return true;
+}
+
+
 void ProfileTierLevel::toDefault()
 {
     general_profile_space = 0;  
@@ -1039,6 +1077,11 @@ void PPS::toDefault()
     pps_deblocking_filter_disabled_flag = 0;
     pps_beta_offset_div2 = 0;
     pps_tc_offset_div2 = 0;
+    pps_scaling_list_data_present_flag = 0;
+    lists_modification_present_flag = 0;
+    log2_parallel_merge_level_minus2 = 0;
+    slice_segment_header_extension_present_flag = 0;
+    pps_extension_flag = 0;
 }
 
 
@@ -1057,6 +1100,13 @@ void Slice::toDefault()
   pic_order_cnt_lsb = 0;
   short_term_ref_pic_set_sps_flag = 0;
   short_term_ref_pic_set_idx = 0;
+  num_ref_idx_l0_active_minus1 = 0;
+  num_ref_idx_l1_active_minus1 = 0;
+  slice_temporal_mvp_enabled_flag = 0;
+  collocated_from_l0_flag = 1;
+  deblocking_filter_override_flag = 0;
+  slice_sao_luma_flag = 0;
+  slice_sao_chroma_flag = 0;
 }
 
 
@@ -1087,4 +1137,34 @@ void SeiMessage::toDefault()
   num_payload_size_ff_bytes = 0;
   last_payload_type_byte = 0;
   last_payload_size_byte = 0;
+}
+
+
+void RefPicListModification::toDefault()
+{
+  ref_pic_list_modification_flag_l0 = 0;
+  list_entry_l0.clear();
+  ref_pic_list_modification_flag_l1 = 0;
+  list_entry_l1.clear();
+}
+
+
+
+void PredWeightTable::toDefault()
+{
+  luma_log2_weight_denom = 0;
+  delta_chroma_log2_weight_denom = 0;
+
+  luma_weight_l0_flag.clear();
+  chroma_weight_l0_flag.clear();
+  delta_luma_weight_l0.clear();
+  luma_offset_l0.clear();
+  delta_chroma_weight_l0.clear();
+  delta_chroma_offset_l0.clear();
+  luma_weight_l1_flag.clear();
+  chroma_weight_l1_flag.clear();
+  delta_luma_weight_l1.clear();
+  luma_offset_l1.clear();
+  delta_chroma_weight_l1.clear();
+  delta_chroma_offset_l1.clear();
 }

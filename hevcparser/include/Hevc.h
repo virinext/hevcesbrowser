@@ -150,6 +150,18 @@ namespace HEVC
     bool operator == (const ShortTermRefPicSet &) const;    
   };
   
+  class RefPicListModification
+  {
+  public:
+    uint8_t                ref_pic_list_modification_flag_l0;
+    std::vector<uint32_t>  list_entry_l0;
+    uint8_t                ref_pic_list_modification_flag_l1;
+    std::vector<uint32_t>  list_entry_l1;
+
+    void toDefault();
+
+    bool operator == (const RefPicListModification &) const;
+  };
 
   class VuiParameters
   {
@@ -214,6 +226,31 @@ namespace HEVC
   };
 
 
+  class PredWeightTable
+  {
+  public:
+    uint32_t                  luma_log2_weight_denom;
+    int32_t                   delta_chroma_log2_weight_denom;
+    std::vector<uint8_t>      luma_weight_l0_flag;
+    std::vector<uint8_t>      chroma_weight_l0_flag;
+    std::vector<int32_t>      delta_luma_weight_l0;
+    std::vector<int32_t>      luma_offset_l0;
+    std::vector<std::array<int32_t, 3> >
+                              delta_chroma_weight_l0;
+    std::vector<std::array<int32_t, 3> >
+                              delta_chroma_offset_l0;
+    std::vector<uint8_t>      luma_weight_l1_flag;
+    std::vector<uint8_t>      chroma_weight_l1_flag;
+    std::vector<int32_t>      delta_luma_weight_l1;
+    std::vector<int32_t>      luma_offset_l1;
+    std::vector<std::array<int32_t, 3> >
+                              delta_chroma_weight_l1;
+    std::vector<std::array<int32_t, 3> >
+                              delta_chroma_offset_l1;
+
+    void toDefault();
+  };
+
   class NALUnit
   {
     public:
@@ -222,6 +259,8 @@ namespace HEVC
       virtual NALUnitType getType() const;
       
       std::shared_ptr<NALUnit> copy() const;
+
+      bool            m_processFailed;
 
       NALUnitType     m_nalUnitType;
   };
@@ -364,6 +403,13 @@ namespace HEVC
     uint8_t      pps_deblocking_filter_disabled_flag;
     uint32_t     pps_beta_offset_div2;
     uint32_t     pps_tc_offset_div2;
+    uint8_t      pps_scaling_list_data_present_flag;
+    ScalingListData
+                 scaling_list_data;
+    uint8_t      lists_modification_present_flag;
+    int32_t      log2_parallel_merge_level_minus2;
+    uint8_t      slice_segment_header_extension_present_flag;
+    uint8_t      pps_extension_flag;
 
     void toDefault();
 
@@ -394,9 +440,44 @@ namespace HEVC
       uint8_t                  colour_plane_id;
       uint32_t                 pic_order_cnt_lsb;
       uint8_t                  short_term_ref_pic_set_sps_flag;
-      std::vector<ShortTermRefPicSet>
-                               short_term_ref_pic_set;
+      ShortTermRefPicSet       short_term_ref_pic_set;
       uint8_t                  short_term_ref_pic_set_idx;
+
+      uint32_t                 num_long_term_sps;
+      uint32_t                 num_long_term_pics;
+      std::vector<uint32_t>    lt_idx_sps;
+      std::vector<uint32_t>    poc_lsb_lt;
+      std::vector<uint8_t>     used_by_curr_pic_lt_flag;
+      std::vector<uint8_t>     delta_poc_msb_present_flag;
+      std::vector<uint32_t>    delta_poc_msb_cycle_lt;
+
+      uint8_t                  slice_temporal_mvp_enabled_flag;
+      uint8_t                  slice_sao_luma_flag;
+      uint8_t                  slice_sao_chroma_flag;
+      uint8_t                  num_ref_idx_active_override_flag;
+      uint32_t                 num_ref_idx_l0_active_minus1;
+      uint32_t                 num_ref_idx_l1_active_minus1;
+      RefPicListModification   ref_pic_lists_modification;
+      uint8_t                  mvd_l1_zero_flag;
+      uint8_t                  cabac_init_flag;
+      uint8_t                  collocated_from_l0_flag;
+      uint32_t                 collocated_ref_idx;
+      PredWeightTable          pred_weight_table;
+      uint32_t                 five_minus_max_num_merge_cand;
+      int32_t                  slice_qp_delta;
+      int32_t                  slice_cb_qp_offset;
+      int32_t                  slice_cr_qp_offset;
+      uint8_t                  deblocking_filter_override_flag;
+      uint8_t                  slice_deblocking_filter_disabled_flag;
+      int32_t                  slice_beta_offset_div2;
+      int32_t                  slice_tc_offset_div2;
+      int32_t                  slice_loop_filter_across_slices_enabled_flag;
+      uint32_t                 num_entry_point_offsets;
+      uint32_t                 offset_len_minus1;
+      std::vector<uint32_t>    entry_point_offset_minus1;
+      uint32_t                 slice_segment_header_extension_length;
+      std::vector<uint8_t>     slice_segment_header_extension_data_byte;
+
 
       void toDefault();
   };
