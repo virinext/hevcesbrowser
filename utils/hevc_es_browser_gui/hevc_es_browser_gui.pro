@@ -26,6 +26,7 @@ HEADERS += CommonInfoViewer.h                            \
 	    CentralWidget.h                                  \
 	    SyntaxViewer.h                                   \
 	    WarningsViewer.h                                 \
+	    StreamInfoViewer.h                               \
 	    ../common/ConvToString.h                         \
 	    ../../external/QHexView/include/QHexView.h
 
@@ -35,6 +36,7 @@ SOURCES += CommonInfoViewer.cpp                          \
 	    CentralWidget.cpp                                \
 	    SyntaxViewer.cpp                                 \
 	    WarningsViewer.cpp                               \
+	    StreamInfoViewer.cpp                             \
 	    ../common/ConvToString.cpp                       \
 	    ../../external/QHexView/src/QHexView.cpp
 

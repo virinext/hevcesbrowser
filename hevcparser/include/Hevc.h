@@ -426,6 +426,7 @@ namespace HEVC
         B_SLICE = 0,
         P_SLICE = 1,
         I_SLICE = 2,
+        NONE_SLICE = 3
       };
 
       Slice(NALUnitType type);

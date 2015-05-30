@@ -13,6 +13,7 @@ class MainWindow: public QMainWindow
   public slots:
     void slotOpen();
     void slotShowWarningsViewer();
+    void slotShowInfoViewer();
     void slotAbout();
 
 private:
@@ -22,6 +23,7 @@ private:
     void readCustomData();
 
     QWidget      *m_pwarnViewer;
+    QWidget      *m_pinfoViewer;
 };
 
 

@@ -21,6 +21,8 @@
 
 #include "CentralWidget.h"
 #include "WarningsViewer.h"
+#include "StreamInfoViewer.h"
+
 #include "version_info.h"
 
 #include <HevcParser.h>
@@ -28,6 +30,7 @@
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags):
   QMainWindow(parent, flags)
   ,m_pwarnViewer(new WarningsViewer)
+  ,m_pinfoViewer(new StreamInfoViewer)
 {
   QToolBar *ptb = addToolBar("Menu");
 
@@ -38,6 +41,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags):
   QAction *pactShowWarn = ptb -> addAction("Warnings...");
   connect(pactShowWarn, SIGNAL(triggered()), SLOT(slotShowWarningsViewer()));
 
+  QAction *pactShowInfo = ptb -> addAction("Info...");
+  connect(pactShowInfo, SIGNAL(triggered()), SLOT(slotShowInfoViewer()));
 
   QMenu *pmenu = menuBar() -> addMenu("&File");
   pmenu -> addAction(pactOpen);
@@ -45,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags):
 
   pmenu -> addSeparator();
   pmenu -> addAction(pactShowWarn);
-
+  pmenu -> addAction(pactShowInfo);
 
   pmenu -> addSeparator();
   pmenu -> addAction("Exit", this, SLOT(close()));
@@ -76,6 +81,7 @@ void MainWindow::process(const QString &fileName)
   CentralWidget *pcntwgt = dynamic_cast<CentralWidget *>(centralWidget());
   pparser -> addConsumer(pcntwgt -> m_pcomInfoViewer.data());
   pparser -> addConsumer(dynamic_cast<WarningsViewer *> (m_pwarnViewer));
+  pparser -> addConsumer(dynamic_cast<StreamInfoViewer *> (m_pinfoViewer));
 
   std::size_t position = 0;
 
@@ -105,6 +111,11 @@ void MainWindow::process(const QString &fileName)
     file.seek(position);
     pprogressBar -> setValue(position);
     QCoreApplication::processEvents();
+
+    if(!pprogressBar -> isVisible())
+    {
+      break;
+    }
   }
 
   if(pcntwgt -> m_pcomInfoViewer -> rowCount() > 0)
@@ -145,6 +156,7 @@ void MainWindow::slotOpen()
     pcntwgt -> m_pcomInfoViewer -> clear();
     pcntwgt -> m_psyntaxViewer -> clear();
     dynamic_cast<WarningsViewer *> (m_pwarnViewer) -> clear();
+    dynamic_cast<StreamInfoViewer *> (m_pinfoViewer) -> clear();
 
     process(fileName);
     QFileInfo info(fileName);
@@ -164,6 +176,13 @@ void MainWindow::slotShowWarningsViewer()
 }
 
 
+void MainWindow::slotShowInfoViewer()
+{
+  m_pinfoViewer -> show();
+  m_pinfoViewer -> raise();
+}
+
+
 void MainWindow::closeEvent(QCloseEvent *pevent)
 {
   saveCustomData();
@@ -171,6 +190,7 @@ void MainWindow::closeEvent(QCloseEvent *pevent)
   pcntwgt -> m_pcomInfoViewer -> saveCustomData();
   
   m_pwarnViewer -> close();
+  m_pinfoViewer -> close();
   
   QWidget::closeEvent(pevent);
 }
