@@ -99,7 +99,7 @@ void StreamInfoViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const 
 }
 
 
-void StreamInfoViewer::onWarning(const std::string &warning, const HEVC::Parser::Info *pInfo)
+void StreamInfoViewer::onWarning(const std::string &warning, const HEVC::Parser::Info *pInfo, HEVC::Parser::WarningType)
 {
 }
 

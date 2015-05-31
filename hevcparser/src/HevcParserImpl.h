@@ -34,11 +34,13 @@ namespace HEVC
       ProfileTierLevel processProfileTierLevel(std::size_t max_sub_layers_minus1, BitstreamReader &bs, const Parser::Info &info);
       HrdParameters processHrdParameters(uint8_t commonInfPresentFlag, std::size_t maxNumSubLayersMinus1, BitstreamReader &bs);
       SubLayerHrdParameters processSubLayerHrdParameters(uint8_t sub_pic_hrd_params_present_flag, std::size_t CpbCnt, BitstreamReader &bs);
-      ShortTermRefPicSet processShortTermRefPicSet(std::size_t stRpsIdx, size_t num_short_term_ref_pic_sets, const std::vector<ShortTermRefPicSet> &refPicSets, std::shared_ptr<SPS> psps, BitstreamReader &bs);
+      ShortTermRefPicSet processShortTermRefPicSet(std::size_t stRpsIdx, size_t num_short_term_ref_pic_sets, const std::vector<ShortTermRefPicSet> &refPicSets, std::shared_ptr<SPS> psps, BitstreamReader &bs, const Parser::Info &info);
       VuiParameters processVuiParameters(std::size_t sps_max_sub_layers_minus1, BitstreamReader &bs);
       ScalingListData processScalingListData(BitstreamReader &bs);
       RefPicListModification processRefPicListModification(BitstreamReader &bs, std::shared_ptr<Slice> pslice);
       PredWeightTable processPredWeightTable(BitstreamReader &bs, std::shared_ptr<Slice> pslice);
+
+      void onWarning(const std::string &warning, const Info *pInfo, WarningType type);
 
       std::map<uint32_t, std::shared_ptr<VPS> >          m_vpsMap;
       std::map<uint32_t, std::shared_ptr<SPS> >          m_spsMap;

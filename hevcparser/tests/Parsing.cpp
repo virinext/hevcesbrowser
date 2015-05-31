@@ -32,7 +32,7 @@ class Consumer: public Parser::Consumer
       m_nalus.push_back(nalu);
     }
 
-    virtual void onWarning(const std::string &warning, const Parser::Info *pInfo) {};
+    virtual void onWarning(const std::string &warning, const Parser::Info *pInfo, Parser::WarningType type) {};
         
     std::vector<NALUInfo>    m_nalus;
 };

@@ -26,6 +26,15 @@ void HevcParserImpl::releaseConsumer(Consumer *pconsumer)
   m_consumers.remove(pconsumer);
 }
 
+
+void HevcParserImpl::onWarning(const std::string &warning, const Info *pInfo, WarningType type)
+{
+  std::list<Consumer *>::const_iterator itr = m_consumers.begin();
+  for(; itr != m_consumers.end(); itr++)
+    (*itr) -> onWarning(warning, pInfo, type);
+}
+
+
 std::size_t HevcParserImpl::process(const uint8_t *pdata, std::size_t size, std::size_t offset)
 {
   std::size_t parsed = 0;
@@ -52,12 +61,6 @@ std::size_t HevcParserImpl::process(const uint8_t *pdata, std::size_t size, std:
       {
         processNALUnit(pdata + pos + startOffset, size - pos - startOffset, info);
       }
-      catch (std::range_error &err)
-      {
-        std::list<Consumer *>::const_iterator itr = m_consumers.begin();
-        for(; itr != m_consumers.end(); itr++)
-          (*itr) -> onWarning(err.what(), &info);
-      }
       catch (std::runtime_error &err)
       {
         std::cerr << pos << " " << err.what();
@@ -71,7 +74,7 @@ std::size_t HevcParserImpl::process(const uint8_t *pdata, std::size_t size, std:
       parsed = pos;
       pos += 3;
     }
-     else
+    else
       pos++;
   }
 
@@ -217,13 +220,12 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
   std::shared_ptr<PPS> ppps = m_ppsMap[pslice -> slice_pic_parameter_set_id];
   if(!ppps)
   {
-    std::list<Consumer *>::const_iterator itr = m_consumers.begin();
     std::stringstream ss;
     ss << "Slice: slice_pic_parameter_set_id = " 
       << (int) pslice -> slice_pic_parameter_set_id
       << ", but PPS with this id not exists";
-    for(; itr != m_consumers.end(); itr++)
-      (*itr) -> onWarning(ss.str(), &info);
+    
+    onWarning(ss.str(), &info, Parser::REFERENCE_STRUCT_NOT_PRESENT);
 
     pslice -> m_processFailed = true;
 
@@ -234,14 +236,12 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
 
   if(!m_spsMap[spsId])
   {
-    std::list<Consumer *>::const_iterator itr = m_consumers.begin();
-
     std::stringstream ss;
     ss << "Slice: pps_seq_parameter_set_id = "
       << (int) ppps -> pps_seq_parameter_set_id
       << ", but SPS with this id not exists";
-    for(; itr != m_consumers.end(); itr++)
-      (*itr) -> onWarning(ss.str(), &info);
+
+    onWarning(ss.str(), &info, Parser::REFERENCE_STRUCT_NOT_PRESENT);
 
     pslice -> m_processFailed = true;
 
@@ -292,9 +292,7 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
     {
       if(m_spsMap[spsId] -> log2_max_pic_order_cnt_lsb_minus4 + 4 >= 32)
       {
-        std::list<Consumer *>::const_iterator itr = m_consumers.begin();
-        for(; itr != m_consumers.end(); itr++)
-          (*itr) -> onWarning("Slice: pic_order_cnt_lsb size more then 32 bits", &info);
+        onWarning("Slice: pic_order_cnt_lsb size more then 32 bits", &info, Parser::OUT_OF_RANGE);
 
         pslice -> m_processFailed = true;
 
@@ -306,7 +304,7 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
 
       if(!pslice -> short_term_ref_pic_set_sps_flag)
       {
-        pslice -> short_term_ref_pic_set = processShortTermRefPicSet(m_spsMap[spsId] -> num_short_term_ref_pic_sets, m_spsMap[spsId] -> num_short_term_ref_pic_sets, m_spsMap[spsId] -> short_term_ref_pic_set, m_spsMap[spsId], bs);
+        pslice -> short_term_ref_pic_set = processShortTermRefPicSet(m_spsMap[spsId] -> num_short_term_ref_pic_sets, m_spsMap[spsId] -> num_short_term_ref_pic_sets, m_spsMap[spsId] -> short_term_ref_pic_set, m_spsMap[spsId], bs, info);
       }
       else if(m_spsMap[spsId] -> num_short_term_ref_pic_sets > 1)
       {
@@ -416,13 +414,12 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
 
         if(pslice -> pred_weight_table.luma_log2_weight_denom > 7)
         {
-          std::list<Consumer *>::const_iterator itr = m_consumers.begin();
           std::stringstream ss;
           ss << "pred_weight_table.luma_log2_weight_denom = " 
             << (int) pslice -> pred_weight_table.luma_log2_weight_denom 
             << ", but must be in range (0-7)";
-          for(; itr != m_consumers.end(); itr++)
-            (*itr) -> onWarning(ss.str(), &info);
+          
+          onWarning(ss.str(), &info, Parser::OUT_OF_RANGE);
         }
       }
 
@@ -469,13 +466,12 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
 
         if(pslice -> offset_len_minus1 > 31)
         {
-          std::list<Consumer *>::const_iterator itr = m_consumers.begin();
           std::stringstream ss;
           ss << "offset_len_minus1 = " 
             << (int) pslice -> offset_len_minus1 
             << ", but must be in range (0-31)";
-          for(; itr != m_consumers.end(); itr++)
-            (*itr) -> onWarning(ss.str(), &info);
+
+          onWarning(ss.str(), &info, Parser::OUT_OF_RANGE);
 
           pslice -> m_processFailed = true;
 
@@ -655,7 +651,7 @@ void HevcParserImpl::processSPS(std::shared_ptr<SPS> psps, BitstreamReader &bs, 
 
   psps -> short_term_ref_pic_set.resize(psps -> num_short_term_ref_pic_sets);
   for(std::size_t i=0; i<psps -> num_short_term_ref_pic_sets; i++)
-    psps -> short_term_ref_pic_set[i] = processShortTermRefPicSet(i, psps -> num_short_term_ref_pic_sets, psps -> short_term_ref_pic_set, psps, bs);
+    psps -> short_term_ref_pic_set[i] = processShortTermRefPicSet(i, psps -> num_short_term_ref_pic_sets, psps -> short_term_ref_pic_set, psps, bs, info);
 
   psps -> long_term_ref_pics_present_flag = bs.getBits(1);
   if(psps -> long_term_ref_pics_present_flag)
@@ -718,13 +714,12 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
 
     if(payloadSize * 8 > bs.availableInNalU())
     {
-      std::list<Consumer *>::const_iterator itr = m_consumers.begin();
       std::stringstream ss;
       ss << "SEI: sei message payload size more then nal unit size (payloadSize=" 
           << payloadSize
           <<")";
-      for(; itr != m_consumers.end(); itr++)
-        (*itr) -> onWarning(ss.str(), &info);
+
+      onWarning(ss.str(), &info, Parser::OUT_OF_RANGE);
       break;
     }
     bs.skipBits(payloadSize * 8);
@@ -1016,7 +1011,7 @@ SubLayerHrdParameters HevcParserImpl::processSubLayerHrdParameters(uint8_t sub_p
 
 
 
-ShortTermRefPicSet HevcParserImpl::processShortTermRefPicSet(std::size_t stRpsIdx, std::size_t num_short_term_ref_pic_sets, const std::vector<ShortTermRefPicSet> &refPicSets, std::shared_ptr<SPS> psps, BitstreamReader &bs)
+ShortTermRefPicSet HevcParserImpl::processShortTermRefPicSet(std::size_t stRpsIdx, std::size_t num_short_term_ref_pic_sets, const std::vector<ShortTermRefPicSet> &refPicSets, std::shared_ptr<SPS> psps, BitstreamReader &bs, const Parser::Info &info)
 {
   ShortTermRefPicSet rpset;
 
@@ -1065,10 +1060,16 @@ ShortTermRefPicSet HevcParserImpl::processShortTermRefPicSet(std::size_t stRpsId
     rpset.num_positive_pics = bs.getGolombU();
 
     if(rpset.num_negative_pics > psps -> sps_max_dec_pic_buffering_minus1[psps -> sps_max_sub_layers_minus1])
-      throw std::range_error("ShortTermRefPicSet: num_negative_pics > sps_max_dec_pic_buffering_minus1");
+    {
+      onWarning("ShortTermRefPicSet: num_negative_pics > sps_max_dec_pic_buffering_minus1", &info, Parser::OUT_OF_RANGE);
+      return rpset;
+    }
 
     if(rpset.num_positive_pics > psps -> sps_max_dec_pic_buffering_minus1[psps -> sps_max_sub_layers_minus1])
-      throw std::range_error("ShortTermRefPicSet: num_negative_pics > sps_max_dec_pic_buffering_minus1");
+    {
+      onWarning("ShortTermRefPicSet: num_positive_pics > sps_max_dec_pic_buffering_minus1", &info, Parser::OUT_OF_RANGE);
+      return rpset;      
+    }
 
     rpset.delta_poc_s0_minus1.resize(rpset.num_negative_pics);
     rpset.used_by_curr_pic_s0_flag.resize(rpset.num_negative_pics);

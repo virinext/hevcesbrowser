@@ -22,6 +22,7 @@
 #include "CentralWidget.h"
 #include "WarningsViewer.h"
 #include "StreamInfoViewer.h"
+#include "ProfileConformanceAnalyzer.h"
 
 #include "version_info.h"
 
@@ -82,6 +83,10 @@ void MainWindow::process(const QString &fileName)
   pparser -> addConsumer(pcntwgt -> m_pcomInfoViewer.data());
   pparser -> addConsumer(dynamic_cast<WarningsViewer *> (m_pwarnViewer));
   pparser -> addConsumer(dynamic_cast<StreamInfoViewer *> (m_pinfoViewer));
+
+  ProfileConformanceAnalyzer profConfAnalyzer;
+  profConfAnalyzer.m_pconsumer = dynamic_cast<WarningsViewer *> (m_pwarnViewer);
+  pparser -> addConsumer(&profConfAnalyzer);
 
   std::size_t position = 0;
 

@@ -15,11 +15,19 @@ namespace HEVC
         std::size_t         m_position;
       };
 
+      enum WarningType
+      {
+        NONE,
+        OUT_OF_RANGE,
+        REFERENCE_STRUCT_NOT_PRESENT,
+        PROFILE_CONFORMANCE
+      };
+
       class Consumer
       {
         public:
           virtual void onNALUnit(std::shared_ptr<NALUnit> pNALUnit, const Info *pInfo) = 0;
-          virtual void onWarning(const std::string &warning, const Info *pInfo) = 0;
+          virtual void onWarning(const std::string &warning, const Info *pInfo, WarningType type) = 0;
       };
       
       virtual ~Parser();
