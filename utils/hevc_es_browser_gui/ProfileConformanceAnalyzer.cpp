@@ -1,6 +1,8 @@
 #include "ProfileConformanceAnalyzer.h"
 
 #include <limits>
+#include <string>
+#include <sstream>
 
 #include <QDebug>
 
@@ -146,12 +148,13 @@ void ProfileConformanceAnalyzer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUn
 
       if(m_profile != std::numeric_limits<uint32_t>::max() && m_profile != pVPS -> profile_tier_level.general_profile_idc)
       {
-        std::string message = "Profile was changed from ";
-        message += std::to_string(m_profile) + " (" + profileName(m_profile) + ") ";
-        message += "to ";
-        message += std::to_string(pVPS -> profile_tier_level.general_profile_idc) + " (" + profileName(pVPS -> profile_tier_level.general_profile_idc) + ") ";
+        std::stringstream ss;
+        ss <<  "Profile was changed from " 
+           << m_profile << " (" << profileName(m_profile) << ") "
+           << "to "
+           << pVPS -> profile_tier_level.general_profile_idc << " (" << profileName(pVPS -> profile_tier_level.general_profile_idc) <<  ") ";
 
-        sendWarning(message, pInfo);
+        sendWarning(ss.str(), pInfo);
       }
 
       m_profile = pVPS -> profile_tier_level.general_profile_idc;
@@ -167,12 +170,13 @@ void ProfileConformanceAnalyzer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUn
 
       if(m_profile != std::numeric_limits<uint32_t>::max() && m_profile != pSPS -> profile_tier_level.general_profile_idc)
       {
-        std::string message = "Profile was changed from ";
-        message += std::to_string(m_profile) + " (" + profileName(m_profile) + ") ";
-        message += "to ";
-        message += std::to_string(pSPS -> profile_tier_level.general_profile_idc) + " (" + profileName(pSPS -> profile_tier_level.general_profile_idc) + ") ";
+        std::stringstream ss;
+        ss << "Profile was changed from "
+          << m_profile << " (" << profileName(m_profile) << ") "
+          << "to "
+          << pSPS -> profile_tier_level.general_profile_idc << " (" << profileName(pSPS -> profile_tier_level.general_profile_idc) << ") ";
 
-        sendWarning(message, pInfo);
+        sendWarning(ss.str(), pInfo);
       }
 
       m_profile = pSPS -> profile_tier_level.general_profile_idc;
