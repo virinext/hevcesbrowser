@@ -7,6 +7,8 @@ HEVCESBrowser is a tool for analyzing HEVC(h265) bitstreams.
 This application displays syntax elements of hevc elementary streams. Input file for HEVCESBrowser should be unmuxed elementary stream. If analysis of the video in any type of container (e.g. in .ts or .mp4 files) is needed, preliminary demuxing is required. For example, you can use ffmpeg for this: ffmpeg -i your_file -vcodec copy -an video.h265. There are gui and cli applications in this product.
 
 
+Current building status: [![Build Status](https://travis-ci.org/virinext/hevcesbrowser.svg)](https://travis-ci.org/virinext/hevcesbrowser)
+
 Prebuilt binaries
 -----
 
