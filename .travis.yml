@@ -1,8 +1,14 @@
+compiler:
+  - gcc
+
 before_install:
   - yes | sudo add-apt-repository ppa:ubuntu-sdk-team/ppa
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get update -qq
   - yes | sudo apt-get install qtdeclarative5-dev
   - yes | sudo apt-get install libboost-all-dev
+  - sudo apt-get install -qq g++-4.8 gcc-4.8
+  - export CXX="g++-4.8" CC="gcc-4.8"
   - git submodule update --init --recursive
   - git submodule update --recursive  
 
