@@ -8,7 +8,7 @@ DESTDIR = ../../build
 MOC_DIR = ../../build/qt
 OBJECTS_DIR = ../../build/qt
 
-QMAKE_CXXFLAGS += -std=gnu++11
+QMAKE_CXXFLAGS += -std=c++11
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
