@@ -16,4 +16,5 @@ script:
   - cmake -DCMAKE_BUILD_TYPE=Release
   - make VERBOSE=1
   - qmake -qt=qt5 utils/hevc_es_browser_gui/hevc_es_browser_gui.pro -r "CONFIG+=Release" "QMAKE_CXX=$CXX" "QMAKE_CC=$CC"
+  - cd utils/hevc_es_browser_gui/ && make -f ../../Makefile gitinfo && cd ../../
   - make VERBOSE=1
