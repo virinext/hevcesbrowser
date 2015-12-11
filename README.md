@@ -38,7 +38,7 @@ Building:
 
 cd hevcesbrowser
 
-git submodule foreach git pull
+git submodule init && git submodule update
 
 mkdir project
 
