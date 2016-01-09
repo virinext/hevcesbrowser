@@ -234,7 +234,7 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
 
   int32_t spsId = ppps -> pps_seq_parameter_set_id;
 
-  if(!m_spsMap[spsId])
+  if(m_spsMap.find(spsId) == m_spsMap.end())
   {
     std::stringstream ss;
     ss << "Slice: pps_seq_parameter_set_id = "
@@ -384,7 +384,6 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
       if(ppps -> lists_modification_present_flag)
       {
         std::size_t NumPocTotalCurr = calcNumPocTotalCurr(pslice, m_spsMap[spsId]);
-        
         if(NumPocTotalCurr > 1)
           pslice -> ref_pic_lists_modification = processRefPicListModification(bs, pslice);
       }
@@ -528,7 +527,7 @@ void HevcParserImpl::processVPS(std::shared_ptr<VPS> pvps, BitstreamReader &bs, 
 
   pvps -> layer_id_included_flag.resize(pvps -> vps_num_layer_sets_minus1+1);
 
-  for(std::size_t i=0; i<=pvps -> vps_num_layer_sets_minus1; i++)
+  for(std::size_t i=1; i<=pvps -> vps_num_layer_sets_minus1; i++)
   {
     pvps -> layer_id_included_flag[i].resize(pvps -> vps_max_layer_id+1);
     for(std::size_t j=0; j<=pvps -> vps_max_layer_id; j++)
@@ -1369,23 +1368,25 @@ PredWeightTable HevcParserImpl::processPredWeightTable(BitstreamReader &bs, std:
 
   if(pslice -> slice_type == SLICE_B)
   {
-    for(std::size_t i=0; i<pslice -> num_ref_idx_l1_active_minus1; i++)
+    pwt.luma_weight_l1_flag.resize(pslice -> num_ref_idx_l1_active_minus1 + 1);
+    
+    for(std::size_t i=0; i<=pslice -> num_ref_idx_l1_active_minus1; i++)
       pwt.luma_weight_l1_flag[i] = bs.getBits(1);
 
-    pwt.chroma_weight_l1_flag.resize(pslice -> num_ref_idx_l1_active_minus1, 0);
+    pwt.chroma_weight_l1_flag.resize(pslice -> num_ref_idx_l1_active_minus1 + 1, 0);
 
     if(psps -> chroma_format_idc != 0)
     {
-      for(std::size_t i=0; i<pslice -> num_ref_idx_l1_active_minus1; i++)
+      for(std::size_t i=0; i<=pslice -> num_ref_idx_l1_active_minus1; i++)
         pwt.chroma_weight_l1_flag[i] = bs.getBits(1);
     }
 
-    pwt.delta_luma_weight_l1.resize(pslice -> num_ref_idx_l1_active_minus1);
-    pwt.luma_offset_l1.resize(pslice -> num_ref_idx_l1_active_minus1);
-    pwt.delta_chroma_weight_l1.resize(pslice -> num_ref_idx_l1_active_minus1);
-    pwt.delta_chroma_offset_l1.resize(pslice -> num_ref_idx_l1_active_minus1);
+    pwt.delta_luma_weight_l1.resize(pslice -> num_ref_idx_l1_active_minus1 + 1);
+    pwt.luma_offset_l1.resize(pslice -> num_ref_idx_l1_active_minus1 + 1);
+    pwt.delta_chroma_weight_l1.resize(pslice -> num_ref_idx_l1_active_minus1 + 1);
+    pwt.delta_chroma_offset_l1.resize(pslice -> num_ref_idx_l1_active_minus1 + 1);
 
-    for(std::size_t i=0; i<pslice -> num_ref_idx_l1_active_minus1; i++)
+    for(std::size_t i=0; i<=pslice -> num_ref_idx_l1_active_minus1; i++)
     {
       if(pwt.luma_weight_l1_flag[i])
       {

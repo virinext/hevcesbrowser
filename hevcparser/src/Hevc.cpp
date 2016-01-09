@@ -1107,6 +1107,8 @@ void Slice::toDefault()
   deblocking_filter_override_flag = 0;
   slice_sao_luma_flag = 0;
   slice_sao_chroma_flag = 0;
+  num_long_term_pics = 0;
+  num_long_term_sps = 0;
 }
 
 

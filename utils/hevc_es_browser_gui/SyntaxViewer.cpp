@@ -124,8 +124,8 @@ void SyntaxViewer::createVPS(std::shared_ptr<HEVC::VPS> pVPS)
   for(std::size_t i = (pVPS -> vps_sub_layer_ordering_info_present_flag ? 0 : pVPS -> vps_max_sub_layers_minus1); i <= pVPS -> vps_max_sub_layers_minus1; i++)
   {
     ploop -> addChild(new QTreeWidgetItem(QStringList("vps_max_dec_pic_buffering_minus1[" + QString::number(i) + "] = " + QString::number(pVPS -> vps_max_dec_pic_buffering_minus1[i]))));
-    ploop -> addChild(new QTreeWidgetItem(QStringList("vps_max_num_reorder_pics[" + QString::number(i) + "] = " + QString::number(pVPS -> vps_max_dec_pic_buffering_minus1[i]))));
-    ploop -> addChild(new QTreeWidgetItem(QStringList("vps_max_latency_increase_plus1[" + QString::number(i) + "] = " + QString::number(pVPS -> vps_max_dec_pic_buffering_minus1[i]))));
+    ploop -> addChild(new QTreeWidgetItem(QStringList("vps_max_num_reorder_pics[" + QString::number(i) + "] = " + QString::number(pVPS -> vps_max_num_reorder_pics[i]))));
+    ploop -> addChild(new QTreeWidgetItem(QStringList("vps_max_latency_increase_plus1[" + QString::number(i) + "] = " + QString::number(pVPS -> vps_max_latency_increase_plus1[i]))));
   }
 
   pvpsItem -> addChild(new QTreeWidgetItem(QStringList("vps_max_layer_id = " + QString::number(pVPS -> vps_max_layer_id))));
@@ -1504,12 +1504,12 @@ void SyntaxViewer::createPredWeightTable(const HEVC::PredWeightTable &pwt, std::
     }
 
 
-    for(std::size_t i=0; i<pSlice -> num_ref_idx_l1_active_minus1; i++)
+    for(std::size_t i=0; i<=pSlice -> num_ref_idx_l1_active_minus1; i++)
     {
       pitemLoop = new QTreeWidgetItem(QStringList("for(i=0; i<=num_ref_idx_l1_active_minus1; i++)"));
       pitemBSlice -> addChild(pitemLoop);
 
-      if(pwt.luma_weight_l0_flag[i])
+      if(pwt.luma_weight_l1_flag[i])
       {
         QTreeWidgetItem *pitem = new QTreeWidgetItem(QStringList("if (luma_weight_l1_flag[" + QString::number(i) +"])"));
         pitemLoop -> addChild(pitem);

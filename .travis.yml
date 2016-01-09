@@ -15,6 +15,10 @@ before_install:
 script:
   - cmake -DCMAKE_BUILD_TYPE=Release
   - make VERBOSE=1
+  - cd hevcparser/tests/samples
+  - ./get_samples.sh
+  - cd ../../../
+  - make test
   - cd utils/hevc_es_browser_gui/
   - qmake -qt=qt5 hevc_es_browser_gui.pro -r "CONFIG+=Release" "QMAKE_CXX=$CXX" "QMAKE_CC=$CC"
   - make gitinfo

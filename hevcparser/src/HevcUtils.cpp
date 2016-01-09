@@ -42,7 +42,6 @@ uint32_t HEVC::calcNumPocTotalCurr(std::shared_ptr<HEVC::Slice> pslice, std::sha
   bool UsedByCurrPicLt[16];
   std::size_t num_long_term = pslice -> num_long_term_sps + pslice -> num_long_term_pics;
 
-
   for(std::size_t i=0; i < num_long_term; i++)
   {
     if (i < pslice -> num_long_term_sps)
@@ -56,6 +55,9 @@ uint32_t HEVC::calcNumPocTotalCurr(std::shared_ptr<HEVC::Slice> pslice, std::sha
   else
     currRpsIdx = psps -> num_short_term_ref_pic_sets;
 
+  if(psps -> short_term_ref_pic_set.size() <= currRpsIdx)
+    return 0;
+
   ShortTermRefPicSet strps = psps -> short_term_ref_pic_set[currRpsIdx];
   for(std::size_t i = 0; i < strps.num_negative_pics; i++)
     if (strps.used_by_curr_pic_s0_flag[i])
@@ -68,6 +70,6 @@ uint32_t HEVC::calcNumPocTotalCurr(std::shared_ptr<HEVC::Slice> pslice, std::sha
   for(std::size_t i = 0;i < (pslice -> num_long_term_sps + pslice -> num_long_term_pics); i++)
     if (UsedByCurrPicLt[i])
       NumPocTotalCurr++;
-  
+
   return NumPocTotalCurr;
 }

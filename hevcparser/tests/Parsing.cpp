@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(SURFING_FIRST_30)
   
   pparser -> addConsumer(&consumer);
   
-  std::ifstream in(getSourceDir() + "/samples/surfing.265", std::ios::binary);
+  std::ifstream in(getSourceDir() + "/samples/surfing_30.265", std::ios::binary);
   
   in.seekg(0, std::ios::end);
   std::size_t size = in.tellg();
@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE(SINTEL_FIRST_30)
   
   pparser -> addConsumer(&consumer);
   
-  std::ifstream in(getSourceDir() + "/samples/Sintel_272p_logo.265", std::ios::binary);
+  std::ifstream in(getSourceDir() + "/samples/Sintel_272p_logo_30.265", std::ios::binary);
   
   in.seekg(0, std::ios::end);
   std::size_t size = in.tellg();
