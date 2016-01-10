@@ -209,7 +209,7 @@ void HEVCInfoWriter::writeSPS(std::shared_ptr<HEVC::SPS> pSPS, std::ostream &out
   {
     out << "\t\t" << "sps_max_dec_pic_buffering_minus1[" << i << "] = " << pSPS -> sps_max_dec_pic_buffering_minus1[i] << std::endl;
     out << "\t\t" << "sps_max_num_reorder_pics[" << i << "] = " << pSPS -> sps_max_num_reorder_pics[i] << std::endl;
-    out << "\t\t" << "sps_max_latency_increase[" << i << "] = " << pSPS -> sps_max_latency_increase[i] << std::endl;
+    out << "\t\t" << "sps_max_latency_increase_plus1[" << i << "] = " << pSPS -> sps_max_latency_increase_plus1[i] << std::endl;
   }
 
 

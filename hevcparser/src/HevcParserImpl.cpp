@@ -367,8 +367,8 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
       pslice -> slice_sao_chroma_flag = bs.getBits(1);
     }
 
-    pslice -> num_ref_idx_l1_active_minus1 = ppps -> num_ref_idx_l0_default_active_minus1;
-    pslice -> num_ref_idx_l0_active_minus1 = ppps -> num_ref_idx_l1_default_active_minus1;
+    pslice -> num_ref_idx_l0_active_minus1 = ppps -> num_ref_idx_l0_default_active_minus1;
+    pslice -> num_ref_idx_l1_active_minus1 = ppps -> num_ref_idx_l1_default_active_minus1;
 
     if(pslice -> slice_type == SLICE_B || pslice -> slice_type == SLICE_P)
     {
@@ -406,8 +406,8 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
         }
       }
 
-      if(ppps -> weighted_pred_flag && pslice -> slice_type == SLICE_B ||
-        ppps -> weighted_bipred_flag && pslice -> slice_type == SLICE_P)
+      if(ppps -> weighted_pred_flag && pslice -> slice_type == SLICE_P ||
+        ppps -> weighted_bipred_flag && pslice -> slice_type == SLICE_B)
       {
         pslice -> pred_weight_table = processPredWeightTable(bs, pslice);
 
@@ -605,7 +605,7 @@ void HevcParserImpl::processSPS(std::shared_ptr<SPS> psps, BitstreamReader &bs, 
 
   psps -> sps_max_dec_pic_buffering_minus1.resize(psps -> sps_max_sub_layers_minus1 + 1, 0);
   psps -> sps_max_num_reorder_pics.resize(psps -> sps_max_sub_layers_minus1 + 1, 0);
-  psps -> sps_max_latency_increase.resize(psps -> sps_max_sub_layers_minus1 + 1, 0);
+  psps -> sps_max_latency_increase_plus1.resize(psps -> sps_max_sub_layers_minus1 + 1, 0);
 
   for(std::size_t i=(psps -> sps_sub_layer_ordering_info_present_flag ? 0 : psps -> sps_max_sub_layers_minus1);
       i<=psps -> sps_max_sub_layers_minus1;
@@ -613,7 +613,7 @@ void HevcParserImpl::processSPS(std::shared_ptr<SPS> psps, BitstreamReader &bs, 
   {
     psps -> sps_max_dec_pic_buffering_minus1[i] = bs.getGolombU();
     psps -> sps_max_num_reorder_pics[i] = bs.getGolombU();
-    psps -> sps_max_latency_increase[i] = bs.getGolombU();
+    psps -> sps_max_latency_increase_plus1[i] = bs.getGolombU();
   }
 
   psps -> log2_min_luma_coding_block_size_minus3 = bs.getGolombU();
@@ -1330,26 +1330,26 @@ PredWeightTable HevcParserImpl::processPredWeightTable(BitstreamReader &bs, std:
   if(psps -> chroma_format_idc != 0)
     pwt.delta_chroma_log2_weight_denom = bs.getGolombS();
 
-  pwt.luma_weight_l0_flag.resize(pslice -> num_ref_idx_l0_active_minus1);
+  pwt.luma_weight_l0_flag.resize(pslice -> num_ref_idx_l0_active_minus1 + 1);
 
-  for(std::size_t i=0; i<pslice -> num_ref_idx_l0_active_minus1; i++)
+  for(std::size_t i=0; i<=pslice -> num_ref_idx_l0_active_minus1; i++)
     pwt.luma_weight_l0_flag[i] = bs.getBits(1);
 
-  pwt.chroma_weight_l0_flag.resize(pslice -> num_ref_idx_l0_active_minus1, 0);
+  pwt.chroma_weight_l0_flag.resize(pslice -> num_ref_idx_l0_active_minus1 + 1, 0);
 
   if(psps -> chroma_format_idc != 0)
   {
-    for(std::size_t i=0; i<pslice -> num_ref_idx_l0_active_minus1; i++)
+    for(std::size_t i=0; i<=pslice -> num_ref_idx_l0_active_minus1; i++)
       pwt.chroma_weight_l0_flag[i] = bs.getBits(1);
   }
 
-  pwt.delta_luma_weight_l0.resize(pslice -> num_ref_idx_l0_active_minus1);
-  pwt.luma_offset_l0.resize(pslice -> num_ref_idx_l0_active_minus1);
+  pwt.delta_luma_weight_l0.resize(pslice -> num_ref_idx_l0_active_minus1 + 1);
+  pwt.luma_offset_l0.resize(pslice -> num_ref_idx_l0_active_minus1 + 1);
 
-  pwt.delta_chroma_weight_l0.resize(pslice -> num_ref_idx_l0_active_minus1);
-  pwt.delta_chroma_offset_l0.resize(pslice -> num_ref_idx_l0_active_minus1);
+  pwt.delta_chroma_weight_l0.resize(pslice -> num_ref_idx_l0_active_minus1 + 1);
+  pwt.delta_chroma_offset_l0.resize(pslice -> num_ref_idx_l0_active_minus1 + 1);
 
-  for(std::size_t i=0; i<pslice -> num_ref_idx_l0_active_minus1; i++)
+  for(std::size_t i=0; i<=pslice -> num_ref_idx_l0_active_minus1; i++)
   {
     if(pwt.luma_weight_l0_flag[i])
     {

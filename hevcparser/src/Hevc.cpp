@@ -251,7 +251,7 @@ bool HEVC::SPS::operator == (const HEVC::SPS &sps) const
   if(sps_max_num_reorder_pics != sps.sps_max_num_reorder_pics)
     return false;
 
-  if(sps_max_latency_increase != sps.sps_max_latency_increase)
+  if(sps_max_latency_increase_plus1 != sps.sps_max_latency_increase_plus1)
     return false;
 
   if(log2_min_luma_coding_block_size_minus3 != sps.log2_min_luma_coding_block_size_minus3)
@@ -1008,7 +1008,7 @@ void SPS::toDefault()
   sps_sub_layer_ordering_info_present_flag = 0;
   sps_max_dec_pic_buffering_minus1.clear();
   sps_max_num_reorder_pics.clear();
-  sps_max_latency_increase.clear();
+  sps_max_latency_increase_plus1.clear();
   log2_min_luma_coding_block_size_minus3 = 0;
   log2_diff_max_min_luma_coding_block_size = 0;
   log2_min_transform_block_size_minus2 = 0;

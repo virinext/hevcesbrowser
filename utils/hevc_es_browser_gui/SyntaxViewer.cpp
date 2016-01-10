@@ -264,7 +264,7 @@ void SyntaxViewer::createSPS(std::shared_ptr<HEVC::SPS> pSPS)
   {
     pitem -> addChild(new QTreeWidgetItem(QStringList("sps_max_dec_pic_buffering_minus1[" + QString::number(i) + "] = " + QString::number(pSPS -> sps_max_dec_pic_buffering_minus1[i]))));
     pitem -> addChild(new QTreeWidgetItem(QStringList("sps_max_num_reorder_pics[" + QString::number(i) + "] = " + QString::number(pSPS -> sps_max_num_reorder_pics[i]))));
-    pitem -> addChild(new QTreeWidgetItem(QStringList("sps_max_latency_increase[" + QString::number(i) + "] = " + QString::number(pSPS -> sps_max_latency_increase[i]))));
+    pitem -> addChild(new QTreeWidgetItem(QStringList("sps_max_latency_increase_plus1[" + QString::number(i) + "] = " + QString::number(pSPS -> sps_max_latency_increase_plus1[i]))));
   }
 
 
@@ -737,8 +737,8 @@ void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
         }
       }
 
-      if(pPPS -> weighted_pred_flag && pSlice -> slice_type == SLICE_B ||
-        pPPS -> weighted_bipred_flag && pSlice -> slice_type == SLICE_P)
+      if(pPPS -> weighted_pred_flag && pSlice -> slice_type == SLICE_P ||
+        pPPS -> weighted_bipred_flag && pSlice -> slice_type == SLICE_B)
       {
         pitemThird = new QTreeWidgetItem(QStringList("if ((weighted_pred_flag && slice_type == P) || (weighted_bipred_flag && slice_type == B))"));
         pitemDepend -> addChild(pitemThird);
@@ -1441,7 +1441,7 @@ void SyntaxViewer::createPredWeightTable(const HEVC::PredWeightTable &pwt, std::
   QTreeWidgetItem *pitemLoop = new QTreeWidgetItem(QStringList("for(i=0; i<=num_ref_idx_l0_active_minus1; i++)"));
   ppwtItem -> addChild(pitemLoop);
 
-  for(std::size_t i=0; i<pSlice -> num_ref_idx_l0_active_minus1; i++)
+  for(std::size_t i=0; i<=pSlice -> num_ref_idx_l0_active_minus1; i++)
     pitemLoop -> addChild(new QTreeWidgetItem(QStringList("luma_weight_l0_flag[" + QString::number(i) + "] = " + QString::number(pwt.luma_weight_l0_flag[i]))));
 
   if(psps -> chroma_format_idc != 0)
@@ -1452,12 +1452,12 @@ void SyntaxViewer::createPredWeightTable(const HEVC::PredWeightTable &pwt, std::
     pitemLoop = new QTreeWidgetItem(QStringList("for(i=0; i<=num_ref_idx_l0_active_minus1; i++)"));
     pitem -> addChild(pitemLoop);
 
-    for(std::size_t i=0; i<pSlice -> num_ref_idx_l0_active_minus1; i++)
+    for(std::size_t i=0; i<=pSlice -> num_ref_idx_l0_active_minus1; i++)
       pitemLoop -> addChild(new QTreeWidgetItem(QStringList("chroma_weight_l0_flag[" + QString::number(i) + "] = " + QString::number(pwt.chroma_weight_l0_flag[i]))));
   }
 
 
-  for(std::size_t i=0; i<pSlice -> num_ref_idx_l0_active_minus1; i++)
+  for(std::size_t i=0; i<=pSlice -> num_ref_idx_l0_active_minus1; i++)
   {
     pitemLoop = new QTreeWidgetItem(QStringList("for(i=0; i<=num_ref_idx_l0_active_minus1; i++)"));
     ppwtItem -> addChild(pitemLoop);
@@ -1488,7 +1488,7 @@ void SyntaxViewer::createPredWeightTable(const HEVC::PredWeightTable &pwt, std::
     QTreeWidgetItem *pitemLoop = new QTreeWidgetItem(QStringList("for(i=0; i<=num_ref_idx_l1_active_minus1; i++)"));
     pitemBSlice -> addChild(pitemLoop);
 
-    for(std::size_t i=0; i<pSlice -> num_ref_idx_l1_active_minus1; i++)
+    for(std::size_t i=0; i<=pSlice -> num_ref_idx_l1_active_minus1; i++)
       pitemLoop -> addChild(new QTreeWidgetItem(QStringList("luma_weight_l1_flag[" + QString::number(i) + "] = " + QString::number(pwt.luma_weight_l1_flag[i]))));
 
     if(psps -> chroma_format_idc != 0)
@@ -1499,7 +1499,7 @@ void SyntaxViewer::createPredWeightTable(const HEVC::PredWeightTable &pwt, std::
       pitemLoop = new QTreeWidgetItem(QStringList("for(i=0; i<=num_ref_idx_l1_active_minus1; i++)"));
       pitem -> addChild(pitemLoop);
 
-      for(std::size_t i=0; i<pSlice -> num_ref_idx_l1_active_minus1; i++)
+      for(std::size_t i=0; i<=pSlice -> num_ref_idx_l1_active_minus1; i++)
         pitemLoop -> addChild(new QTreeWidgetItem(QStringList("chroma_weight_l1_flag[" + QString::number(i) + "] = " + QString::number(pwt.chroma_weight_l1_flag[i]))));
     }
 

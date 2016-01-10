@@ -325,7 +325,7 @@ namespace HEVC
       uint8_t                  sps_sub_layer_ordering_info_present_flag;
       std::vector<uint32_t>    sps_max_dec_pic_buffering_minus1;
       std::vector<uint32_t>    sps_max_num_reorder_pics;
-      std::vector<uint32_t>    sps_max_latency_increase;
+      std::vector<uint32_t>    sps_max_latency_increase_plus1;
       uint32_t                 log2_min_luma_coding_block_size_minus3;
       uint32_t                 log2_diff_max_min_luma_coding_block_size;
       uint32_t                 log2_min_transform_block_size_minus2;
