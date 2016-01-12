@@ -711,29 +711,25 @@ void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
         pitemThird-> addChild(new QTreeWidgetItem(QStringList("cabac_init_flag = " + QString::number(pSlice -> cabac_init_flag))));
       }
 
-      if(pSlice -> slice_type == SLICE_B || pSlice -> collocated_from_l0_flag && pSlice -> num_ref_idx_l0_active_minus1 ||
-            !pSlice -> collocated_from_l0_flag && pSlice -> num_ref_idx_l1_active_minus1)
+      if(pSlice -> slice_temporal_mvp_enabled_flag)
       {
-        if(pSlice -> slice_temporal_mvp_enabled_flag)
+        pitemThird = new QTreeWidgetItem(QStringList("if (slice_temporal_mvp_enabled_flag)"));
+        pitemDepend -> addChild(pitemThird);
+
+        if(pSlice -> slice_type == SLICE_B)
         {
-          pitemThird = new QTreeWidgetItem(QStringList("if (slice_temporal_mvp_enabled_flag)"));
-          pitem -> addChild(pitemThird);
+          QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if (slice_type == B)"));
+          pitemThird -> addChild(pitemSecond);
+          pitemSecond -> addChild(new QTreeWidgetItem(QStringList("collocated_from_l0_flag = " + QString::number(pSlice -> collocated_from_l0_flag))));
+        }
 
-          if(pSlice -> slice_type == SLICE_B)
-          {
-            QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if (slice_type == B)"));
-            pitemThird -> addChild(pitemSecond);
-            pitemSecond -> addChild(new QTreeWidgetItem(QStringList("collocated_from_l0_flag = " + QString::number(pSlice -> collocated_from_l0_flag))));
-          }
+        if(pSlice -> collocated_from_l0_flag && pSlice -> num_ref_idx_l0_active_minus1 ||
+            !pSlice -> collocated_from_l0_flag && pSlice -> num_ref_idx_l1_active_minus1)
+        {
+          QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if ((collocated_from_l0_flag && num_ref_idx_l0_active_minus1 > 0 ) || (!collocated_from_l0_flag && num_ref_idx_l1_active_minus1 > 0))"));
+          pitemThird -> addChild(pitemSecond);
 
-          if(pSlice -> collocated_from_l0_flag && pSlice -> num_ref_idx_l0_active_minus1 ||
-              !pSlice -> collocated_from_l0_flag && pSlice -> num_ref_idx_l1_active_minus1)
-          {
-            QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if ((collocated_from_l0_flag && num_ref_idx_l0_active_minus1 > 0 ) || (!collocated_from_l0_flag && num_ref_idx_l1_active_minus1 > 0))"));
-            pitemThird -> addChild(pitemSecond);
-
-            pitemSecond -> addChild(new QTreeWidgetItem(QStringList("collocated_ref_idx = " + QString::number(pSlice -> collocated_ref_idx))));
-          }
+          pitemSecond -> addChild(new QTreeWidgetItem(QStringList("collocated_ref_idx = " + QString::number(pSlice -> collocated_ref_idx))));
         }
       }
 

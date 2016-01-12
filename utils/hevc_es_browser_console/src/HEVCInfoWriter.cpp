@@ -352,7 +352,7 @@ void HEVCInfoWriter::writePPS(std::shared_ptr<HEVC::PPS> pPPS, std::ostream &out
     {
       out << "\t\t" << "if( !pps_deblocking_filter_disabled_flag )" << std::endl;
       out << "\t\t\t" << "pps_beta_offset_div2 = " << (int) pPPS -> pps_beta_offset_div2 << std::endl;
-      out << "\t\t\t" << "pps_beta_offset_div2 = " << (int) pPPS -> pps_beta_offset_div2 << std::endl;
+      out << "\t\t\t" << "pps_tc_offset_div2 = " << (int) pPPS -> pps_tc_offset_div2 << std::endl;
     }
   }
 }
