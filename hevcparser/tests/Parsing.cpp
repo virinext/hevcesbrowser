@@ -1125,4 +1125,318 @@ BOOST_AUTO_TEST_CASE(E_11345V_4T2_record_part)
 }
 
 
+BOOST_AUTO_TEST_CASE(TearsOfSteel_720p_h265_part)
+{
+  Parser *pparser = Parser::create();
+  
+  Consumer consumer;
+  
+  pparser -> addConsumer(&consumer);
+  
+  std::ifstream in(getSourceDir() + "/samples/TearsOfSteel_720p_h265_part.hevc", std::ios::binary);
+  
+  in.seekg(0, std::ios::end);
+  std::size_t size = in.tellg();
+  in.seekg(0, std::ios::beg);
+  
+  char *pdata = new char[size];
+  in.read(pdata, size);
+  size = in.gcount();
+  pparser -> process((const uint8_t *)pdata, size);
+    
+  pparser -> releaseConsumer(&consumer);
+  Parser::release(pparser);
+  
+
+  BOOST_CHECK_EQUAL(consumer.m_nalus[0].m_info.m_position, 0x0);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[0].m_pnalu -> getType(), NAL_VPS);
+
+  std::shared_ptr<VPS> pvps = std::static_pointer_cast<VPS>(consumer.m_nalus[0].m_pnalu);
+  
+  BOOST_CHECK_EQUAL(pvps -> vps_video_parameter_set_id, 0);
+  BOOST_CHECK_EQUAL(pvps -> vps_max_layers_minus1, 0);
+  BOOST_CHECK_EQUAL(pvps -> vps_max_sub_layers_minus1, 0);
+  BOOST_CHECK_EQUAL(pvps -> vps_temporal_id_nesting_flag, 1);
+  BOOST_CHECK_EQUAL(pvps -> profile_tier_level.general_profile_space, 0);
+  BOOST_CHECK_EQUAL(pvps -> profile_tier_level.general_tier_flag, 0);
+  BOOST_CHECK_EQUAL(pvps -> profile_tier_level.general_profile_idc, 1);
+
+  uint8_t profile_compatibility[32] = { 0, 1, 1, 0};
+  BOOST_CHECK_EQUAL_COLLECTIONS(profile_compatibility, profile_compatibility + 32, 
+                              pvps -> profile_tier_level.general_profile_compatibility_flag, pvps -> profile_tier_level.general_profile_compatibility_flag+32);
+
+  BOOST_CHECK_EQUAL(pvps -> profile_tier_level.general_progressive_source_flag, 0);
+  BOOST_CHECK_EQUAL(pvps -> profile_tier_level.general_interlaced_source_flag, 0);
+  BOOST_CHECK_EQUAL(pvps -> profile_tier_level.general_non_packed_constraint_flag, 0);
+  BOOST_CHECK_EQUAL(pvps -> profile_tier_level.general_frame_only_constraint_flag, 0);
+  BOOST_CHECK_EQUAL(pvps -> profile_tier_level.general_level_idc, 186);
+  
+  BOOST_CHECK_EQUAL(pvps -> vps_sub_layer_ordering_info_present_flag, 1);
+
+  uint8_t pic_buffering_minus1[1] = {4};
+  uint8_t vps_max_num_reorder_pics[1] = {3};
+  uint8_t latency_increase[1] = {0};
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(pic_buffering_minus1, pic_buffering_minus1 + 1,
+		    pvps->vps_max_dec_pic_buffering_minus1.begin(), pvps->vps_max_dec_pic_buffering_minus1.end());
+  BOOST_CHECK_EQUAL_COLLECTIONS(vps_max_num_reorder_pics, vps_max_num_reorder_pics + 1,
+		    pvps->vps_max_num_reorder_pics.begin(), pvps->vps_max_num_reorder_pics.end());
+  BOOST_CHECK_EQUAL_COLLECTIONS(latency_increase, latency_increase + 1,
+		    pvps->vps_max_latency_increase_plus1.begin(), pvps->vps_max_latency_increase_plus1.end());
+  
+  BOOST_CHECK_EQUAL(pvps -> vps_max_layer_id, 0);
+  BOOST_CHECK_EQUAL(pvps -> vps_num_layer_sets_minus1, 0);
+  BOOST_CHECK_EQUAL(pvps -> vps_timing_info_present_flag, 0);
+  BOOST_CHECK_EQUAL(pvps -> vps_extension_flag, 0);
+
+  
+  
+  BOOST_CHECK_EQUAL(consumer.m_nalus[1].m_info.m_position, 0x1d);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[1].m_pnalu -> getType(), NAL_SPS);
+
+  std::shared_ptr<SPS> psps = std::static_pointer_cast<SPS>(consumer.m_nalus[1].m_pnalu);
+  BOOST_CHECK_EQUAL(psps -> sps_video_parameter_set_id, 0);
+  BOOST_CHECK_EQUAL(psps -> sps_max_sub_layers_minus1, 0);
+  BOOST_CHECK_EQUAL(psps -> sps_temporal_id_nesting_flag, 1);
+  BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_profile_space, 0);
+  BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_tier_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_profile_idc, 1);
+  BOOST_CHECK_EQUAL_COLLECTIONS(profile_compatibility, profile_compatibility + 32, 
+                              psps -> profile_tier_level.general_profile_compatibility_flag, psps -> profile_tier_level.general_profile_compatibility_flag + 32);
+  BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_progressive_source_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_interlaced_source_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_non_packed_constraint_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_frame_only_constraint_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_level_idc, 186);
+  
+  BOOST_CHECK_EQUAL(psps -> sps_seq_parameter_set_id, 0);
+  BOOST_CHECK_EQUAL(psps -> chroma_format_idc, 1);
+
+  BOOST_CHECK_EQUAL(psps -> pic_width_in_luma_samples, 1280);
+  BOOST_CHECK_EQUAL(psps -> pic_height_in_luma_samples, 720);
+  BOOST_CHECK_EQUAL(psps -> long_term_ref_pics_present_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> sps_temporal_mvp_enabled_flag, 1);
+  BOOST_CHECK_EQUAL(psps -> strong_intra_smoothing_enabled_flag, 1);
+  BOOST_CHECK_EQUAL(psps -> vui_parameters_present_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> sps_extension_flag, 0);
+
+  BOOST_CHECK_EQUAL(consumer.m_nalus[2].m_info.m_position, 0x00000052);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[2].m_pnalu -> getType(), NAL_PPS);
+
+  std::shared_ptr<PPS> ppps = std::static_pointer_cast<PPS>(consumer.m_nalus[2].m_pnalu);
+  BOOST_CHECK_EQUAL(ppps -> pps_pic_parameter_set_id, 0);
+  BOOST_CHECK_EQUAL(ppps -> pps_seq_parameter_set_id, 0);
+  BOOST_CHECK_EQUAL(ppps -> dependent_slice_segments_enabled_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> output_flag_present_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> num_extra_slice_header_bits, 0);
+  BOOST_CHECK_EQUAL(ppps -> sign_data_hiding_flag, 1);
+  BOOST_CHECK_EQUAL(ppps -> cabac_init_present_flag, 1);
+  BOOST_CHECK_EQUAL(ppps -> num_ref_idx_l0_default_active_minus1, 1);
+  BOOST_CHECK_EQUAL(ppps -> num_ref_idx_l1_default_active_minus1, 1);
+  BOOST_CHECK_EQUAL(ppps -> init_qp_minus26, 0);
+  BOOST_CHECK_EQUAL(ppps -> constrained_intra_pred_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> transform_skip_enabled_flag, 1);
+  BOOST_CHECK_EQUAL(ppps -> cu_qp_delta_enabled_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> pps_cb_qp_offset, 0);
+  BOOST_CHECK_EQUAL(ppps -> pps_cr_qp_offset, 0);
+  BOOST_CHECK_EQUAL(ppps -> pps_slice_chroma_qp_offsets_present_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> weighted_pred_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> weighted_bipred_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> transquant_bypass_enabled_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> tiles_enabled_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> entropy_coding_sync_enabled_flag, 1);
+  BOOST_CHECK_EQUAL(ppps -> pps_loop_filter_across_slices_enabled_flag, 1);
+  BOOST_CHECK_EQUAL(ppps -> deblocking_filter_control_present_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> pps_scaling_list_data_present_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> lists_modification_present_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> log2_parallel_merge_level_minus2, 0);
+  BOOST_CHECK_EQUAL(ppps -> slice_segment_header_extension_present_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> pps_extension_flag, 0);
+  
+  
+  BOOST_CHECK_EQUAL(consumer.m_nalus[3].m_info.m_position, 0x5d);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[3].m_pnalu -> getType(), NAL_VPS);
+
+  pvps = std::static_pointer_cast<VPS>(consumer.m_nalus[3].m_pnalu);
+  
+  BOOST_CHECK_EQUAL(pvps -> vps_video_parameter_set_id, 0);
+  BOOST_CHECK_EQUAL(pvps -> vps_max_layers_minus1, 0);
+  BOOST_CHECK_EQUAL(pvps -> vps_max_sub_layers_minus1, 0);
+  BOOST_CHECK_EQUAL(pvps -> vps_temporal_id_nesting_flag, 1);
+  BOOST_CHECK_EQUAL(pvps -> profile_tier_level.general_profile_space, 0);
+  BOOST_CHECK_EQUAL(pvps -> profile_tier_level.general_tier_flag, 0);
+  BOOST_CHECK_EQUAL(pvps -> profile_tier_level.general_profile_idc, 1);
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(profile_compatibility, profile_compatibility + 32, 
+                              pvps -> profile_tier_level.general_profile_compatibility_flag, pvps -> profile_tier_level.general_profile_compatibility_flag+32);
+
+  BOOST_CHECK_EQUAL(pvps -> profile_tier_level.general_progressive_source_flag, 0);
+  BOOST_CHECK_EQUAL(pvps -> profile_tier_level.general_interlaced_source_flag, 0);
+  BOOST_CHECK_EQUAL(pvps -> profile_tier_level.general_non_packed_constraint_flag, 0);
+  BOOST_CHECK_EQUAL(pvps -> profile_tier_level.general_frame_only_constraint_flag, 0);
+  BOOST_CHECK_EQUAL(pvps -> profile_tier_level.general_level_idc, 186);
+  
+  BOOST_CHECK_EQUAL(pvps -> vps_sub_layer_ordering_info_present_flag, 1);
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(pic_buffering_minus1, pic_buffering_minus1 + 1,
+		    pvps->vps_max_dec_pic_buffering_minus1.begin(), pvps->vps_max_dec_pic_buffering_minus1.end());
+  BOOST_CHECK_EQUAL_COLLECTIONS(vps_max_num_reorder_pics, vps_max_num_reorder_pics + 1,
+		    pvps->vps_max_num_reorder_pics.begin(), pvps->vps_max_num_reorder_pics.end());
+  BOOST_CHECK_EQUAL_COLLECTIONS(latency_increase, latency_increase + 1,
+		    pvps->vps_max_latency_increase_plus1.begin(), pvps->vps_max_latency_increase_plus1.end());
+  
+  BOOST_CHECK_EQUAL(pvps -> vps_max_layer_id, 0);
+  BOOST_CHECK_EQUAL(pvps -> vps_num_layer_sets_minus1, 0);
+  BOOST_CHECK_EQUAL(pvps -> vps_timing_info_present_flag, 0);
+  BOOST_CHECK_EQUAL(pvps -> vps_extension_flag, 0);
+
+  
+  
+  BOOST_CHECK_EQUAL(consumer.m_nalus[4].m_info.m_position, 0x7a);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[4].m_pnalu -> getType(), NAL_SPS);
+
+  psps = std::static_pointer_cast<SPS>(consumer.m_nalus[4].m_pnalu);
+  BOOST_CHECK_EQUAL(psps -> sps_video_parameter_set_id, 0);
+  BOOST_CHECK_EQUAL(psps -> sps_max_sub_layers_minus1, 0);
+  BOOST_CHECK_EQUAL(psps -> sps_temporal_id_nesting_flag, 1);
+  BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_profile_space, 0);
+  BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_tier_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_profile_idc, 1);
+  BOOST_CHECK_EQUAL_COLLECTIONS(profile_compatibility, profile_compatibility + 32, 
+                              psps -> profile_tier_level.general_profile_compatibility_flag, psps -> profile_tier_level.general_profile_compatibility_flag + 32);
+  BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_progressive_source_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_interlaced_source_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_non_packed_constraint_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_frame_only_constraint_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> profile_tier_level.general_level_idc, 186);
+  
+  BOOST_CHECK_EQUAL(psps -> sps_seq_parameter_set_id, 0);
+  BOOST_CHECK_EQUAL(psps -> chroma_format_idc, 1);
+
+  BOOST_CHECK_EQUAL(psps -> pic_width_in_luma_samples, 1280);
+  BOOST_CHECK_EQUAL(psps -> pic_height_in_luma_samples, 720);
+  BOOST_CHECK_EQUAL(psps -> long_term_ref_pics_present_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> sps_temporal_mvp_enabled_flag, 1);
+  BOOST_CHECK_EQUAL(psps -> strong_intra_smoothing_enabled_flag, 1);
+  BOOST_CHECK_EQUAL(psps -> vui_parameters_present_flag, 0);
+  BOOST_CHECK_EQUAL(psps -> sps_extension_flag, 0);
+
+  BOOST_CHECK_EQUAL(consumer.m_nalus[5].m_info.m_position, 0x000000af);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[5].m_pnalu -> getType(), NAL_PPS);
+
+  ppps = std::static_pointer_cast<PPS>(consumer.m_nalus[5].m_pnalu);
+  BOOST_CHECK_EQUAL(ppps -> pps_pic_parameter_set_id, 0);
+  BOOST_CHECK_EQUAL(ppps -> pps_seq_parameter_set_id, 0);
+  BOOST_CHECK_EQUAL(ppps -> dependent_slice_segments_enabled_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> output_flag_present_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> num_extra_slice_header_bits, 0);
+  BOOST_CHECK_EQUAL(ppps -> sign_data_hiding_flag, 1);
+  BOOST_CHECK_EQUAL(ppps -> cabac_init_present_flag, 1);
+  BOOST_CHECK_EQUAL(ppps -> num_ref_idx_l0_default_active_minus1, 1);
+  BOOST_CHECK_EQUAL(ppps -> num_ref_idx_l1_default_active_minus1, 1);
+  BOOST_CHECK_EQUAL(ppps -> init_qp_minus26, 0);
+  BOOST_CHECK_EQUAL(ppps -> constrained_intra_pred_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> transform_skip_enabled_flag, 1);
+  BOOST_CHECK_EQUAL(ppps -> cu_qp_delta_enabled_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> pps_cb_qp_offset, 0);
+  BOOST_CHECK_EQUAL(ppps -> pps_cr_qp_offset, 0);
+  BOOST_CHECK_EQUAL(ppps -> pps_slice_chroma_qp_offsets_present_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> weighted_pred_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> weighted_bipred_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> transquant_bypass_enabled_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> tiles_enabled_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> entropy_coding_sync_enabled_flag, 1);
+  BOOST_CHECK_EQUAL(ppps -> pps_loop_filter_across_slices_enabled_flag, 1);
+  BOOST_CHECK_EQUAL(ppps -> deblocking_filter_control_present_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> pps_scaling_list_data_present_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> lists_modification_present_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> log2_parallel_merge_level_minus2, 0);
+  BOOST_CHECK_EQUAL(ppps -> slice_segment_header_extension_present_flag, 0);
+  BOOST_CHECK_EQUAL(ppps -> pps_extension_flag, 0);
+  
+  
+  
+ 
+  BOOST_CHECK_EQUAL(consumer.m_nalus[6].m_info.m_position, 0x000000ba);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[6].m_pnalu -> getType(), NAL_IDR_W_RADL);
+
+  std::shared_ptr<Slice> pslice = std::static_pointer_cast<Slice>(consumer.m_nalus[6].m_pnalu);
+
+  BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
+  BOOST_CHECK_EQUAL(pslice -> no_output_of_prior_pics_flag, 0);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
+  BOOST_CHECK_EQUAL(pslice -> slice_type, 2);
+  BOOST_CHECK_EQUAL(pslice -> slice_qp_delta, 1);
+
+  BOOST_CHECK_EQUAL(pslice -> slice_loop_filter_across_slices_enabled_flag, 1);
+  BOOST_CHECK_EQUAL(pslice -> num_entry_point_offsets, 11);
+  BOOST_CHECK_EQUAL(pslice -> offset_len_minus1, 4);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[0], 20);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[1], 14);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[2], 12);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[3], 11);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[4], 9);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[5], 8);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[6], 8);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[7], 8);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[8], 7);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[9], 6);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[10], 6);
+
+
+  
+  BOOST_CHECK_EQUAL(consumer.m_nalus[7].m_info.m_position, 0x000015a);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[7].m_pnalu -> getType(), NAL_TRAIL_R);
+  pslice = std::static_pointer_cast<Slice>(consumer.m_nalus[7].m_pnalu);
+
+  BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
+  BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
+  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 8);
+  BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 1);
+
+  BOOST_CHECK_EQUAL(pslice -> num_entry_point_offsets, 11);
+  BOOST_CHECK_EQUAL(pslice -> offset_len_minus1, 2);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[0], 3);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[1], 2);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[2], 2);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[3], 2);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[4], 2);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[5], 2);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[6], 1);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[7], 1);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[8], 1);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[9], 1);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[10], 1);
+
+
+
+  BOOST_CHECK_EQUAL(consumer.m_nalus[8].m_info.m_position, 0x000018a);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[8].m_pnalu -> getType(), NAL_TRAIL_R);
+  pslice = std::static_pointer_cast<Slice>(consumer.m_nalus[8].m_pnalu);
+
+  BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
+  BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
+  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 4);
+  BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 1);
+
+  BOOST_CHECK_EQUAL(pslice -> num_entry_point_offsets, 11);
+  BOOST_CHECK_EQUAL(pslice -> offset_len_minus1, 1);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[0], 2);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[1], 2);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[2], 2);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[3], 2);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[4], 2);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[5], 1);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[6], 1);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[7], 1);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[8], 1);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[9], 1);
+  BOOST_CHECK_EQUAL(pslice -> entry_point_offset_minus1[10], 1);
+
+
+}
+
+
 BOOST_AUTO_TEST_SUITE_END();
