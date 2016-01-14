@@ -454,31 +454,31 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
     {
       pslice -> slice_loop_filter_across_slices_enabled_flag = bs.getBits(1);
     }
+  }
 
-    if(ppps -> tiles_enabled_flag || ppps -> entropy_coding_sync_enabled_flag)
+  if(ppps -> tiles_enabled_flag || ppps -> entropy_coding_sync_enabled_flag)
+  {
+    pslice -> num_entry_point_offsets = bs.getGolombU();
+    if(pslice -> num_entry_point_offsets > 0)
     {
-      pslice -> num_entry_point_offsets = bs.getGolombU();
-      if(pslice -> num_entry_point_offsets > 0)
+      pslice -> offset_len_minus1 = bs.getGolombU();
+      pslice -> entry_point_offset_minus1.resize(pslice -> num_entry_point_offsets);
+
+      if(pslice -> offset_len_minus1 > 31)
       {
-        pslice -> offset_len_minus1 = bs.getGolombU();
-        pslice -> entry_point_offset_minus1.resize(pslice -> num_entry_point_offsets);
+        std::stringstream ss;
+        ss << "offset_len_minus1 = " 
+          << (int) pslice -> offset_len_minus1 
+          << ", but must be in range (0-31)";
 
-        if(pslice -> offset_len_minus1 > 31)
-        {
-          std::stringstream ss;
-          ss << "offset_len_minus1 = " 
-            << (int) pslice -> offset_len_minus1 
-            << ", but must be in range (0-31)";
+        onWarning(ss.str(), &info, Parser::OUT_OF_RANGE);
 
-          onWarning(ss.str(), &info, Parser::OUT_OF_RANGE);
+        pslice -> m_processFailed = true;
 
-          pslice -> m_processFailed = true;
-
-          return;
-        }
-        for(std::size_t i=0; i<pslice -> num_entry_point_offsets; i++)
-          pslice -> entry_point_offset_minus1[i] = bs.getBits(pslice -> offset_len_minus1 + 1);
+        return;
       }
+      for(std::size_t i=0; i<pslice -> num_entry_point_offsets; i++)
+        pslice -> entry_point_offset_minus1[i] = bs.getBits(pslice -> offset_len_minus1 + 1);
     }
   }
 

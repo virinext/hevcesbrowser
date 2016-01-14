@@ -792,27 +792,27 @@ void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
 
       pitemDepend -> addChild(new QTreeWidgetItem(QStringList("slice_loop_filter_across_slices_enabled_flag = " + QString::number(pSlice -> slice_loop_filter_across_slices_enabled_flag))));
     }
+  }
 
-    if(pPPS -> tiles_enabled_flag || pPPS -> entropy_coding_sync_enabled_flag)
+  if(pPPS -> tiles_enabled_flag || pPPS -> entropy_coding_sync_enabled_flag)
+  {
+    pitem = new QTreeWidgetItem(QStringList("if (tiles_enabled_flag || entropy_coding_sync_enabled_flag)"));
+    psliceItem -> addChild(pitem);
+
+    pitem -> addChild(new QTreeWidgetItem(QStringList("num_entry_point_offsets = " + QString::number(pSlice -> num_entry_point_offsets))));
+
+    if(pSlice -> num_entry_point_offsets > 0)
     {
-      pitemDepend = new QTreeWidgetItem(QStringList("if (tiles_enabled_flag || entropy_coding_sync_enabled_flag)"));
-      pitem -> addChild(pitemDepend);
+      pitemThird = new QTreeWidgetItem(QStringList("if (num_entry_point_offsets > 0)"));
+      pitem -> addChild(pitemThird);
 
-      pitemDepend -> addChild(new QTreeWidgetItem(QStringList("num_entry_point_offsets = " + QString::number(pSlice -> num_entry_point_offsets))));
+      pitemThird -> addChild(new QTreeWidgetItem(QStringList("offset_len_minus1 = " + QString::number(pSlice -> offset_len_minus1))));
 
-      if(pSlice -> num_entry_point_offsets > 0)
-      {
-        pitemThird = new QTreeWidgetItem(QStringList("if (num_entry_point_offsets > 0)"));
-        pitemDepend -> addChild(pitemThird);
+      QTreeWidgetItem *pitemLoop = new QTreeWidgetItem(QStringList("for( i = 0; i < num_entry_point_offsets; i++ )"));
+      pitemThird -> addChild(pitemLoop);
 
-        pitemThird -> addChild(new QTreeWidgetItem(QStringList("offset_len_minus1 = " + QString::number(pSlice -> offset_len_minus1))));
-
-        QTreeWidgetItem *pitemLoop = new QTreeWidgetItem(QStringList("for( i = 0; i < num_entry_point_offsets; i++ )"));
-        pitemThird -> addChild(pitemLoop);
-
-        for(std::size_t i=0; i<pSlice -> num_entry_point_offsets; i++)
-          pitemLoop -> addChild(new QTreeWidgetItem(QStringList("entry_point_offset_minus1[" + QString::number(i) + "] = " + QString::number(pSlice -> entry_point_offset_minus1[i]))));
-      }
+      for(std::size_t i=0; i<pSlice -> num_entry_point_offsets; i++)
+        pitemLoop -> addChild(new QTreeWidgetItem(QStringList("entry_point_offset_minus1[" + QString::number(i) + "] = " + QString::number(pSlice -> entry_point_offset_minus1[i]))));
     }
   }
 
