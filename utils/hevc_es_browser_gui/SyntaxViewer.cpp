@@ -214,7 +214,7 @@ void SyntaxViewer::createSPS(std::shared_ptr<HEVC::SPS> pSPS)
 {
   QTreeWidgetItem *pspsItem = new QTreeWidgetItem(QStringList("SPS"));
   addTopLevelItem(pspsItem);
-
+  
   QTreeWidgetItem *pitem;
   pspsItem -> addChild(new QTreeWidgetItem(QStringList("sps_video_parameter_set_id = " + QString::number(pSPS -> sps_video_parameter_set_id))));
   pspsItem -> addChild(new QTreeWidgetItem(QStringList("sps_max_sub_layers_minus1 = " + QString::number(pSPS -> sps_max_sub_layers_minus1))));
@@ -282,9 +282,12 @@ void SyntaxViewer::createSPS(std::shared_ptr<HEVC::SPS> pSPS)
     pspsItem -> addChild(pitem);
     pitem -> addChild(new QTreeWidgetItem(QStringList("sps_scaling_list_data_present_flag = " + QString::number(pSPS -> sps_scaling_list_data_present_flag))));
 
-    QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("scaling_list_data( )"));
-    pitem -> addChild(pitemSecond);
-    createScalingListData(pSPS -> scaling_list_data, pitemSecond);
+    if(pSPS -> sps_scaling_list_data_present_flag)
+    {
+      QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("scaling_list_data( )"));
+      pitem -> addChild(pitemSecond);
+      createScalingListData(pSPS -> scaling_list_data, pitemSecond);
+    }
   }
 
   pspsItem -> addChild(new QTreeWidgetItem(QStringList("amp_enabled_flag = " + QString::number(pSPS -> amp_enabled_flag))));
