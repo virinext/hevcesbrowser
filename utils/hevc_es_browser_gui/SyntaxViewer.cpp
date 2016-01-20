@@ -214,7 +214,7 @@ void SyntaxViewer::createSPS(std::shared_ptr<HEVC::SPS> pSPS)
 {
   QTreeWidgetItem *pspsItem = new QTreeWidgetItem(QStringList("SPS"));
   addTopLevelItem(pspsItem);
-  
+
   QTreeWidgetItem *pitem;
   pspsItem -> addChild(new QTreeWidgetItem(QStringList("sps_video_parameter_set_id = " + QString::number(pSPS -> sps_video_parameter_set_id))));
   pspsItem -> addChild(new QTreeWidgetItem(QStringList("sps_max_sub_layers_minus1 = " + QString::number(pSPS -> sps_max_sub_layers_minus1))));
@@ -293,6 +293,18 @@ void SyntaxViewer::createSPS(std::shared_ptr<HEVC::SPS> pSPS)
   pspsItem -> addChild(new QTreeWidgetItem(QStringList("amp_enabled_flag = " + QString::number(pSPS -> amp_enabled_flag))));
   pspsItem -> addChild(new QTreeWidgetItem(QStringList("sample_adaptive_offset_enabled_flag = " + QString::number(pSPS -> sample_adaptive_offset_enabled_flag))));
   pspsItem -> addChild(new QTreeWidgetItem(QStringList("pcm_enabled_flag = " + QString::number(pSPS -> pcm_enabled_flag))));
+  if(pSPS -> pcm_enabled_flag)
+  {
+    pitem = new QTreeWidgetItem(QStringList("if( pcm_enabled_flag )"));
+    pspsItem -> addChild(pitem);
+
+    pitem -> addChild(new QTreeWidgetItem(QStringList("pcm_sample_bit_depth_luma_minus1 = " + QString::number(pSPS -> pcm_sample_bit_depth_luma_minus1))));
+    pitem -> addChild(new QTreeWidgetItem(QStringList("pcm_sample_bit_depth_chroma_minus1 = " + QString::number(pSPS -> pcm_sample_bit_depth_chroma_minus1))));
+    pitem -> addChild(new QTreeWidgetItem(QStringList("log2_min_pcm_luma_coding_block_size_minus3 = " + QString::number(pSPS -> log2_min_pcm_luma_coding_block_size_minus3))));
+    pitem -> addChild(new QTreeWidgetItem(QStringList("log2_diff_max_min_pcm_luma_coding_block_size = " + QString::number(pSPS -> log2_diff_max_min_pcm_luma_coding_block_size))));
+    pitem -> addChild(new QTreeWidgetItem(QStringList("pcm_loop_filter_disabled_flag = " + QString::number(pSPS -> pcm_loop_filter_disabled_flag))));
+  }
+
   pspsItem -> addChild(new QTreeWidgetItem(QStringList("num_short_term_ref_pic_sets = " + QString::number(pSPS -> num_short_term_ref_pic_sets))));
 
   if(pSPS -> num_short_term_ref_pic_sets)
@@ -457,7 +469,7 @@ void SyntaxViewer::createPPS(std::shared_ptr<HEVC::PPS> pPPS)
       pitem -> addChild(pitemSecond);
 
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList("pps_beta_offset_div2 = " + QString::number(pPPS -> pps_beta_offset_div2))));
-      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("pps_beta_offset_div2 = " + QString::number(pPPS -> pps_beta_offset_div2))));
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("pps_tc_offset_div2 = " + QString::number(pPPS -> pps_tc_offset_div2))));
     }
   }
 
@@ -973,14 +985,16 @@ void SyntaxViewer::createProfileTierLevel(const HEVC::ProfileTierLevel &ptl, QTr
           pitem -> addChild(new QTreeWidgetItem(QStringList("sub_layer_tier_flag[" + QString::number(i) + "] = " + QString::number(ptl.sub_layer_tier_flag[i]))));
           pitem -> addChild(new QTreeWidgetItem(QStringList("sub_layer_profile_idc[" + QString::number(i) + "] = " + QString::number(ptl.sub_layer_profile_idc[i]))));
 
-          QString str = "{ ";
+          QString str = "sub_layer_profile_compatibility_flag = { \n\t";
           for(std::size_t j=0; j<31; j++)
           {
             str += QString::number(ptl.sub_layer_profile_compatibility_flag[i][j]) + ", ";
             if((j+1) % 8 == 0)
-              str += "\n";
+              str += "\n\t";
           }
-          str +=  QString::number(ptl.sub_layer_profile_compatibility_flag[i][31]) + " }";
+          str +=  QString::number(ptl.sub_layer_profile_compatibility_flag[i][31]) + " \n}";
+          pitem -> addChild(new QTreeWidgetItem(QStringList(str)));
+
 
           pitem -> addChild(new QTreeWidgetItem(QStringList("sub_layer_progressive_source_flag[" + QString::number(i) + "] = " + QString::number(ptl.sub_layer_progressive_source_flag[i]))));
           pitem -> addChild(new QTreeWidgetItem(QStringList("sub_layer_interlaced_source_flag[" + QString::number(i) + "] = " + QString::number(ptl.sub_layer_interlaced_source_flag[i]))));
@@ -1095,19 +1109,19 @@ void SyntaxViewer::createVuiParameters(const HEVC::VuiParameters &vui, std::size
       QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if( vui_poc_proportional_to_timing_flag )"));
       pitem -> addChild(pitemSecond);
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList("vui_num_ticks_poc_diff_one_minus1 = " + QString::number(vui.vui_num_ticks_poc_diff_one_minus1))));
-    }
 
-    pitem -> addChild(new QTreeWidgetItem(QStringList("vui_hrd_parameters_present_flag = " + QString::number(vui.vui_hrd_parameters_present_flag))));
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("vui_hrd_parameters_present_flag = " + QString::number(vui.vui_hrd_parameters_present_flag))));
 
-    if(vui.vui_hrd_parameters_present_flag)
-    {
-      QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if( vui_hrd_parameters_present_flag )"));
-      pitem -> addChild(pitemSecond);
+      if(vui.vui_hrd_parameters_present_flag)
+      {
+        QTreeWidgetItem *pitemThird = new QTreeWidgetItem(QStringList("if( vui_hrd_parameters_present_flag )"));
+        pitemSecond -> addChild(pitemThird);
 
-      QTreeWidgetItem *pitemThird = new QTreeWidgetItem(QStringList("hrd_parameters(1, " + QString::number(maxNumSubLayersMinus1) + ")"));
-      pitemSecond -> addChild(pitemThird);
+        QTreeWidgetItem *pitemHrd = new QTreeWidgetItem(QStringList("hrd_parameters(1, " + QString::number(maxNumSubLayersMinus1) + ")"));
+        pitemThird -> addChild(pitemHrd);
 
-      createHrdParameters(vui.hrd_parameters, 1, pitemThird);
+        createHrdParameters(vui.hrd_parameters, 1, pitemHrd);
+      }
     }
   }
 
@@ -1374,7 +1388,7 @@ void SyntaxViewer::createScalingListData(const HEVC::ScalingListData &scdata, QT
         {
           pitem = new QTreeWidgetItem(QStringList("if( sizeId > 1 )"));
           pitemSecond -> addChild(pitem);
-          pitem -> addChild(new QTreeWidgetItem(QStringList("scaling_list_dc_coef_minus8[" + QString::number(sizeId) + "][" + QString::number(matrixId) + "] = " + QString::number(scdata.scaling_list_dc_coef_minus8[sizeId][matrixId]))));
+          pitem -> addChild(new QTreeWidgetItem(QStringList("scaling_list_dc_coef_minus8[" + QString::number(sizeId) + "][" + QString::number(matrixId) + "] = " + QString::number(scdata.scaling_list_dc_coef_minus8[sizeId-2][matrixId]))));
         }
 
         pitem = new QTreeWidgetItem(QStringList("for( i = 0; i < coefNum; i++ )"));
@@ -1474,8 +1488,8 @@ void SyntaxViewer::createPredWeightTable(const HEVC::PredWeightTable &pwt, std::
       QTreeWidgetItem *pitem = new QTreeWidgetItem(QStringList("if (chroma_weight_l0_flag[" + QString::number(i) +"])"));
       pitemLoop -> addChild(pitem);
 
-      pitem -> addChild(new QTreeWidgetItem(QStringList("delta_chroma_weight_l0[" + QString::number(i) + "] = { " + QString::number(pwt.delta_chroma_weight_l0[i][0]) + ", " + QString::number(pwt.delta_chroma_weight_l0[i][1]) + ", " + QString::number(pwt.delta_chroma_weight_l0[i][2]) + " } ")));
-      pitem -> addChild(new QTreeWidgetItem(QStringList("delta_chroma_offset_l0[" + QString::number(i) + "] = { " + QString::number(pwt.delta_chroma_offset_l0[i][0]) + ", " + QString::number(pwt.delta_chroma_offset_l0[i][1]) + ", " + QString::number(pwt.delta_chroma_offset_l0[i][2]) + " } ")));
+      pitem -> addChild(new QTreeWidgetItem(QStringList("delta_chroma_weight_l0[" + QString::number(i) + "] = { " + QString::number(pwt.delta_chroma_weight_l0[i][0]) + ", " + QString::number(pwt.delta_chroma_weight_l0[i][1]) + " } ")));
+      pitem -> addChild(new QTreeWidgetItem(QStringList("delta_chroma_offset_l0[" + QString::number(i) + "] = { " + QString::number(pwt.delta_chroma_offset_l0[i][0]) + ", " + QString::number(pwt.delta_chroma_offset_l0[i][1]) + " } ")));
     }
   }
 
@@ -1521,8 +1535,8 @@ void SyntaxViewer::createPredWeightTable(const HEVC::PredWeightTable &pwt, std::
         QTreeWidgetItem *pitem = new QTreeWidgetItem(QStringList("if (chroma_weight_l1_flag[" + QString::number(i) +"])"));
         pitemLoop -> addChild(pitem);
 
-        pitem -> addChild(new QTreeWidgetItem(QStringList("delta_chroma_weight_l1[" + QString::number(i) + "] = { " + QString::number(pwt.delta_chroma_weight_l1[i][0]) + ", " + QString::number(pwt.delta_chroma_weight_l1[i][1]) + ", " + QString::number(pwt.delta_chroma_weight_l1[i][2]) + " } ")));
-        pitem -> addChild(new QTreeWidgetItem(QStringList("delta_chroma_offset_l1[" + QString::number(i) + "] = { " + QString::number(pwt.delta_chroma_offset_l1[i][0]) + ", " + QString::number(pwt.delta_chroma_offset_l1[i][1]) + ", " + QString::number(pwt.delta_chroma_offset_l1[i][2]) + " } ")));
+        pitem -> addChild(new QTreeWidgetItem(QStringList("delta_chroma_weight_l1[" + QString::number(i) + "] = { " + QString::number(pwt.delta_chroma_weight_l1[i][0]) + ", " + QString::number(pwt.delta_chroma_weight_l1[i][1]) + " } ")));
+        pitem -> addChild(new QTreeWidgetItem(QStringList("delta_chroma_offset_l1[" + QString::number(i) + "] = { " + QString::number(pwt.delta_chroma_offset_l1[i][0]) + ", " + QString::number(pwt.delta_chroma_offset_l1[i][1]) + " } ")));
       }
     }
   } 

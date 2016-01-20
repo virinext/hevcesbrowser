@@ -235,17 +235,17 @@ namespace HEVC
     std::vector<uint8_t>      chroma_weight_l0_flag;
     std::vector<int32_t>      delta_luma_weight_l0;
     std::vector<int32_t>      luma_offset_l0;
-    std::vector<std::array<int32_t, 3> >
+    std::vector<std::array<int32_t, 2> >
                               delta_chroma_weight_l0;
-    std::vector<std::array<int32_t, 3> >
+    std::vector<std::array<int32_t, 2> >
                               delta_chroma_offset_l0;
     std::vector<uint8_t>      luma_weight_l1_flag;
     std::vector<uint8_t>      chroma_weight_l1_flag;
     std::vector<int32_t>      delta_luma_weight_l1;
     std::vector<int32_t>      luma_offset_l1;
-    std::vector<std::array<int32_t, 3> >
+    std::vector<std::array<int32_t, 2> >
                               delta_chroma_weight_l1;
-    std::vector<std::array<int32_t, 3> >
+    std::vector<std::array<int32_t, 2> >
                               delta_chroma_offset_l1;
 
     void toDefault();

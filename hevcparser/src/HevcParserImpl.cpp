@@ -793,6 +793,9 @@ ProfileTierLevel HevcParserImpl::processProfileTierLevel(std::size_t max_sub_lay
       ptl.sub_layer_interlaced_source_flag[i] = bs.getBits(1);
       ptl.sub_layer_non_packed_constraint_flag[i] = bs.getBits(1);
       ptl.sub_layer_frame_only_constraint_flag[i] = bs.getBits(1);
+      bs.getBits(32);
+      bs.getBits(12);
+
     }
 
     if(ptl.sub_layer_level_present_flag[i])
@@ -1358,7 +1361,7 @@ PredWeightTable HevcParserImpl::processPredWeightTable(BitstreamReader &bs, std:
     }
     if(pwt.chroma_weight_l0_flag[i])
     {
-      for(std::size_t j=0; j<3; j++)
+      for(std::size_t j=0; j<2; j++)
       {
         pwt.delta_chroma_weight_l0[i][j] = bs.getGolombS();
         pwt.delta_chroma_offset_l0[i][j] = bs.getGolombS();
@@ -1395,7 +1398,7 @@ PredWeightTable HevcParserImpl::processPredWeightTable(BitstreamReader &bs, std:
       }
       if(pwt.chroma_weight_l1_flag[i])
       {
-        for(std::size_t j=0; j<3; j++)
+        for(std::size_t j=0; j<2; j++)
         {
           pwt.delta_chroma_weight_l1[i][j] = bs.getGolombS();
           pwt.delta_chroma_offset_l1[i][j] = bs.getGolombS();
