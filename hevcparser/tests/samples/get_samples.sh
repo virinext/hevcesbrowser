@@ -10,3 +10,4 @@ wget https://www.dropbox.com/s/i28erkj91t0kra0/ffmpeg_default.hevc?dl=0 -O ffmpe
 wget https://www.dropbox.com/s/c4sfy9a6udoaxhp/ffmpeg_cp_tr_cm_2020.hevc?dl=0 -O ffmpeg_cp_tr_cm_2020.hevc -nc
 wget https://www.dropbox.com/s/w0vwk4itinuojma/f265_default.hevc?dl=0 -O f265_default.hevc -nc
 wget https://www.dropbox.com/s/pnkpuonmipbpnuu/homer_default.hevc?dl=0 -O homer_default.hevc -nc
+wget https://www.dropbox.com/s/0e8orlki0cp96s1/BQSquare_416x240_60_qp37.bin?dl=0 O BQSquare_416x240_60_qp37.bin -nc
