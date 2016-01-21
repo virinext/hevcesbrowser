@@ -26,9 +26,9 @@ class Consumer: public Parser::Consumer
     virtual void onNALUnit(std::shared_ptr<NALUnit> pNALUnit, const Parser::Info *pInfo)
     {
       NALUInfo nalu;
-      nalu.m_pnalu = std::move(pNALUnit -> copy());
+      nalu.m_pnalu = pNALUnit;
       nalu.m_info = *pInfo;
-      
+            
       m_nalus.push_back(nalu);
     }
 
@@ -2224,8 +2224,6 @@ BOOST_AUTO_TEST_CASE(BQSquare_416x240_60_qp37)
   BOOST_CHECK_EQUAL(pslice -> slice_qp_delta, 11);
   BOOST_CHECK_EQUAL(pslice -> slice_loop_filter_across_slices_enabled_flag, 1);
 
-  
-  
   BOOST_CHECK_EQUAL(consumer.m_nalus[1201].m_info.m_position, 0x33a77);
   BOOST_CHECK_EQUAL(consumer.m_nalus[1201].m_pnalu -> getType(), NAL_TRAIL_N);
   pslice = std::static_pointer_cast<Slice>(consumer.m_nalus[1201].m_pnalu);
@@ -2243,6 +2241,21 @@ BOOST_AUTO_TEST_CASE(BQSquare_416x240_60_qp37)
 
   BOOST_CHECK_EQUAL(consumer.m_nalus[1202].m_info.m_position, 0x33aab);
   BOOST_CHECK_EQUAL(consumer.m_nalus[1202].m_pnalu -> getType(), NAL_SEI_SUFFIX); 
+  std::shared_ptr<SEI> psei  = std::static_pointer_cast<SEI>(consumer.m_nalus[1202].m_pnalu);
+
+  BOOST_CHECK_EQUAL(psei -> sei_message.size(), 1);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_type_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_type_byte, 132);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_size_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_size_byte, 49);
+
+  std::shared_ptr<DecodedPictureHash> pdecPictHash = std::static_pointer_cast<DecodedPictureHash>(psei -> sei_message[0].sei_payload);
+  BOOST_CHECK_EQUAL(pdecPictHash->hash_type, 0);
+  BOOST_CHECK_EQUAL(pdecPictHash->picture_md5.size(), 3);
+  BOOST_CHECK_EQUAL(pdecPictHash->picture_md5.size(), 3);
+  uint8_t hash[] = {0xA9, 0x0A, 0x8A, 0x08, 0x95, 0xE5, 0x1F, 0x9B, 0x79, 0x73, 0xA7, 0x91, 0xF9, 0x72, 0xF9, 0x07};
+  BOOST_CHECK_EQUAL_COLLECTIONS(pdecPictHash->picture_md5[2].begin(), pdecPictHash->picture_md5[2].end(),
+	hash, hash + sizeof(hash) / sizeof(hash[0]));
 }
 
 BOOST_AUTO_TEST_SUITE_END();

@@ -1142,6 +1142,11 @@ void SeiMessage::toDefault()
 }
 
 
+void DecodedPictureHash::toDefault()
+{
+  hash_type = 0;
+}
+
 void RefPicListModification::toDefault()
 {
   ref_pic_list_modification_flag_l0 = 0;

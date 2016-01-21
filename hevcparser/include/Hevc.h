@@ -214,6 +214,13 @@ namespace HEVC
   };
 
 
+  class SeiPayload
+  {
+  public:
+    virtual ~SeiPayload() {};
+  };
+
+
   class SeiMessage
   {
   public:
@@ -221,6 +228,20 @@ namespace HEVC
     uint32_t           num_payload_size_ff_bytes;
     uint8_t            last_payload_type_byte;
     uint8_t            last_payload_size_byte;
+    std::shared_ptr<SeiPayload>
+                       sei_payload;
+
+    virtual void toDefault();
+  };
+
+
+  class DecodedPictureHash: public SeiPayload
+  {
+  public:
+    uint8_t                                   hash_type;
+    std::vector<std::array<uint8_t, 16> >     picture_md5;
+    std::vector<uint16_t>                     picture_crc;
+    std::vector<uint32_t>                     picture_checksum;
 
     void toDefault();
   };

@@ -50,6 +50,8 @@ private:
     void createRefPicListModification(const HEVC::RefPicListModification &rplModif, QTreeWidgetItem *pItem);
     void createPredWeightTable(const HEVC::PredWeightTable &pwt, std::shared_ptr<HEVC::Slice> pSlice, QTreeWidgetItem *pItem);
 
+    void createDecodedPictureHash(std::shared_ptr<HEVC::DecodedPictureHash> pDecPictHash, QTreeWidgetItem *pItem);
+
     std::map<uint32_t, std::shared_ptr<HEVC::VPS> >          m_vpsMap;
     std::map<uint32_t, std::shared_ptr<HEVC::SPS> >          m_spsMap;
     std::map<uint32_t, std::shared_ptr<HEVC::PPS> >          m_ppsMap;

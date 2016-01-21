@@ -153,6 +153,7 @@ void HevcParserImpl::processNALUnit(const uint8_t *pdata, std::size_t size, cons
       std::shared_ptr<Slice> pslice(new Slice(type));
       processSlice(pslice, bs, info);
       pnalU = pslice;
+      m_lastSlice = pslice;
       break;
     }
 
@@ -694,12 +695,15 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
   {
     SeiMessage msg;
     msg.toDefault();
+    std::size_t payloadType = 0;
     msg.last_payload_type_byte = bs.getBits(8);
     while(msg.last_payload_type_byte == 0xff)
     {
       msg.num_payload_type_ff_bytes++;
       msg.last_payload_type_byte = bs.getBits(8);
+      payloadType += 255;
     }
+    payloadType += msg.last_payload_type_byte;
 
     msg.last_payload_size_byte = bs.getBits(8);
     std::size_t payloadSize = 0;
@@ -711,7 +715,7 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
     }
     payloadSize += msg.last_payload_size_byte;
 
-    if(payloadSize * 8 > bs.availableInNalU())
+    if(payloadSize > bs.availableInNalU())
     {
       std::stringstream ss;
       ss << "SEI: sei message payload size more then nal unit size (payloadSize=" 
@@ -721,6 +725,21 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
       onWarning(ss.str(), &info, Parser::OUT_OF_RANGE);
       break;
     }
+
+    switch(payloadType)
+    {
+      case 132:
+      {
+        std::shared_ptr<DecodedPictureHash> pdecPicHash(new DecodedPictureHash);
+        BitstreamReader tmpBs = bs;
+        processDecodedPictureHash(pdecPicHash, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pdecPicHash);
+        break;
+      }
+
+
+    }
+
     bs.skipBits(payloadSize * 8);
 
     psei -> sei_message.push_back(msg);
@@ -1406,4 +1425,47 @@ PredWeightTable HevcParserImpl::processPredWeightTable(BitstreamReader &bs, std:
       }
     }
   } 
+}
+
+
+void HevcParserImpl::processDecodedPictureHash(std::shared_ptr<DecodedPictureHash> pdecPicHash, BitstreamReader &bs)
+{
+  if(!m_lastSlice)
+    return;
+
+  std::shared_ptr<PPS> ppps = m_ppsMap[m_lastSlice -> slice_pic_parameter_set_id];
+  if(!ppps)
+    return;
+
+  int32_t spsId = ppps -> pps_seq_parameter_set_id;
+
+  std::shared_ptr<SPS> psps = m_spsMap[spsId];
+
+  if(!psps)
+    return;
+
+  pdecPicHash -> hash_type = bs.getBits(8);
+
+  std::size_t cnt = psps -> chroma_format_idc == 0 ? 1:3;
+
+  if(pdecPicHash -> hash_type == 0)
+    pdecPicHash -> picture_md5.resize(cnt);
+  else if(pdecPicHash -> hash_type == 1 )
+    pdecPicHash -> picture_crc.resize(cnt);
+  else if(pdecPicHash -> hash_type == 2 )
+    pdecPicHash -> picture_checksum.resize(cnt);
+
+
+  for(std::size_t i=0; i<cnt; i++)
+  {
+    if(pdecPicHash -> hash_type == 0)
+    {
+      for(std::size_t j=0; j<16; j++)
+        pdecPicHash -> picture_md5[i][j] = bs.getBits(8);
+    }
+    else if(pdecPicHash -> hash_type == 1 )
+      pdecPicHash -> picture_crc[i] = bs.getBits(16);
+    else if(pdecPicHash -> hash_type == 2 )
+      pdecPicHash -> picture_checksum[i] = bs.getBits(32);
+  }
 }

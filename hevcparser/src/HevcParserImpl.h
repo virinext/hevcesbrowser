@@ -39,12 +39,14 @@ namespace HEVC
       ScalingListData processScalingListData(BitstreamReader &bs);
       RefPicListModification processRefPicListModification(BitstreamReader &bs, std::shared_ptr<Slice> pslice);
       PredWeightTable processPredWeightTable(BitstreamReader &bs, std::shared_ptr<Slice> pslice);
+      void processDecodedPictureHash(std::shared_ptr<DecodedPictureHash> pdecPicHash, BitstreamReader &bs);
 
       void onWarning(const std::string &warning, const Info *pInfo, WarningType type);
 
       std::map<uint32_t, std::shared_ptr<VPS> >          m_vpsMap;
       std::map<uint32_t, std::shared_ptr<SPS> >          m_spsMap;
       std::map<uint32_t, std::shared_ptr<PPS> >          m_ppsMap;
+      std::shared_ptr<Slice>                             m_lastSlice;
 
       std::list<Consumer *>          m_consumers;
   };

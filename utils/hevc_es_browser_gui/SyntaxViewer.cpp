@@ -897,10 +897,20 @@ void SyntaxViewer::createSEI(std::shared_ptr<HEVC::SEI> pSEI)
       }
     }
 
-    pitem -> addChild(new QTreeWidgetItem(QStringList("last_payload_type_byte = " + QString::number(pSEI -> sei_message[i].last_payload_size_byte))));
+    pitem -> addChild(new QTreeWidgetItem(QStringList("last_payload_size_byte = " + QString::number(pSEI -> sei_message[i].last_payload_size_byte))));
 
     payloadSize += pSEI -> sei_message[i].last_payload_size_byte;
-    pitem -> addChild(new QTreeWidgetItem(QStringList("sei_payload(" + QString::number(payloadType) + ", " + QString::number(payloadSize) + ")")));
+
+    if(payloadType == 132)
+    {
+      std::shared_ptr<HEVC::DecodedPictureHash> pdecPictHash = std::dynamic_pointer_cast<HEVC::DecodedPictureHash>(pSEI -> sei_message[i].sei_payload);
+
+      QTreeWidgetItem *pitemDecPictHash = new QTreeWidgetItem(QStringList("decoded_picture_hash(" + QString::number(payloadSize) + ")"));
+      pitem -> addChild(pitemDecPictHash);
+      createDecodedPictureHash(pdecPictHash, pitemDecPictHash);
+    }
+    else
+      pitem -> addChild(new QTreeWidgetItem(QStringList("sei_payload(" + QString::number(payloadType) + ", " + QString::number(payloadSize) + ")")));
   }
 }
 
@@ -1541,6 +1551,43 @@ void SyntaxViewer::createPredWeightTable(const HEVC::PredWeightTable &pwt, std::
     }
   } 
 
+}
+
+void SyntaxViewer::createDecodedPictureHash(std::shared_ptr<HEVC::DecodedPictureHash> pDecPictHash, QTreeWidgetItem *pItem)
+{
+  pItem -> addChild(new QTreeWidgetItem(QStringList("hash_type = " + QString::number(pDecPictHash->hash_type))));
+
+  QTreeWidgetItem *ploop = new QTreeWidgetItem(QStringList("for( cIdx = 0; cIdx < ( chroma_format_idc = = 0 ? 1 : 3 ); cIdx++ )"));
+  pItem -> addChild(ploop);
+
+  QTreeWidgetItem *pif = new QTreeWidgetItem(QStringList("if(hash_type = " + QString::number(pDecPictHash->hash_type) + ") "));
+  ploop -> addChild(pif);
+
+
+  if(pDecPictHash->hash_type == 0)
+  {
+    for(std::size_t i=0; i<pDecPictHash->picture_md5.size(); i++)
+    {
+      QString str;
+      for(std::size_t j=0; j<16; j++)
+        str += QString("%1").arg(pDecPictHash->picture_md5[i][j], 2, 16, QChar('0')).toUpper();
+      pif -> addChild(new QTreeWidgetItem(QStringList("picture_md5[" + QString::number(i) + "] = " + str)));
+    }
+  }
+  if(pDecPictHash->hash_type == 1)
+  {
+    for(std::size_t i=0; i<pDecPictHash->picture_crc.size(); i++)
+    {
+      pif -> addChild(new QTreeWidgetItem(QStringList("picture_crc[" + QString::number(i) + "] = " + QString::number(pDecPictHash -> picture_crc[i]))));
+    }
+  }
+  else
+  {
+    for(std::size_t i=0; i<pDecPictHash->picture_crc.size(); i++)
+    {
+      pif -> addChild(new QTreeWidgetItem(QStringList("picture_checksum[" + QString::number(i) + "] = " + QString::number(pDecPictHash -> picture_checksum[i]))));
+    }
+  }
 }
 
 
