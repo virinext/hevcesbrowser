@@ -134,7 +134,7 @@ void MainWindow::process(const QString &fileName)
     pcntwgt -> m_pcomInfoViewer -> item(pcntwgt -> m_pcomInfoViewer -> rowCount() - 1, 1) -> setText(QString::number(position - lastNalUOffset));
   }
 
-  pcntwgt -> m_phexViewer -> setData(fullData);
+  pcntwgt -> m_phexViewer -> setData((QHexView::DataStorage *)new QHexView::DataStorageFile(fileName));
 
   pprogressBar -> close();
   delete pprogressBar;
