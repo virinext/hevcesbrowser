@@ -100,7 +100,6 @@ void MainWindow::process(const QString &fileName)
 
   pprogressBar -> show();
 
-  QByteArray fullData;
   while(!file.atEnd())
   {
     QByteArray arr = file.read(4 * (1 << 20));
@@ -108,11 +107,9 @@ void MainWindow::process(const QString &fileName)
     position += parsed;
     if(file.atEnd())
     {
-      fullData += arr;
       break;
     }
 
-    fullData += arr.left(parsed);
     file.seek(position);
     pprogressBar -> setValue(position);
     QCoreApplication::processEvents();
