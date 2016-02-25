@@ -238,7 +238,7 @@ void ProfileConformanceAnalyzer::checkMain10SPS(std::shared_ptr<HEVC::SPS> pSPS,
   if(pSPS -> bit_depth_luma_minus8 > 2)
     sendWarning("Main10 profile: SPSs shall have bit_depth_luma_minus8 in the range of 0 to 2, inclusive", pInfo);
 
-  if(pSPS -> bit_depth_chroma_minus8)
+  if(pSPS -> bit_depth_chroma_minus8 > 2)
     sendWarning("Main10 profile: SPSs shall have bit_depth_chroma_minus8 in the range of 0 to 2, inclusive", pInfo);
 
   if(ctbLog2SizeY(pSPS) < 4 || ctbLog2SizeY(pSPS) > 6)
