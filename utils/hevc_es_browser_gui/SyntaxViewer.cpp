@@ -949,6 +949,42 @@ void SyntaxViewer::createSEI(std::shared_ptr<HEVC::SEI> pSEI)
         break;
       }
 
+      case HEVC::SeiMessage::TONE_MAPPING_INFO:
+      {
+        std::shared_ptr<HEVC::ToneMapping> pSeiMessage = std::dynamic_pointer_cast<HEVC::ToneMapping>(pSEI -> sei_message[i].sei_payload);
+        QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("tone_mapping_info(" + QString::number(payloadSize) + ")"));
+        pitem -> addChild(pitemSei);
+        createToneMapping(pSeiMessage, pitemSei);
+        break;
+      }
+
+      case HEVC::SeiMessage::FRAME_PACKING:
+      {
+        std::shared_ptr<HEVC::FramePacking> pSeiMessage = std::dynamic_pointer_cast<HEVC::FramePacking>(pSEI -> sei_message[i].sei_payload);
+        QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("frame_packing_arrangement(" + QString::number(payloadSize) + ")"));
+        pitem -> addChild(pitemSei);
+        createFramePacking(pSeiMessage, pitemSei);
+        break;
+      }
+
+      case HEVC::SeiMessage::DISPLAY_ORIENTATION:
+      {
+        std::shared_ptr<HEVC::DisplayOrientation> pSeiMessage = std::dynamic_pointer_cast<HEVC::DisplayOrientation>(pSEI -> sei_message[i].sei_payload);
+        QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("display_orientation(" + QString::number(payloadSize) + ")"));
+        pitem -> addChild(pitemSei);
+        createDisplayOrientation(pSeiMessage, pitemSei);
+        break;
+      }
+
+      case HEVC::SeiMessage::SOP_DESCRIPTION:
+      {
+        std::shared_ptr<HEVC::SOPDescription> pSeiMessage = std::dynamic_pointer_cast<HEVC::SOPDescription>(pSEI -> sei_message[i].sei_payload);
+        QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("structure_of_pictures_info(" + QString::number(payloadSize) + ")"));
+        pitem -> addChild(pitemSei);
+        createSOPDescription(pSeiMessage, pitemSei);
+        break;
+      }
+
       case HEVC::SeiMessage::ACTIVE_PARAMETER_SETS:
       {
         std::shared_ptr<HEVC::ActiveParameterSets> pSeiMessage = std::dynamic_pointer_cast<HEVC::ActiveParameterSets>(pSEI -> sei_message[i].sei_payload);
@@ -956,6 +992,16 @@ void SyntaxViewer::createSEI(std::shared_ptr<HEVC::SEI> pSEI)
         QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("active_parameter_sets(" + QString::number(payloadSize) + ")"));
         pitem -> addChild(pitemSei);
         createActiveParameterSets(pSeiMessage, pitemSei);
+        break;
+      }
+
+      case HEVC::SeiMessage::TEMPORAL_LEVEL0_INDEX:
+      {
+        std::shared_ptr<HEVC::TemporalLevel0Index> pSeiMessage = std::dynamic_pointer_cast<HEVC::TemporalLevel0Index>(pSEI -> sei_message[i].sei_payload);
+
+        QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("temporal_sub_layer_zero_index(" + QString::number(payloadSize) + ")"));
+        pitem -> addChild(pitemSei);
+        createTemporalLevel0Index(pSeiMessage, pitemSei);
         break;
       }
 
@@ -1919,6 +1965,198 @@ void SyntaxViewer::createContentLightLevelInfo(std::shared_ptr<HEVC::ContentLigh
 {
   pItem -> addChild(new QTreeWidgetItem(QStringList("max_content_light_level = " + QString::number(pSeiPayload->max_content_light_level))));
   pItem -> addChild(new QTreeWidgetItem(QStringList("max_pic_average_light_level = " + QString::number(pSeiPayload->max_pic_average_light_level))));
+}
+
+
+void SyntaxViewer::createFramePacking(std::shared_ptr<HEVC::FramePacking> pSei, QTreeWidgetItem *pItem)
+{
+  pItem -> addChild(new QTreeWidgetItem(QStringList("frame_packing_arrangement_id = " + QString::number(pSei->frame_packing_arrangement_id))));
+  pItem -> addChild(new QTreeWidgetItem(QStringList("frame_packing_arrangement_cancel_flag = " + QString::number(pSei->frame_packing_arrangement_cancel_flag))));
+
+  if(!pSei -> frame_packing_arrangement_cancel_flag)
+  {
+    QTreeWidgetItem *pitemIf = new QTreeWidgetItem(QStringList("if( !frame_packing_arrangement_cancel_flag )"));
+    pItem -> addChild(pitemIf);
+
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("frame_packing_arrangement_type = " + QString::number(pSei->frame_packing_arrangement_type))));
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("quincunx_sampling_flag = " + QString::number(pSei->quincunx_sampling_flag))));
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("content_interpretation_type = " + QString::number(pSei->content_interpretation_type))));
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("spatial_flipping_flag = " + QString::number(pSei->spatial_flipping_flag))));
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("frame0_flipped_flag = " + QString::number(pSei->frame0_flipped_flag))));
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("field_views_flag = " + QString::number(pSei->field_views_flag))));
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("current_frame_is_frame0_flag = " + QString::number(pSei->current_frame_is_frame0_flag))));
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("frame0_self_contained_flag = " + QString::number(pSei->frame0_self_contained_flag))));
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("frame1_self_contained_flag = " + QString::number(pSei->frame1_self_contained_flag))));
+
+    if(!pSei -> quincunx_sampling_flag && pSei -> frame_packing_arrangement_type != 5)
+    {
+      QTreeWidgetItem *pitemGridPos = new QTreeWidgetItem(QStringList("if( !quincunx_sampling_flag && frame_packing_arrangement_type != 5 )"));
+      pitemIf -> addChild(pitemGridPos);
+
+      pitemGridPos -> addChild(new QTreeWidgetItem(QStringList("frame0_grid_position_x = " + QString::number(pSei->frame0_grid_position_x))));
+      pitemGridPos -> addChild(new QTreeWidgetItem(QStringList("frame0_grid_position_y = " + QString::number(pSei->frame0_grid_position_y))));
+      pitemGridPos -> addChild(new QTreeWidgetItem(QStringList("frame1_grid_position_x = " + QString::number(pSei->frame1_grid_position_x))));
+      pitemGridPos -> addChild(new QTreeWidgetItem(QStringList("frame1_grid_position_y = " + QString::number(pSei->frame1_grid_position_y))));
+    }
+
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("frame_packing_arrangement_reserved_byte = " + QString::number(pSei->frame_packing_arrangement_reserved_byte))));
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("frame_packing_arrangement_persistence_flag = " + QString::number(pSei->frame_packing_arrangement_persistence_flag))));
+
+  }
+
+  pItem -> addChild(new QTreeWidgetItem(QStringList("upsampled_aspect_ratio_flag = " + QString::number(pSei->upsampled_aspect_ratio_flag))));
+}
+
+
+void SyntaxViewer::createDisplayOrientation(std::shared_ptr<HEVC::DisplayOrientation> pSei, QTreeWidgetItem *pItem)
+{
+  pItem -> addChild(new QTreeWidgetItem(QStringList("display_orientation_cancel_flag = " + QString::number(pSei->display_orientation_cancel_flag))));
+  if(!pSei -> display_orientation_cancel_flag)
+  {
+    QTreeWidgetItem *pitemIf = new QTreeWidgetItem(QStringList("if( !display_orientation_cancel_flag )"));
+    pItem -> addChild(pitemIf);
+
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("hor_flip = " + QString::number(pSei->hor_flip))));
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("ver_flip = " + QString::number(pSei->ver_flip))));
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("anticlockwise_rotation = " + QString::number(pSei->anticlockwise_rotation))));
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("display_orientation_persistence_flag = " + QString::number(pSei->display_orientation_persistence_flag))));
+  }
+}
+
+
+void SyntaxViewer::createToneMapping(std::shared_ptr<HEVC::ToneMapping> pSei, QTreeWidgetItem *pItem)
+{
+  pItem -> addChild(new QTreeWidgetItem(QStringList("tone_map_id = " + QString::number(pSei->tone_map_id))));
+  pItem -> addChild(new QTreeWidgetItem(QStringList("tone_map_cancel_flag = " + QString::number(pSei->tone_map_cancel_flag))));
+
+  if(!pSei -> tone_map_cancel_flag)
+  {
+    QTreeWidgetItem *pitemIf = new QTreeWidgetItem(QStringList("if( !tone_map_cancel_flag )"));
+    pItem -> addChild(pitemIf);
+
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("tone_map_persistence_flag = " + QString::number(pSei->tone_map_persistence_flag))));
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("coded_data_bit_depth = " + QString::number(pSei->coded_data_bit_depth))));
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("target_bit_depth = " + QString::number(pSei->target_bit_depth))));
+    pitemIf -> addChild(new QTreeWidgetItem(QStringList("tone_map_model_id = " + QString::number(pSei->tone_map_model_id))));
+
+    if(pSei -> tone_map_model_id == 0)
+    {
+      QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if( tone_map_model_id = = 0 )"));
+      pItem -> addChild(pitemSecond);
+
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("min_value = " + QString::number(pSei->min_value))));
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("max_value = " + QString::number(pSei->max_value))));
+    }
+    else if(pSei -> tone_map_model_id == 1)
+    {
+      QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if( tone_map_model_id = = 1 )"));
+      pItem -> addChild(pitemSecond);
+
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("sigmoid_midpoint = " + QString::number(pSei->sigmoid_midpoint))));
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("sigmoid_width = " + QString::number(pSei->sigmoid_width))));
+    }
+    else if(pSei -> tone_map_model_id == 2)
+    {
+      QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if( tone_map_model_id = = 2 )"));
+      pItem -> addChild(pitemSecond);
+
+      QTreeWidgetItem *ploop = new QTreeWidgetItem(QStringList("for( i = 0; i < ( 1 << target_bit_depth ); i++ )"));
+      pitemSecond -> addChild(ploop);
+
+      for(std::size_t i = 0; i<(1 << pSei->target_bit_depth); i++)
+      {
+        ploop -> addChild(new QTreeWidgetItem(QStringList("start_of_coded_interval[" + QString::number(i) + "] = " + QString::number(pSei -> start_of_coded_interval[i]))));
+      }
+      
+    }
+    else if(pSei -> tone_map_model_id == 3)
+    {
+      QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if( tone_map_model_id = = 3 )"));
+      pItem -> addChild(pitemSecond);
+
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("num_pivots = " + QString::number(pSei->num_pivots))));
+
+      QTreeWidgetItem *ploop = new QTreeWidgetItem(QStringList("for( i = 0; i < num_pivots; i++ )"));
+      pitemSecond -> addChild(ploop);      
+
+      for(std::size_t i=0; i<pSei -> num_pivots; i++)
+      {
+        ploop -> addChild(new QTreeWidgetItem(QStringList("coded_pivot_value[" + QString::number(i) + "] = " + QString::number(pSei -> coded_pivot_value[i]))));
+        ploop -> addChild(new QTreeWidgetItem(QStringList("target_pivot_value[" + QString::number(i) + "] = " + QString::number(pSei -> target_pivot_value[i]))));
+      }
+    }
+    else if(pSei -> tone_map_model_id == 4)
+    {
+      QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if( tone_map_model_id = = 4 )"));
+      pItem -> addChild(pitemSecond);
+
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("camera_iso_speed_idc = " + QString::number(pSei->camera_iso_speed_idc))));
+      if(pSei -> camera_iso_speed_idc == 255)
+      {
+        QTreeWidgetItem *pitemThird = new QTreeWidgetItem(QStringList("if( camera_iso_speed_idc = = EXTENDED_ISO )"));
+        pitemSecond -> addChild(pitemThird);
+
+        pitemThird -> addChild(new QTreeWidgetItem(QStringList("camera_iso_speed_value = " + QString::number(pSei->camera_iso_speed_value))));
+      }      
+
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("exposure_index_idc = " + QString::number(pSei->exposure_index_idc))));
+      if(pSei -> exposure_index_idc == 255)
+      {
+        QTreeWidgetItem *pitemThird = new QTreeWidgetItem(QStringList("if( exposure_index_idc = = EXTENDED_ISO )"));
+        pitemSecond -> addChild(pitemThird);
+
+        pitemThird -> addChild(new QTreeWidgetItem(QStringList("exposure_index_value = " + QString::number(pSei->exposure_index_value))));
+      } 
+
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("exposure_compensation_value_sign_flag = " + QString::number(pSei->exposure_compensation_value_sign_flag))));
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("exposure_compensation_value_numerator = " + QString::number(pSei->exposure_compensation_value_numerator))));
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("exposure_compensation_value_denom_idc = " + QString::number(pSei->exposure_compensation_value_denom_idc))));
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("ref_screen_luminance_white = " + QString::number(pSei->ref_screen_luminance_white))));
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("extended_range_white_level = " + QString::number(pSei->extended_range_white_level))));
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("nominal_black_level_code_value = " + QString::number(pSei->nominal_black_level_code_value))));
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("nominal_white_level_code_value = " + QString::number(pSei->nominal_white_level_code_value))));
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("extended_white_level_code_value = " + QString::number(pSei->extended_white_level_code_value))));            
+    }
+  }
+}
+
+
+void SyntaxViewer::createSOPDescription(std::shared_ptr<HEVC::SOPDescription> pSei, QTreeWidgetItem *pItem)
+{
+  pItem -> addChild(new QTreeWidgetItem(QStringList("sop_seq_parameter_set_id = " + QString::number(pSei->sop_seq_parameter_set_id))));
+  pItem -> addChild(new QTreeWidgetItem(QStringList("num_entries_in_sop_minus1 = " + QString::number(pSei->num_entries_in_sop_minus1))));
+
+  QTreeWidgetItem *ploop = new QTreeWidgetItem(QStringList("for( i = 0; i <= num_entries_in_sop_minus1; i++ )"));
+  pItem -> addChild(ploop);      
+
+  for(std::size_t i=0; i<=pSei -> num_entries_in_sop_minus1; i++)
+  {
+    ploop -> addChild(new QTreeWidgetItem(QStringList("sop_vcl_nut[" + QString::number(i) + "] = " + QString::number(pSei -> sop_vcl_nut[i]))));
+    ploop -> addChild(new QTreeWidgetItem(QStringList("sop_temporal_id[" + QString::number(i) + "] = " + QString::number(pSei -> sop_temporal_id[i]))));
+
+    if(pSei -> sop_vcl_nut[i] != 19 && pSei -> sop_vcl_nut[i] != 20)
+    {
+      QTreeWidgetItem *pitemIf = new QTreeWidgetItem(QStringList("if( sop_vcl_nut[ i ] != IDR_W_RADL && sop_vcl_nut[ i ] != IDR_N_LP )"));
+      ploop -> addChild(pitemIf);
+
+      pitemIf -> addChild(new QTreeWidgetItem(QStringList("sop_short_term_rps_idx[" + QString::number(i) + "] = " + QString::number(pSei -> sop_short_term_rps_idx[i]))));
+    }    
+
+    if(i > 0)
+    {
+      QTreeWidgetItem *pitemIf = new QTreeWidgetItem(QStringList("if( i > 0 )"));
+      ploop -> addChild(pitemIf);
+
+      pitemIf -> addChild(new QTreeWidgetItem(QStringList("sop_poc_delta[" + QString::number(i) + "] = " + QString::number(pSei -> sop_poc_delta[i]))));
+    }
+  }
+}
+
+
+void SyntaxViewer::createTemporalLevel0Index(std::shared_ptr<HEVC::TemporalLevel0Index> pSeiPayload, QTreeWidgetItem *pItem)
+{
+  pItem -> addChild(new QTreeWidgetItem(QStringList("temporal_sub_layer_zero_idx = " + QString::number(pSeiPayload->temporal_sub_layer_zero_idx))));
+  pItem -> addChild(new QTreeWidgetItem(QStringList("irap_pic_id = " + QString::number(pSeiPayload->irap_pic_id))));
 }
 
 

@@ -46,6 +46,11 @@ namespace HEVC
       void processPicTiming(std::shared_ptr<PicTiming> pSeiPayload, BitstreamReader &bs);
       void processRecoveryPoint(std::shared_ptr<RecoveryPoint> pSeiPayload, BitstreamReader &bs);
       void processActiveParameterSets(std::shared_ptr<ActiveParameterSets> pSeiPayload, BitstreamReader &bs);
+      void processTemporalLevel0Index(std::shared_ptr<TemporalLevel0Index> pSeiPayload, BitstreamReader &bs);
+      void processToneMapping(std::shared_ptr<ToneMapping> pSeiPayload, BitstreamReader &bs);
+      void processFramePacking(std::shared_ptr<FramePacking> pSeiPayload, BitstreamReader &bs);
+      void processDisplayOrientation(std::shared_ptr<DisplayOrientation> pSeiPayload, BitstreamReader &bs);
+      void processSOPDescription(std::shared_ptr<SOPDescription> pSeiPayload, BitstreamReader &bs);
       void processMasteringDisplayInfo(std::shared_ptr<MasteringDisplayInfo> pcolourVolume, BitstreamReader &bs);
       void processContentLightLevelInfo(std::shared_ptr<ContentLightLevelInfo> pSeiPayload, BitstreamReader &bs);
 

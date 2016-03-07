@@ -55,7 +55,12 @@ private:
     void createBufferingPeriod(std::shared_ptr<HEVC::BufferingPeriod> pSei, QTreeWidgetItem *pItem);
     void createPicTiming(std::shared_ptr<HEVC::PicTiming> pSei, QTreeWidgetItem *pItem);
     void createRecoveryPoint(std::shared_ptr<HEVC::RecoveryPoint> pSei, QTreeWidgetItem *pItem);
+    void createToneMapping(std::shared_ptr<HEVC::ToneMapping> pSei, QTreeWidgetItem *pItem);
+    void createFramePacking(std::shared_ptr<HEVC::FramePacking> pSei, QTreeWidgetItem *pItem);
+    void createDisplayOrientation(std::shared_ptr<HEVC::DisplayOrientation> pSei, QTreeWidgetItem *pItem);
+    void createSOPDescription(std::shared_ptr<HEVC::SOPDescription> pSei, QTreeWidgetItem *pItem);
     void createActiveParameterSets(std::shared_ptr<HEVC::ActiveParameterSets> pSeiPayload, QTreeWidgetItem *pItem);
+    void createTemporalLevel0Index(std::shared_ptr<HEVC::TemporalLevel0Index> pSeiPayload, QTreeWidgetItem *pItem);
     void createMasteringDisplayInfo(std::shared_ptr<HEVC::MasteringDisplayInfo> pSei, QTreeWidgetItem *pItem);
     void createContentLightLevelInfo(std::shared_ptr<HEVC::ContentLightLevelInfo> pSeiPayload, QTreeWidgetItem *pItem);
 

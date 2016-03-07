@@ -345,6 +345,100 @@ namespace HEVC
   };
 
 
+  class TemporalLevel0Index: public SeiPayload
+  {
+  public:
+    uint8_t                 temporal_sub_layer_zero_idx;
+    uint8_t                 irap_pic_id;
+
+    void toDefault() {};
+  };
+
+  class ToneMapping: public SeiPayload
+  {
+  public:
+    uint32_t                tone_map_id;
+    uint8_t                 tone_map_cancel_flag;
+    uint8_t                 tone_map_persistence_flag;
+    uint8_t                 coded_data_bit_depth;
+    uint8_t                 target_bit_depth;
+    uint32_t                tone_map_model_id;
+    uint32_t                min_value;
+    uint32_t                max_value;
+    uint32_t                sigmoid_midpoint;
+    uint32_t                sigmoid_width;
+    std::vector<uint32_t>   start_of_coded_interval;
+    uint16_t                num_pivots;
+    std::vector<uint32_t>   coded_pivot_value;
+    std::vector<uint32_t>   target_pivot_value;
+    uint8_t                 camera_iso_speed_idc;
+    uint32_t                camera_iso_speed_value;
+    uint8_t                 exposure_index_idc;
+    uint32_t                exposure_index_value;
+    uint8_t                 exposure_compensation_value_sign_flag;
+    uint16_t                exposure_compensation_value_numerator;
+    uint16_t                exposure_compensation_value_denom_idc;
+    uint32_t                ref_screen_luminance_white;
+    uint32_t                extended_range_white_level;
+    uint16_t                nominal_black_level_code_value;
+    uint16_t                nominal_white_level_code_value;
+    uint16_t                extended_white_level_code_value;
+
+    void toDefault() {};
+  };
+
+
+  class FramePacking: public SeiPayload
+  {
+  public:
+    uint32_t                frame_packing_arrangement_id;
+    uint8_t                 frame_packing_arrangement_cancel_flag;
+    uint8_t                 frame_packing_arrangement_type;
+    uint8_t                 quincunx_sampling_flag;
+    uint8_t                 content_interpretation_type;
+    uint8_t                 spatial_flipping_flag;
+    uint8_t                 frame0_flipped_flag;
+    uint8_t                 field_views_flag;
+    uint8_t                 current_frame_is_frame0_flag;
+    uint8_t                 frame0_self_contained_flag;
+    uint8_t                 frame1_self_contained_flag;
+    uint8_t                 frame0_grid_position_x;
+    uint8_t                 frame0_grid_position_y;
+    uint8_t                 frame1_grid_position_x;
+    uint8_t                 frame1_grid_position_y;
+    uint8_t                 frame_packing_arrangement_reserved_byte;
+    uint8_t                 frame_packing_arrangement_persistence_flag;
+    uint8_t                 upsampled_aspect_ratio_flag;
+
+    void toDefault() {};
+  };
+
+
+  class DisplayOrientation: public SeiPayload
+  {
+  public:
+    uint8_t                 display_orientation_cancel_flag;
+    uint8_t                 hor_flip;
+    uint8_t                 ver_flip;
+    uint16_t                anticlockwise_rotation;
+    uint8_t                 display_orientation_persistence_flag;
+
+    void toDefault() {};
+  };
+
+  class SOPDescription: public SeiPayload
+  {
+  public:
+    uint32_t                sop_seq_parameter_set_id;
+    uint32_t                num_entries_in_sop_minus1;
+    std::vector<uint8_t>    sop_vcl_nut;
+    std::vector<uint8_t>    sop_temporal_id;
+    std::vector<uint32_t>   sop_short_term_rps_idx;
+    std::vector<uint32_t>   sop_poc_delta;
+
+    void toDefault() {};
+  };
+
   class MasteringDisplayInfo: public SeiPayload
   {
   public:

@@ -775,11 +775,56 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
         break;
       }
 
+      case SeiMessage::TONE_MAPPING_INFO:
+      {
+        std::shared_ptr<ToneMapping> pseiPayload(new ToneMapping);
+        BitstreamReader tmpBs = bs;
+        processToneMapping(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
+
+      case SeiMessage::FRAME_PACKING:
+      {
+        std::shared_ptr<FramePacking> pseiPayload(new FramePacking);
+        BitstreamReader tmpBs = bs;
+        processFramePacking(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
+
+      case SeiMessage::DISPLAY_ORIENTATION:
+      {
+        std::shared_ptr<DisplayOrientation> pseiPayload(new DisplayOrientation);
+        BitstreamReader tmpBs = bs;
+        processDisplayOrientation(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
+
+      case SeiMessage::SOP_DESCRIPTION:
+      {
+        std::shared_ptr<SOPDescription> pseiPayload(new SOPDescription);
+        BitstreamReader tmpBs = bs;
+        processSOPDescription(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
+
       case SeiMessage::ACTIVE_PARAMETER_SETS:
       {
         std::shared_ptr<ActiveParameterSets> pseiPayload(new ActiveParameterSets);
         BitstreamReader tmpBs = bs;
         processActiveParameterSets(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
+
+      case SeiMessage::TEMPORAL_LEVEL0_INDEX:
+      {
+        std::shared_ptr<TemporalLevel0Index> pseiPayload(new TemporalLevel0Index);
+        BitstreamReader tmpBs = bs;
+        processTemporalLevel0Index(pseiPayload, tmpBs);
         msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
         break;
       }
@@ -1708,4 +1753,150 @@ void HevcParserImpl::processContentLightLevelInfo(std::shared_ptr<ContentLightLe
 {
   pSeiPayload -> max_content_light_level = bs.getBits(16);
   pSeiPayload -> max_pic_average_light_level = bs.getBits(16);
+}
+
+void HevcParserImpl::processFramePacking(std::shared_ptr<FramePacking> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> frame_packing_arrangement_id = bs.getGolombU();
+  pSeiPayload -> frame_packing_arrangement_cancel_flag = bs.getBits(1);
+
+  if(!pSeiPayload -> frame_packing_arrangement_cancel_flag)
+  {
+    pSeiPayload -> frame_packing_arrangement_type = bs.getBits(7);
+    pSeiPayload -> quincunx_sampling_flag = bs.getBits(1);
+    pSeiPayload -> content_interpretation_type = bs.getBits(6);
+    pSeiPayload -> spatial_flipping_flag = bs.getBits(1);
+    pSeiPayload -> frame0_flipped_flag = bs.getBits(1);
+    pSeiPayload -> field_views_flag = bs.getBits(1);
+    pSeiPayload -> current_frame_is_frame0_flag = bs.getBits(1);
+    pSeiPayload -> frame0_self_contained_flag = bs.getBits(1);
+    pSeiPayload -> frame1_self_contained_flag = bs.getBits(1);
+
+    if(!pSeiPayload -> quincunx_sampling_flag && pSeiPayload -> frame_packing_arrangement_type != 5)
+    {
+      pSeiPayload -> frame0_grid_position_x = bs.getBits(4);
+      pSeiPayload -> frame0_grid_position_y = bs.getBits(4);
+      pSeiPayload -> frame1_grid_position_x = bs.getBits(4);
+      pSeiPayload -> frame1_grid_position_y = bs.getBits(4);
+
+
+    }
+    pSeiPayload -> frame_packing_arrangement_reserved_byte = bs.getBits(8);
+    pSeiPayload -> frame_packing_arrangement_persistence_flag = bs.getBits(1);
+  }
+
+  pSeiPayload -> upsampled_aspect_ratio_flag = bs.getBits(1);
+}
+
+void HevcParserImpl::processDisplayOrientation(std::shared_ptr<DisplayOrientation> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> display_orientation_cancel_flag = bs.getBits(1);
+  if(!pSeiPayload -> display_orientation_cancel_flag)
+  {
+    pSeiPayload -> hor_flip = bs.getBits(1);
+    pSeiPayload -> ver_flip = bs.getBits(1);
+    pSeiPayload -> anticlockwise_rotation = bs.getBits(16);
+    pSeiPayload -> display_orientation_persistence_flag = bs.getBits(1);
+  }
+}
+
+
+void HevcParserImpl::processToneMapping(std::shared_ptr<ToneMapping> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> tone_map_id = bs.getGolombU();
+  pSeiPayload -> tone_map_cancel_flag = bs.getBits(1);
+
+  if(!pSeiPayload -> tone_map_cancel_flag)
+  {
+    pSeiPayload -> tone_map_persistence_flag = bs.getBits(1);
+    pSeiPayload -> coded_data_bit_depth = bs.getBits(8);
+    pSeiPayload -> target_bit_depth = bs.getBits(8);
+    pSeiPayload -> tone_map_model_id = bs.getGolombU();
+
+    if(pSeiPayload -> tone_map_model_id == 0)
+    {
+      pSeiPayload -> min_value = bs.getBits(32);
+      pSeiPayload -> max_value = bs.getBits(32);
+    }
+    else if(pSeiPayload -> tone_map_model_id == 1)
+    {
+      pSeiPayload -> sigmoid_midpoint = bs.getBits(32);
+      pSeiPayload -> sigmoid_width = bs.getBits(32);
+    }
+    else if(pSeiPayload -> tone_map_model_id == 2)
+    {
+      std::size_t start_of_coded_interval_length = ((pSeiPayload->coded_data_bit_depth + 7)>>3)<<3;
+
+      pSeiPayload -> start_of_coded_interval.resize(1 << pSeiPayload->target_bit_depth);
+      for(std::size_t i = 0; i<(1 << pSeiPayload->target_bit_depth); i++)
+      {
+        pSeiPayload -> start_of_coded_interval[i] = bs.getBits(start_of_coded_interval_length);
+      }
+    }
+    else if(pSeiPayload -> tone_map_model_id == 3)
+    {
+      pSeiPayload -> num_pivots = bs.getBits(16);
+
+      pSeiPayload -> coded_pivot_value.resize(pSeiPayload -> num_pivots);
+      pSeiPayload -> target_pivot_value.resize(pSeiPayload -> num_pivots);
+
+      std::size_t length = ((pSeiPayload->coded_data_bit_depth + 7)>>3)<<3;
+
+      for(std::size_t i=0; i<pSeiPayload -> num_pivots; i++)
+      {
+        pSeiPayload -> coded_pivot_value[i] = bs.getBits(length);
+        pSeiPayload -> target_pivot_value[i] = bs.getBits(length);
+      }
+
+    }
+    else if(pSeiPayload -> tone_map_model_id == 4)
+    {
+      pSeiPayload -> camera_iso_speed_idc = bs.getBits(8);
+      if(pSeiPayload -> camera_iso_speed_idc == 255)
+        pSeiPayload -> camera_iso_speed_value = bs.getBits(32);
+
+      pSeiPayload -> exposure_index_idc = bs.getBits(8);
+      if(pSeiPayload -> exposure_index_idc == 255)
+        pSeiPayload -> exposure_index_value = bs.getBits(32);
+
+      pSeiPayload -> exposure_compensation_value_sign_flag = bs.getBits(1);
+      pSeiPayload -> exposure_compensation_value_numerator = bs.getBits(16);
+      pSeiPayload -> exposure_compensation_value_denom_idc = bs.getBits(16);
+      pSeiPayload -> ref_screen_luminance_white = bs.getBits(32);
+      pSeiPayload -> extended_range_white_level = bs.getBits(32);
+      pSeiPayload -> nominal_black_level_code_value = bs.getBits(16);
+      pSeiPayload -> nominal_white_level_code_value = bs.getBits(16);
+      pSeiPayload -> extended_white_level_code_value = bs.getBits(16);
+    }
+  }
+}
+
+void HevcParserImpl::processSOPDescription(std::shared_ptr<SOPDescription> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> sop_seq_parameter_set_id = bs.getGolombU();
+  pSeiPayload -> num_entries_in_sop_minus1 = bs.getGolombU();
+
+  pSeiPayload -> sop_vcl_nut.resize(pSeiPayload -> num_entries_in_sop_minus1 + 1);
+  pSeiPayload -> sop_temporal_id.resize(pSeiPayload -> num_entries_in_sop_minus1 + 1);
+  pSeiPayload -> sop_short_term_rps_idx.resize(pSeiPayload -> num_entries_in_sop_minus1 + 1);
+  pSeiPayload -> sop_poc_delta.resize(pSeiPayload -> num_entries_in_sop_minus1 + 1);
+
+  for(std::size_t i=0; i<=pSeiPayload -> num_entries_in_sop_minus1; i++)
+  {
+    pSeiPayload -> sop_vcl_nut[i] = bs.getBits(6);
+    pSeiPayload -> sop_temporal_id[i] = bs.getBits(3);
+
+    if(pSeiPayload -> sop_vcl_nut[i] != 19 && pSeiPayload -> sop_vcl_nut[i] != 20)
+        pSeiPayload -> sop_short_term_rps_idx[i] = bs.getGolombU();
+
+    if(i > 0)
+      pSeiPayload -> sop_poc_delta[i] = bs.getGolombS();
+  }
+}
+
+
+void HevcParserImpl::processTemporalLevel0Index(std::shared_ptr<TemporalLevel0Index> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> temporal_sub_layer_zero_idx = bs.getBits(8);
+  pSeiPayload -> irap_pic_id = bs.getBits(8);
 }

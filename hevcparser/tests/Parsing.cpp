@@ -2479,4 +2479,217 @@ BOOST_AUTO_TEST_CASE(x265_cll)
 }
 
 
+BOOST_AUTO_TEST_CASE(HM1)
+{
+  Parser *pparser = Parser::create();
+  
+  Consumer consumer;
+  
+  pparser -> addConsumer(&consumer);
+  
+  std::ifstream in(getSourceDir() + "/samples/HM1.bin", std::ios::binary);
+  
+  in.seekg(0, std::ios::end);
+  std::size_t size = in.tellg();
+  in.seekg(0, std::ios::beg);
+  
+  char *pdata = new char[size];
+  in.read(pdata, size);
+  size = in.gcount();
+  pparser -> process((const uint8_t *)pdata, size);
+    
+  pparser -> releaseConsumer(&consumer);
+  Parser::release(pparser);
+  
+
+  BOOST_CHECK_EQUAL(consumer.m_nalus[3].m_info.m_position, 0x4b);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[3].m_pnalu -> getType(), NAL_SEI_PREFIX);
+  
+  std::shared_ptr<SEI> psei = std::static_pointer_cast<SEI>(consumer.m_nalus[3].m_pnalu);
+  
+  BOOST_CHECK_EQUAL(psei -> sei_message.size(), 1);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_type_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_type_byte, 45);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_size_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_size_byte, 6);
+
+  std::shared_ptr<FramePacking> pfp = std::static_pointer_cast<FramePacking>(psei -> sei_message[0].sei_payload);
+
+  BOOST_CHECK_EQUAL(pfp -> frame_packing_arrangement_id, 0);
+  BOOST_CHECK_EQUAL(pfp -> frame_packing_arrangement_cancel_flag, 0);
+  BOOST_CHECK_EQUAL(pfp -> frame_packing_arrangement_type, 3);
+  BOOST_CHECK_EQUAL(pfp -> quincunx_sampling_flag, 0);
+  BOOST_CHECK_EQUAL(pfp -> content_interpretation_type, 0);
+  BOOST_CHECK_EQUAL(pfp -> spatial_flipping_flag, 0);
+  BOOST_CHECK_EQUAL(pfp -> frame0_flipped_flag, 0);
+  BOOST_CHECK_EQUAL(pfp -> field_views_flag, 0);
+  BOOST_CHECK_EQUAL(pfp -> current_frame_is_frame0_flag, 0);
+  BOOST_CHECK_EQUAL(pfp -> frame0_self_contained_flag, 0);
+  BOOST_CHECK_EQUAL(pfp -> frame1_self_contained_flag, 0);
+  BOOST_CHECK_EQUAL(pfp -> frame0_grid_position_x, 0);
+  BOOST_CHECK_EQUAL(pfp -> frame0_grid_position_y, 0);
+  BOOST_CHECK_EQUAL(pfp -> frame1_grid_position_x, 0);
+  BOOST_CHECK_EQUAL(pfp -> frame1_grid_position_y, 0);
+  BOOST_CHECK_EQUAL(pfp -> frame_packing_arrangement_reserved_byte, 0);
+  BOOST_CHECK_EQUAL(pfp -> frame_packing_arrangement_persistence_flag, 1);
+  BOOST_CHECK_EQUAL(pfp -> upsampled_aspect_ratio_flag, 0);
+
+
+  BOOST_CHECK_EQUAL(consumer.m_nalus[4].m_info.m_position, 0x5a);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[4].m_pnalu -> getType(), NAL_SEI_PREFIX);
+  
+  psei = std::static_pointer_cast<SEI>(consumer.m_nalus[4].m_pnalu);
+  
+  BOOST_CHECK_EQUAL(psei -> sei_message.size(), 1);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_type_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_type_byte, 47);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_size_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_size_byte, 3);
+
+  std::shared_ptr<DisplayOrientation> pdo = std::static_pointer_cast<DisplayOrientation>(psei -> sei_message[0].sei_payload);
+
+  BOOST_CHECK_EQUAL(pdo -> display_orientation_cancel_flag, 0);
+  BOOST_CHECK_EQUAL(pdo -> hor_flip, 0);
+  BOOST_CHECK_EQUAL(pdo -> ver_flip, 0);
+  BOOST_CHECK_EQUAL(pdo -> anticlockwise_rotation, 1);
+  BOOST_CHECK_EQUAL(pdo -> display_orientation_persistence_flag, 0);
+
+
+  BOOST_CHECK_EQUAL(consumer.m_nalus[5].m_info.m_position, 0x65);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[5].m_pnalu -> getType(), NAL_SEI_PREFIX);
+
+  psei = std::static_pointer_cast<SEI>(consumer.m_nalus[5].m_pnalu);
+  
+  BOOST_CHECK_EQUAL(psei -> sei_message.size(), 1);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_type_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_type_byte, 23);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_size_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_size_byte, 11);
+
+  std::shared_ptr<ToneMapping> ptm = std::static_pointer_cast<ToneMapping>(psei -> sei_message[0].sei_payload);
+
+  BOOST_CHECK_EQUAL(ptm -> tone_map_id, 0);
+  BOOST_CHECK_EQUAL(ptm -> tone_map_cancel_flag, 0);
+  BOOST_CHECK_EQUAL(ptm -> tone_map_persistence_flag, 1);
+  BOOST_CHECK_EQUAL(ptm -> coded_data_bit_depth, 8);
+  BOOST_CHECK_EQUAL(ptm -> target_bit_depth, 8);
+  BOOST_CHECK_EQUAL(ptm -> tone_map_model_id, 0);
+  BOOST_CHECK_EQUAL(ptm -> min_value, 0);
+  BOOST_CHECK_EQUAL(ptm -> max_value, 1023);
+
+
+  BOOST_CHECK_EQUAL(consumer.m_nalus[6].m_info.m_position, 0x7a);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[6].m_pnalu -> getType(), NAL_SEI_PREFIX);
+
+  psei = std::static_pointer_cast<SEI>(consumer.m_nalus[6].m_pnalu);
+  
+  BOOST_CHECK_EQUAL(psei -> sei_message.size(), 1);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_type_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_type_byte, 128);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_size_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_size_byte, 2);
+
+  std::shared_ptr<SOPDescription> psop = std::static_pointer_cast<SOPDescription>(psei -> sei_message[0].sei_payload);
+
+  BOOST_CHECK_EQUAL(psop -> sop_seq_parameter_set_id, 0);
+  BOOST_CHECK_EQUAL(psop -> num_entries_in_sop_minus1, 0);
+  BOOST_CHECK_EQUAL(psop -> sop_vcl_nut.size(), 1);
+  BOOST_CHECK_EQUAL(psop -> sop_vcl_nut[0], 19);
+  BOOST_CHECK_EQUAL(psop -> sop_temporal_id.size(), 1);
+  BOOST_CHECK_EQUAL(psop -> sop_temporal_id[0], 0);
+
+
+  BOOST_CHECK_EQUAL(consumer.m_nalus[7].m_info.m_position, 0x84);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[7].m_pnalu -> getType(), NAL_SEI_PREFIX);
+
+  psei = std::static_pointer_cast<SEI>(consumer.m_nalus[7].m_pnalu);
+  
+  BOOST_CHECK_EQUAL(psei -> sei_message.size(), 1);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_type_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_type_byte, 131);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_size_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_size_byte, 2);
+
+  std::shared_ptr<TemporalLevel0Index> ptli = std::static_pointer_cast<TemporalLevel0Index>(psei -> sei_message[0].sei_payload);
+
+  BOOST_CHECK_EQUAL(ptli -> temporal_sub_layer_zero_idx, 0);
+  BOOST_CHECK_EQUAL(ptli -> irap_pic_id, 1);
+
+
+  BOOST_CHECK_EQUAL(consumer.m_nalus[9].m_info.m_position, 0x478d);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[9].m_pnalu -> getType(), NAL_SEI_PREFIX);
+
+  psei = std::static_pointer_cast<SEI>(consumer.m_nalus[9].m_pnalu);
+  
+  BOOST_CHECK_EQUAL(psei -> sei_message.size(), 1);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_type_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_type_byte, 128);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_size_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_size_byte, 2);
+
+  psop = std::static_pointer_cast<SOPDescription>(psei -> sei_message[0].sei_payload);
+
+  BOOST_CHECK_EQUAL(psop -> sop_seq_parameter_set_id, 0);
+  BOOST_CHECK_EQUAL(psop -> num_entries_in_sop_minus1, 0);
+  BOOST_CHECK_EQUAL(psop -> sop_vcl_nut.size(), 1);
+  BOOST_CHECK_EQUAL(psop -> sop_vcl_nut[0], 1);
+  BOOST_CHECK_EQUAL(psop -> sop_temporal_id.size(), 1);
+  BOOST_CHECK_EQUAL(psop -> sop_temporal_id[0], 0);
+  BOOST_CHECK_EQUAL(psop -> sop_short_term_rps_idx.size(), 1);
+  BOOST_CHECK_EQUAL(psop -> sop_short_term_rps_idx[0], 0);
+
+
+  BOOST_CHECK_EQUAL(consumer.m_nalus[10].m_info.m_position, 0x4798);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[10].m_pnalu -> getType(), NAL_SEI_PREFIX);
+
+  psei = std::static_pointer_cast<SEI>(consumer.m_nalus[10].m_pnalu);
+  
+  BOOST_CHECK_EQUAL(psei -> sei_message.size(), 1);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_type_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_type_byte, 131);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_size_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_size_byte, 2);
+
+  ptli = std::static_pointer_cast<TemporalLevel0Index>(psei -> sei_message[0].sei_payload);
+
+  BOOST_CHECK_EQUAL(ptli -> temporal_sub_layer_zero_idx, 1);
+  BOOST_CHECK_EQUAL(ptli -> irap_pic_id, 1);
+
+
+  BOOST_CHECK_EQUAL(consumer.m_nalus[13].m_info.m_position, 0x8d4f);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[13].m_pnalu -> getType(), NAL_SEI_PREFIX);
+
+  psei = std::static_pointer_cast<SEI>(consumer.m_nalus[13].m_pnalu);
+  
+  BOOST_CHECK_EQUAL(psei -> sei_message.size(), 1);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_type_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_type_byte, 131);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_size_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_size_byte, 2);
+
+  ptli = std::static_pointer_cast<TemporalLevel0Index>(psei -> sei_message[0].sei_payload);
+
+  BOOST_CHECK_EQUAL(ptli -> temporal_sub_layer_zero_idx, 2);
+  BOOST_CHECK_EQUAL(ptli -> irap_pic_id, 1);
+
+
+  BOOST_CHECK_EQUAL(consumer.m_nalus[16].m_info.m_position, 0xd745);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[16].m_pnalu -> getType(), NAL_SEI_PREFIX);
+
+  psei = std::static_pointer_cast<SEI>(consumer.m_nalus[16].m_pnalu);
+  
+  BOOST_CHECK_EQUAL(psei -> sei_message.size(), 1);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_type_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_type_byte, 131);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_size_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_size_byte, 2);
+
+  ptli = std::static_pointer_cast<TemporalLevel0Index>(psei -> sei_message[0].sei_payload);
+
+  BOOST_CHECK_EQUAL(ptli -> temporal_sub_layer_zero_idx, 3);
+  BOOST_CHECK_EQUAL(ptli -> irap_pic_id, 1);
+
+}
+
+
 BOOST_AUTO_TEST_SUITE_END();
