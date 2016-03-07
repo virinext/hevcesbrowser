@@ -220,10 +220,38 @@ namespace HEVC
     virtual ~SeiPayload() {};
   };
 
-
   class SeiMessage
   {
   public:
+    enum PayloadType
+    {
+        BUFFERING_PERIOD                     = 0,
+        PICTURE_TIMING                       = 1,
+        PAN_SCAN_RECT                        = 2,
+        FILLER_PAYLOAD                       = 3,
+        USER_DATA_REGISTERED_ITU_T_T35       = 4,
+        USER_DATA_UNREGISTERED               = 5,
+        RECOVERY_POINT                       = 6,
+        SCENE_INFO                           = 9,
+        FULL_FRAME_SNAPSHOT                  = 15,
+        PROGRESSIVE_REFINEMENT_SEGMENT_START = 16,
+        PROGRESSIVE_REFINEMENT_SEGMENT_END   = 17,
+        FILM_GRAIN_CHARACTERISTICS           = 19,
+        POST_FILTER_HINT                     = 22,
+        TONE_MAPPING_INFO                    = 23,
+        FRAME_PACKING                        = 45,
+        DISPLAY_ORIENTATION                  = 47,
+        SOP_DESCRIPTION                      = 128,
+        ACTIVE_PARAMETER_SETS                = 129,
+        DECODING_UNIT_INFO                   = 130,
+        TEMPORAL_LEVEL0_INDEX                = 131,
+        DECODED_PICTURE_HASH                 = 132,
+        SCALABLE_NESTING                     = 133,
+        REGION_REFRESH_INFO                  = 134,
+        MASTERING_DISPLAY_INFO               = 137,
+        CONTENT_LIGHT_LEVEL_INFO             = 144,
+    };
+
     uint32_t           num_payload_type_ff_bytes;
     uint32_t           num_payload_size_ff_bytes;
     uint8_t            last_payload_type_byte;
@@ -242,6 +270,80 @@ namespace HEVC
     std::vector<std::array<uint8_t, 16> >     picture_md5;
     std::vector<uint16_t>                     picture_crc;
     std::vector<uint32_t>                     picture_checksum;
+
+    void toDefault();
+  };
+
+  class UserDataUnregistered: public SeiPayload
+  {
+  public:
+    uint8_t                               uuid_iso_iec_11578[16];
+    std::vector<uint8_t>                  user_data_payload_byte;
+
+    void toDefault() {};
+  };
+
+  class BufferingPeriod: public SeiPayload
+  {
+  public:
+    uint32_t                           bp_seq_parameter_set_id;
+    uint8_t                            irap_cpb_params_present_flag;
+    uint32_t                           cpb_delay_offset;
+    uint32_t                           dpb_delay_offset;
+    uint8_t                            concatenation_flag;
+    uint32_t                           au_cpb_removal_delay_delta_minus1;
+    std::vector<uint32_t>              nal_initial_cpb_removal_delay;
+    std::vector<uint32_t>              nal_initial_cpb_removal_offset;
+    std::vector<uint32_t>              nal_initial_alt_cpb_removal_delay;
+    std::vector<uint32_t>              nal_initial_alt_cpb_removal_offset;
+    std::vector<uint32_t>              vcl_initial_cpb_removal_delay;
+    std::vector<uint32_t>              vcl_initial_cpb_removal_offset;
+    std::vector<uint32_t>              vcl_initial_alt_cpb_removal_delay;
+    std::vector<uint32_t>              vcl_initial_alt_cpb_removal_offset;
+
+    void toDefault();
+  };
+
+  class PicTiming: public SeiPayload
+  {
+  public:
+    uint8_t                            pic_struct;
+    uint8_t                            source_scan_type;
+    uint8_t                            duplicate_flag;
+    uint32_t                           au_cpb_removal_delay_minus1;
+    uint32_t                           pic_dpb_output_delay;
+    uint32_t                           pic_dpb_output_du_delay;
+    uint32_t                           num_decoding_units_minus1;
+    uint8_t                            du_common_cpb_removal_delay_flag;
+    uint32_t                           du_common_cpb_removal_delay_increment_minus1;
+    std::vector<uint32_t>              num_nalus_in_du_minus1;
+    std::vector<uint32_t>              du_cpb_removal_delay_increment_minus1;
+
+    void toDefault();
+  };  
+
+  class ActiveParameterSets: public SeiPayload
+  {
+  public:
+    uint8_t                 active_video_parameter_set_id;
+    uint8_t                 self_contained_cvs_flag;
+    uint8_t                 no_parameter_set_update_flag;
+    uint32_t                num_sps_ids_minus1;
+    std::vector<uint32_t>   active_seq_parameter_set_id;
+
+    void toDefault() {};
+  };
+
+
+  class MasteringDisplayInfo: public SeiPayload
+  {
+  public:
+    uint16_t      display_primary_x[3];
+    uint16_t      display_primary_y[3];
+    uint16_t      white_point_x;
+    uint16_t      white_point_y;
+    uint32_t      max_display_mastering_luminance;
+    uint32_t      min_display_mastering_luminance;
 
     void toDefault();
   };

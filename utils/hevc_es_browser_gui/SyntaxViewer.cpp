@@ -738,8 +738,8 @@ void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
           pitemSecond -> addChild(new QTreeWidgetItem(QStringList("collocated_from_l0_flag = " + QString::number(pSlice -> collocated_from_l0_flag))));
         }
 
-        if(pSlice -> collocated_from_l0_flag && pSlice -> num_ref_idx_l0_active_minus1 ||
-            !pSlice -> collocated_from_l0_flag && pSlice -> num_ref_idx_l1_active_minus1)
+        if((pSlice -> collocated_from_l0_flag && pSlice -> num_ref_idx_l0_active_minus1) ||
+            (!pSlice -> collocated_from_l0_flag && pSlice -> num_ref_idx_l1_active_minus1))
         {
           QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if ((collocated_from_l0_flag && num_ref_idx_l0_active_minus1 > 0 ) || (!collocated_from_l0_flag && num_ref_idx_l1_active_minus1 > 0))"));
           pitemThird -> addChild(pitemSecond);
@@ -748,8 +748,8 @@ void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
         }
       }
 
-      if(pPPS -> weighted_pred_flag && pSlice -> slice_type == SLICE_P ||
-        pPPS -> weighted_bipred_flag && pSlice -> slice_type == SLICE_B)
+      if((pPPS -> weighted_pred_flag && pSlice -> slice_type == SLICE_P) ||
+        (pPPS -> weighted_bipred_flag && pSlice -> slice_type == SLICE_B))
       {
         pitemThird = new QTreeWidgetItem(QStringList("if ((weighted_pred_flag && slice_type == P) || (weighted_bipred_flag && slice_type == B))"));
         pitemDepend -> addChild(pitemThird);
@@ -890,7 +890,7 @@ void SyntaxViewer::createSEI(std::shared_ptr<HEVC::SEI> pSEI)
     {
       QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("while( next_bits( 8 ) == 0xFF )"));
       pitem -> addChild(pitemSecond);
-      for(std::size_t i=0; i<pSEI -> sei_message[i].num_payload_size_ff_bytes; i++)
+      for(std::size_t j=0; j<pSEI -> sei_message[i].num_payload_size_ff_bytes; j++)
       {
         pitemSecond -> addChild(new QTreeWidgetItem(QStringList("0xFF")));
         payloadSize += 255;
@@ -900,17 +900,69 @@ void SyntaxViewer::createSEI(std::shared_ptr<HEVC::SEI> pSEI)
     pitem -> addChild(new QTreeWidgetItem(QStringList("last_payload_size_byte = " + QString::number(pSEI -> sei_message[i].last_payload_size_byte))));
 
     payloadSize += pSEI -> sei_message[i].last_payload_size_byte;
-
-    if(payloadType == 132)
+    switch(payloadType)
     {
-      std::shared_ptr<HEVC::DecodedPictureHash> pdecPictHash = std::dynamic_pointer_cast<HEVC::DecodedPictureHash>(pSEI -> sei_message[i].sei_payload);
+      case HEVC::SeiMessage::DECODED_PICTURE_HASH:
+      {
+        std::shared_ptr<HEVC::DecodedPictureHash> pdecPictHash = std::dynamic_pointer_cast<HEVC::DecodedPictureHash>(pSEI -> sei_message[i].sei_payload);
 
-      QTreeWidgetItem *pitemDecPictHash = new QTreeWidgetItem(QStringList("decoded_picture_hash(" + QString::number(payloadSize) + ")"));
-      pitem -> addChild(pitemDecPictHash);
-      createDecodedPictureHash(pdecPictHash, pitemDecPictHash);
+        QTreeWidgetItem *pitemDecPictHash = new QTreeWidgetItem(QStringList("decoded_picture_hash(" + QString::number(payloadSize) + ")"));
+        pitem -> addChild(pitemDecPictHash);
+        createDecodedPictureHash(pdecPictHash, pitemDecPictHash);
+        break;
+      }
+
+      case HEVC::SeiMessage::USER_DATA_UNREGISTERED:
+      {
+        std::shared_ptr<HEVC::UserDataUnregistered> pSeiMessage = std::dynamic_pointer_cast<HEVC::UserDataUnregistered>(pSEI -> sei_message[i].sei_payload);
+
+        QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("user_data_unregistered(" + QString::number(payloadSize) + ")"));
+        pitem -> addChild(pitemSei);
+        createUserDataUnregistered(pSeiMessage, pitemSei);
+        break;
+      }
+
+      case HEVC::SeiMessage::BUFFERING_PERIOD:
+      {
+        std::shared_ptr<HEVC::BufferingPeriod> pSeiMessage = std::dynamic_pointer_cast<HEVC::BufferingPeriod>(pSEI -> sei_message[i].sei_payload);
+        QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("buffering_period(" + QString::number(payloadSize) + ")"));
+        pitem -> addChild(pitemSei);
+        createBufferingPeriod(pSeiMessage, pitemSei);
+        break;
+      }      
+
+      case HEVC::SeiMessage::PICTURE_TIMING:
+      {
+        std::shared_ptr<HEVC::PicTiming> pSeiMessage = std::dynamic_pointer_cast<HEVC::PicTiming>(pSEI -> sei_message[i].sei_payload);
+        QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("pic_timitng(" + QString::number(payloadSize) + ")"));
+        pitem -> addChild(pitemSei);
+        createPicTiming(pSeiMessage, pitemSei);
+        break;
+      }         
+
+      case HEVC::SeiMessage::ACTIVE_PARAMETER_SETS:
+      {
+        std::shared_ptr<HEVC::ActiveParameterSets> pSeiMessage = std::dynamic_pointer_cast<HEVC::ActiveParameterSets>(pSEI -> sei_message[i].sei_payload);
+
+        QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("active_parameter_sets(" + QString::number(payloadSize) + ")"));
+        pitem -> addChild(pitemSei);
+        createActiveParameterSets(pSeiMessage, pitemSei);
+        break;
+      }
+
+      case HEVC::SeiMessage::MASTERING_DISPLAY_INFO:
+      {
+        std::shared_ptr<HEVC::MasteringDisplayInfo> pSeiMessage = std::dynamic_pointer_cast<HEVC::MasteringDisplayInfo>(pSEI -> sei_message[i].sei_payload);
+
+        QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("mastering_display_info(" + QString::number(payloadSize) + ")"));
+        pitem -> addChild(pitemSei);
+        createMasteringDisplayInfo(pSeiMessage, pitemSei);
+        break;
+      }
+
+      default:
+        pitem -> addChild(new QTreeWidgetItem(QStringList("sei_payload(" + QString::number(payloadType) + ", " + QString::number(payloadSize) + ")")));
     }
-    else
-      pitem -> addChild(new QTreeWidgetItem(QStringList("sei_payload(" + QString::number(payloadType) + ", " + QString::number(payloadSize) + ")")));
   }
 }
 
@@ -1121,17 +1173,19 @@ void SyntaxViewer::createVuiParameters(const HEVC::VuiParameters &vui, std::size
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList("vui_num_ticks_poc_diff_one_minus1 = " + QString::number(vui.vui_num_ticks_poc_diff_one_minus1))));
 
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList("vui_hrd_parameters_present_flag = " + QString::number(vui.vui_hrd_parameters_present_flag))));
+    }
 
-      if(vui.vui_hrd_parameters_present_flag)
-      {
-        QTreeWidgetItem *pitemThird = new QTreeWidgetItem(QStringList("if( vui_hrd_parameters_present_flag )"));
-        pitemSecond -> addChild(pitemThird);
+    pitem -> addChild(new QTreeWidgetItem(QStringList("vui_hrd_parameters_present_flag = " + QString::number(vui.vui_hrd_parameters_present_flag))));
 
-        QTreeWidgetItem *pitemHrd = new QTreeWidgetItem(QStringList("hrd_parameters(1, " + QString::number(maxNumSubLayersMinus1) + ")"));
-        pitemThird -> addChild(pitemHrd);
+    if(vui.vui_hrd_parameters_present_flag)
+    {
+      QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("if( vui_hrd_parameters_present_flag )"));
+      pitem -> addChild(pitemSecond);
 
-        createHrdParameters(vui.hrd_parameters, 1, pitemHrd);
-      }
+      QTreeWidgetItem *pitemHrd = new QTreeWidgetItem(QStringList("hrd_parameters(1, " + QString::number(maxNumSubLayersMinus1) + ")"));
+      pitemSecond -> addChild(pitemHrd);
+
+      createHrdParameters(vui.hrd_parameters, 1, pitemHrd);
     }
   }
 
@@ -1586,6 +1640,249 @@ void SyntaxViewer::createDecodedPictureHash(std::shared_ptr<HEVC::DecodedPicture
     for(std::size_t i=0; i<pDecPictHash->picture_crc.size(); i++)
     {
       pif -> addChild(new QTreeWidgetItem(QStringList("picture_checksum[" + QString::number(i) + "] = " + QString::number(pDecPictHash -> picture_checksum[i]))));
+    }
+  }
+}
+
+
+void SyntaxViewer::createMasteringDisplayInfo(std::shared_ptr<HEVC::MasteringDisplayInfo> pSei, QTreeWidgetItem *pItem)
+{
+  QTreeWidgetItem *pitemLoop = new QTreeWidgetItem(QStringList("for( i = 0; i < 3 ; i++ )"));
+  pItem -> addChild(pitemLoop);
+
+
+  for (uint32_t i = 0; i < 3; i++)
+  {
+    pitemLoop -> addChild(new QTreeWidgetItem(QStringList("display_primary_x[" + QString::number(i) + "] = " + QString::number(pSei -> display_primary_x[i]))));
+    pitemLoop -> addChild(new QTreeWidgetItem(QStringList("display_primary_y[" + QString::number(i) + "] = " + QString::number(pSei -> display_primary_y[i]))));
+  }
+
+  pItem -> addChild(new QTreeWidgetItem(QStringList("white_point_x = " + QString::number(pSei -> white_point_x))));
+  pItem -> addChild(new QTreeWidgetItem(QStringList("white_point_y = " + QString::number(pSei -> white_point_y))));
+
+  pItem -> addChild(new QTreeWidgetItem(QStringList("max_display_mastering_luminance = " + QString::number(pSei -> max_display_mastering_luminance))));
+  pItem -> addChild(new QTreeWidgetItem(QStringList("min_display_mastering_luminance = " + QString::number(pSei -> min_display_mastering_luminance))));
+}
+
+
+void SyntaxViewer::createActiveParameterSets(std::shared_ptr<HEVC::ActiveParameterSets> pSeiPayload, QTreeWidgetItem *pItem)
+{
+  pItem -> addChild(new QTreeWidgetItem(QStringList("active_video_parameter_set_id = " + QString::number(pSeiPayload -> active_video_parameter_set_id))));
+  pItem -> addChild(new QTreeWidgetItem(QStringList("self_contained_cvs_flag = " + QString::number(pSeiPayload -> self_contained_cvs_flag))));
+  pItem -> addChild(new QTreeWidgetItem(QStringList("no_parameter_set_update_flag = " + QString::number(pSeiPayload -> no_parameter_set_update_flag))));
+  pItem -> addChild(new QTreeWidgetItem(QStringList("num_sps_ids_minus1 = " + QString::number(pSeiPayload -> num_sps_ids_minus1))));
+
+  QString str = "active_seq_parameter_set_id = {\n\t";
+  for (uint32_t i = 0; i < pSeiPayload -> num_sps_ids_minus1; i++)
+  {
+    str += QString::number(pSeiPayload -> active_seq_parameter_set_id[i]) + ",  ";
+    if((i + 1) % 8)
+      str += "\n\t";
+  }
+
+  str += QString::number(pSeiPayload -> active_seq_parameter_set_id[pSeiPayload -> num_sps_ids_minus1]) + "\n}";
+  pItem -> addChild(new QTreeWidgetItem(QStringList(str)));
+}
+
+
+void SyntaxViewer::createUserDataUnregistered(std::shared_ptr<HEVC::UserDataUnregistered> pSei, QTreeWidgetItem *pItem)
+{
+  QString str = 
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[0], 2, 16, QChar('0')).toLower() + 
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[1], 2, 16, QChar('0')).toLower() + 
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[2], 2, 16, QChar('0')).toLower() +
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[3], 2, 16, QChar('0')).toLower() +
+    "-" +
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[4], 2, 16, QChar('0')).toLower() + 
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[5], 2, 16, QChar('0')).toLower() + 
+    "-" +
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[6], 2, 16, QChar('0')).toLower() + 
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[7], 2, 16, QChar('0')).toLower() + 
+    "-" +
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[8], 2, 16, QChar('0')).toLower() + 
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[9], 2, 16, QChar('0')).toLower() + 
+    "-" +
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[10], 2, 16, QChar('0')).toLower() + 
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[11], 2, 16, QChar('0')).toLower() + 
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[12], 2, 16, QChar('0')).toLower() + 
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[13], 2, 16, QChar('0')).toLower() + 
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[14], 2, 16, QChar('0')).toLower() + 
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[15], 2, 16, QChar('0')).toLower();
+
+  pItem -> addChild(new QTreeWidgetItem(QStringList("uuid_iso_iec_11578 = " + str)));
+
+
+  if(pSei -> user_data_payload_byte.empty())
+  {
+    str = "user_data_payload_byte = { }";
+  }
+  else
+  {
+    str = "user_data_payload_byte = {\n\t";
+    for (int i = 0; i < pSei -> user_data_payload_byte.size() - 1; i++)
+    {
+      str += QString("%1").arg(pSei -> user_data_payload_byte[i], 2, 16, QChar('0')).toLower();
+      if((i + 1) % 16 == 0)
+        str += "\n\t";
+    }
+    str += QString::number(pSei -> user_data_payload_byte[pSei -> user_data_payload_byte.size() - 1], 16) + "\n}";
+  }
+
+  pItem -> addChild(new QTreeWidgetItem(QStringList(str)));
+}
+
+
+void SyntaxViewer::createBufferingPeriod(std::shared_ptr<HEVC::BufferingPeriod> pSei, QTreeWidgetItem *pItem)
+{
+  pItem -> addChild(new QTreeWidgetItem(QStringList("bp_seq_parameter_set_id = " + QString::number(pSei->bp_seq_parameter_set_id))));
+
+  std::shared_ptr<HEVC::SPS> psps = m_spsMap[pSei -> bp_seq_parameter_set_id];
+  if(!psps)
+    return;
+
+  if(!psps->vui_parameters.hrd_parameters.sub_pic_hrd_params_present_flag)
+  {
+    QTreeWidgetItem *pitemIrap = new QTreeWidgetItem(QStringList("if( !sub_pic_hrd_params_present_flag )"));
+    pItem -> addChild(pitemIrap);
+    pitemIrap -> addChild(new QTreeWidgetItem(QStringList("irap_cpb_params_present_flag = " + QString::number(pSei->irap_cpb_params_present_flag))));
+  }
+
+  if(pSei -> irap_cpb_params_present_flag)
+  {
+    QTreeWidgetItem *pitemIrap = new QTreeWidgetItem(QStringList("if( irap_cpb_params_present_flag )"));
+    pItem -> addChild(pitemIrap);
+    pitemIrap -> addChild(new QTreeWidgetItem(QStringList("cpb_delay_offset = " + QString::number(pSei->cpb_delay_offset))));
+    pitemIrap -> addChild(new QTreeWidgetItem(QStringList("dpb_delay_offset = " + QString::number(pSei->dpb_delay_offset))));
+  }
+
+  pItem -> addChild(new QTreeWidgetItem(QStringList("concatenation_flag = " + QString::number(pSei->concatenation_flag))));
+  pItem -> addChild(new QTreeWidgetItem(QStringList("au_cpb_removal_delay_delta_minus1 = " + QString::number(pSei->au_cpb_removal_delay_delta_minus1))));
+
+  bool NalHrdBpPresentFlag = psps->vui_parameters.hrd_parameters.nal_hrd_parameters_present_flag;
+  if(NalHrdBpPresentFlag)
+  {
+    QTreeWidgetItem *pitemBpPresentFlag= new QTreeWidgetItem(QStringList("if( NalHrdBpPresentFlag )"));
+    pItem -> addChild(pitemBpPresentFlag);
+
+    QTreeWidgetItem *ploop = new QTreeWidgetItem(QStringList("for( i = 0; i <= CpbCnt; i++ )"));
+    pitemBpPresentFlag -> addChild(ploop);
+
+    for(std::size_t i=0; i<pSei->nal_initial_cpb_removal_delay.size(); i++)
+    {
+      ploop -> addChild(new QTreeWidgetItem(QStringList("nal_initial_cpb_removal_delay[" + QString::number(i) + "] = " + QString::number(pSei -> nal_initial_cpb_removal_delay[i]))));
+      ploop -> addChild(new QTreeWidgetItem(QStringList("nal_initial_cpb_removal_offset[" + QString::number(i) + "] = " + QString::number(pSei -> nal_initial_cpb_removal_offset[i]))));
+
+      if(psps->vui_parameters.hrd_parameters.sub_pic_hrd_params_present_flag || pSei->irap_cpb_params_present_flag)
+      {
+        QTreeWidgetItem *pitemAlt = new QTreeWidgetItem(QStringList("if( sub_pic_hrd_params_present_flag | | irap_cpb_params_present_flag )"));
+        ploop -> addChild(pitemAlt);
+
+        pitemAlt -> addChild(new QTreeWidgetItem(QStringList("nal_initial_alt_cpb_removal_delay[" + QString::number(i) + "] = " + QString::number(pSei -> nal_initial_alt_cpb_removal_delay[i]))));
+        pitemAlt -> addChild(new QTreeWidgetItem(QStringList("nal_initial_alt_cpb_removal_offset[" + QString::number(i) + "] = " + QString::number(pSei -> nal_initial_alt_cpb_removal_offset[i]))));
+      }
+
+    }
+  }
+
+  bool VclHrdBpPresentFlag = psps->vui_parameters.hrd_parameters.vcl_hrd_parameters_present_flag;
+  if(VclHrdBpPresentFlag)
+  {
+    QTreeWidgetItem *pitemBpPresentFlag= new QTreeWidgetItem(QStringList("if( VclHrdBpPresentFlag )"));
+    pItem -> addChild(pitemBpPresentFlag);
+
+    QTreeWidgetItem *ploop = new QTreeWidgetItem(QStringList("for( i = 0; i <= CpbCnt; i++ )"));
+    pitemBpPresentFlag -> addChild(ploop);
+
+    for(std::size_t i=0; i<pSei->vcl_initial_cpb_removal_delay.size(); i++)
+    {
+      ploop -> addChild(new QTreeWidgetItem(QStringList("vcl_initial_cpb_removal_delay[" + QString::number(i) + "] = " + QString::number(pSei -> vcl_initial_cpb_removal_delay[i]))));
+      ploop -> addChild(new QTreeWidgetItem(QStringList("vcl_initial_cpb_removal_offset[" + QString::number(i) + "] = " + QString::number(pSei -> vcl_initial_cpb_removal_offset[i]))));
+
+      if(psps->vui_parameters.hrd_parameters.sub_pic_hrd_params_present_flag || pSei->irap_cpb_params_present_flag)
+      {
+        QTreeWidgetItem *pitemAlt = new QTreeWidgetItem(QStringList("if( sub_pic_hrd_params_present_flag | | irap_cpb_params_present_flag )"));
+        ploop -> addChild(pitemAlt);
+
+        pitemAlt -> addChild(new QTreeWidgetItem(QStringList("vcl_initial_alt_cpb_removal_delay[" + QString::number(i) + "] = " + QString::number(pSei -> vcl_initial_alt_cpb_removal_delay[i]))));
+        pitemAlt -> addChild(new QTreeWidgetItem(QStringList("vcl_initial_alt_cpb_removal_offset[" + QString::number(i) + "] = " + QString::number(pSei -> vcl_initial_alt_cpb_removal_offset[i]))));
+      }
+    }
+  }
+}
+
+
+void SyntaxViewer::createPicTiming(std::shared_ptr<HEVC::PicTiming> pSei, QTreeWidgetItem *pItem)
+{
+  std::shared_ptr<HEVC::SPS> psps;
+
+  if(m_spsMap.size())
+    psps = m_spsMap.begin() -> second;
+
+  if(!psps)
+    return;
+
+
+  if(psps->vui_parameters.frame_field_info_present_flag)
+  {
+    QTreeWidgetItem *pitemField = new QTreeWidgetItem(QStringList("if( frame_field_info_present_flag )"));
+    pItem -> addChild(pitemField);
+
+    pitemField -> addChild(new QTreeWidgetItem(QStringList("pic_struct = " + QString::number(pSei->pic_struct))));
+    pitemField -> addChild(new QTreeWidgetItem(QStringList("source_scan_type = " + QString::number(pSei->source_scan_type))));
+    pitemField -> addChild(new QTreeWidgetItem(QStringList("duplicate_flag = " + QString::number(pSei->duplicate_flag))));
+  }
+
+  bool CpbDpbDelaysPresentFlag = psps->vui_parameters.hrd_parameters.nal_hrd_parameters_present_flag ||
+                                  psps->vui_parameters.hrd_parameters.vcl_hrd_parameters_present_flag;
+
+  if(CpbDpbDelaysPresentFlag)
+  {
+    QTreeWidgetItem *pitemDpbDelays = new QTreeWidgetItem(QStringList("if( CpbDpbDelaysPresentFlag )"));
+    pItem -> addChild(pitemDpbDelays);
+
+    pitemDpbDelays -> addChild(new QTreeWidgetItem(QStringList("au_cpb_removal_delay_minus1 = " + QString::number(pSei->au_cpb_removal_delay_minus1))));
+    pitemDpbDelays -> addChild(new QTreeWidgetItem(QStringList("pic_dpb_output_delay = " + QString::number(pSei->pic_dpb_output_delay))));
+
+    if(psps->vui_parameters.hrd_parameters.sub_pic_hrd_params_present_flag)
+    {
+      QTreeWidgetItem *pitemDuDelay = new QTreeWidgetItem(QStringList("if( CpbDpbDelaysPresentFlag )"));
+      pitemDpbDelays -> addChild(pitemDuDelay);
+
+      pitemDuDelay -> addChild(new QTreeWidgetItem(QStringList("pic_dpb_output_du_delay = " + QString::number(pSei->pic_dpb_output_du_delay))));
+    }
+
+    if(psps->vui_parameters.hrd_parameters.sub_pic_hrd_params_present_flag && 
+        psps->vui_parameters.hrd_parameters.sub_pic_cpb_params_in_pic_timing_sei_flag)
+    {
+      QTreeWidgetItem *pitemIf = new QTreeWidgetItem(QStringList("if( CpbDpbDelaysPresentFlag )"));
+      pitemDpbDelays -> addChild(pitemIf);
+
+      pitemIf -> addChild(new QTreeWidgetItem(QStringList("num_decoding_units_minus1 = " + QString::number(pSei->num_decoding_units_minus1))));
+      pitemIf -> addChild(new QTreeWidgetItem(QStringList("du_common_cpb_removal_delay_flag = " + QString::number(pSei->du_common_cpb_removal_delay_flag))));
+
+      if(pSei -> du_common_cpb_removal_delay_flag)
+      {
+        QTreeWidgetItem *pitemDuCommCpb = new QTreeWidgetItem(QStringList("if( CpbDpbDelaysPresentFlag )"));
+        pitemIf -> addChild(pitemDuCommCpb);
+
+        pitemDuCommCpb -> addChild(new QTreeWidgetItem(QStringList("du_common_cpb_removal_delay_increment_minus1 = " + QString::number(pSei->num_decoding_units_minus1))));
+      }
+
+      QTreeWidgetItem *ploop = new QTreeWidgetItem(QStringList("for( i = 0; i <= num_decoding_units_minus1; i++ )"));
+      pitemIf -> addChild(ploop);
+
+      for(std::size_t i=0; i<=pSei -> num_decoding_units_minus1; i++)
+      {
+        ploop -> addChild(new QTreeWidgetItem(QStringList("num_nalus_in_du_minus1[" + QString::number(i) + "] = " + QString::number(pSei -> num_nalus_in_du_minus1[i]))));
+
+        if(!pSei -> du_common_cpb_removal_delay_flag && i<pSei -> num_decoding_units_minus1)
+        {
+          QTreeWidgetItem *pitemDuCommCpb = new QTreeWidgetItem(QStringList("if( !du_common_cpb_removal_delay_flag && i < num_decoding_units_minus1 )"));
+          ploop -> addChild(pitemDuCommCpb);
+
+          pitemDuCommCpb -> addChild(new QTreeWidgetItem(QStringList("du_cpb_removal_delay_increment_minus1[" + QString::number(i) + "] = " + QString::number(pSei -> du_cpb_removal_delay_increment_minus1[i]))));
+        }
+      }
     }
   }
 }

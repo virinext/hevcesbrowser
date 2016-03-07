@@ -1175,3 +1175,48 @@ void PredWeightTable::toDefault()
   delta_chroma_weight_l1.clear();
   delta_chroma_offset_l1.clear();
 }
+
+
+void MasteringDisplayInfo::toDefault()
+{
+  memset(display_primary_x, 0, sizeof(display_primary_x));
+  memset(display_primary_y, 0, sizeof(display_primary_x));
+  white_point_x = 0;
+  white_point_y = 0;
+  max_display_mastering_luminance = 0;
+  min_display_mastering_luminance = 0;
+}
+
+
+void BufferingPeriod::toDefault()
+{
+  nal_initial_cpb_removal_delay.clear();
+  nal_initial_cpb_removal_offset.clear();
+  nal_initial_alt_cpb_removal_delay.clear();
+  nal_initial_alt_cpb_removal_offset.clear();
+  vcl_initial_cpb_removal_delay.clear();
+  vcl_initial_cpb_removal_offset.clear();
+  vcl_initial_alt_cpb_removal_delay.clear();
+  vcl_initial_alt_cpb_removal_offset.clear();
+
+  irap_cpb_params_present_flag = 0;
+  cpb_delay_offset = 0;
+  dpb_delay_offset = 0;
+
+}
+
+
+void PicTiming::toDefault()
+{
+  pic_struct = 0;
+  source_scan_type = 0;
+  duplicate_flag = 0;
+  au_cpb_removal_delay_minus1 = 0;
+  pic_dpb_output_delay = 0;
+  pic_dpb_output_du_delay = 0;
+  num_decoding_units_minus1 = 0;
+  du_common_cpb_removal_delay_flag = 0;
+  du_common_cpb_removal_delay_increment_minus1 = 0;
+  num_nalus_in_du_minus1.clear();
+  du_cpb_removal_delay_increment_minus1.clear();
+}

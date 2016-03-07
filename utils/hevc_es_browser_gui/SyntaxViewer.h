@@ -51,6 +51,11 @@ private:
     void createPredWeightTable(const HEVC::PredWeightTable &pwt, std::shared_ptr<HEVC::Slice> pSlice, QTreeWidgetItem *pItem);
 
     void createDecodedPictureHash(std::shared_ptr<HEVC::DecodedPictureHash> pDecPictHash, QTreeWidgetItem *pItem);
+    void createUserDataUnregistered(std::shared_ptr<HEVC::UserDataUnregistered> pSei, QTreeWidgetItem *pItem);
+    void createBufferingPeriod(std::shared_ptr<HEVC::BufferingPeriod> pSei, QTreeWidgetItem *pItem);
+    void createPicTiming(std::shared_ptr<HEVC::PicTiming> pSei, QTreeWidgetItem *pItem);
+    void createActiveParameterSets(std::shared_ptr<HEVC::ActiveParameterSets> pSeiPayload, QTreeWidgetItem *pItem);
+    void createMasteringDisplayInfo(std::shared_ptr<HEVC::MasteringDisplayInfo> pSei, QTreeWidgetItem *pItem);
 
     std::map<uint32_t, std::shared_ptr<HEVC::VPS> >          m_vpsMap;
     std::map<uint32_t, std::shared_ptr<HEVC::SPS> >          m_spsMap;

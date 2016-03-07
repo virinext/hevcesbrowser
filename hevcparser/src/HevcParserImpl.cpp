@@ -686,7 +686,7 @@ void HevcParserImpl::processAUD(std::shared_ptr<AUD> paud, BitstreamReader &bs, 
   paud -> pic_type = bs.getBits(3);
 }
 
-
+#include <iostream>
 void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, const Parser::Info &info)
 {
   psei -> toDefault();
@@ -728,7 +728,7 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
 
     switch(payloadType)
     {
-      case 132:
+      case SeiMessage::DECODED_PICTURE_HASH:
       {
         std::shared_ptr<DecodedPictureHash> pdecPicHash(new DecodedPictureHash);
         BitstreamReader tmpBs = bs;
@@ -737,14 +737,59 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
         break;
       }
 
+      case SeiMessage::BUFFERING_PERIOD:
+      {
+        std::shared_ptr<BufferingPeriod> pseiPayload(new BufferingPeriod);
+        pseiPayload->toDefault();
+        BitstreamReader tmpBs = bs;
+        processBufferingPeriod(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
 
+      case SeiMessage::PICTURE_TIMING:
+      {
+        std::shared_ptr<PicTiming> pseiPayload(new PicTiming);
+        pseiPayload->toDefault();
+        BitstreamReader tmpBs = bs;
+        processPicTiming(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
+
+      case SeiMessage::USER_DATA_UNREGISTERED:
+      {
+        std::shared_ptr<UserDataUnregistered> pseiPayload(new UserDataUnregistered);
+        BitstreamReader tmpBs = bs;
+        processUserDataUnregistered(pseiPayload, tmpBs, payloadSize);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
+
+      case SeiMessage::ACTIVE_PARAMETER_SETS:
+      {
+        std::shared_ptr<ActiveParameterSets> pseiPayload(new ActiveParameterSets);
+        BitstreamReader tmpBs = bs;
+        processActiveParameterSets(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
+
+      case SeiMessage::MASTERING_DISPLAY_INFO:
+      {
+        std::shared_ptr<MasteringDisplayInfo> psei(new MasteringDisplayInfo);
+        BitstreamReader tmpBs = bs;
+        processMasteringDisplayInfo(psei, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(psei);
+        break;
+      }
     }
 
     bs.skipBits(payloadSize * 8);
 
     psei -> sei_message.push_back(msg);
   }
-  while(bs.available() > 8 && bs.showBits(8) != 0x80);
+  while(bs.availableInNalU() > 8 && bs.showBits(8) != 0x80);
 
 }
 
@@ -1467,5 +1512,168 @@ void HevcParserImpl::processDecodedPictureHash(std::shared_ptr<DecodedPictureHas
       pdecPicHash -> picture_crc[i] = bs.getBits(16);
     else if(pdecPicHash -> hash_type == 2 )
       pdecPicHash -> picture_checksum[i] = bs.getBits(32);
+  }
+}
+
+void HevcParserImpl::processMasteringDisplayInfo(std::shared_ptr<MasteringDisplayInfo> pcolourVolume, BitstreamReader &bs)
+{
+  for (uint32_t i = 0; i < 3; i++)
+  {
+    pcolourVolume -> display_primary_x[i] = bs.getBits(16);
+    pcolourVolume -> display_primary_y[i] = bs.getBits(16);
+  }
+
+  pcolourVolume -> white_point_x = bs.getBits(16);
+  pcolourVolume -> white_point_y =  bs.getBits(16);
+
+  pcolourVolume -> max_display_mastering_luminance = bs.getBits(32);
+  pcolourVolume -> min_display_mastering_luminance = bs.getBits(32);
+}
+
+
+void HevcParserImpl::processActiveParameterSets(std::shared_ptr<ActiveParameterSets> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> active_video_parameter_set_id = bs.getBits(4);
+  pSeiPayload -> self_contained_cvs_flag = bs.getBits(1);
+  pSeiPayload -> no_parameter_set_update_flag = bs.getBits(1);
+  pSeiPayload -> num_sps_ids_minus1 = bs.getGolombU();
+
+  pSeiPayload -> active_seq_parameter_set_id.resize(pSeiPayload -> num_sps_ids_minus1 + 1);
+
+  for(uint32_t i = 0; i <= pSeiPayload -> num_sps_ids_minus1; i++)
+    pSeiPayload -> active_seq_parameter_set_id[i] = bs.getGolombU();
+}
+
+void HevcParserImpl::processUserDataUnregistered(std::shared_ptr<UserDataUnregistered> pSeiPayload, BitstreamReader &bs, std::size_t payloadSize)
+{
+  if(payloadSize < 16)
+    return;
+
+  for(std::size_t i=0; i<16; i++)
+    pSeiPayload -> uuid_iso_iec_11578[i] = bs.getBits(8);
+
+  pSeiPayload -> user_data_payload_byte.resize(payloadSize - 16);
+  for(std::size_t i=16; i<payloadSize; i++)
+    pSeiPayload -> user_data_payload_byte[i-16] = bs.getBits(8);
+}
+
+void HevcParserImpl::processBufferingPeriod(std::shared_ptr<BufferingPeriod> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> bp_seq_parameter_set_id = bs.getGolombU();
+
+  std::shared_ptr<SPS> psps = m_spsMap[pSeiPayload -> bp_seq_parameter_set_id];
+
+  if(!psps)
+    return;
+  if(!psps->vui_parameters.hrd_parameters.sub_pic_hrd_params_present_flag)
+    pSeiPayload -> irap_cpb_params_present_flag = bs.getBits(1);
+
+  if(pSeiPayload -> irap_cpb_params_present_flag)
+  {
+    pSeiPayload -> cpb_delay_offset = bs.getBits(psps->vui_parameters.hrd_parameters.au_cpb_removal_delay_length_minus1 + 1);
+    pSeiPayload -> dpb_delay_offset = bs.getBits(psps->vui_parameters.hrd_parameters.dpb_output_delay_length_minus1 + 1);
+  }
+
+  pSeiPayload -> concatenation_flag = bs.getBits(1);
+  pSeiPayload -> au_cpb_removal_delay_delta_minus1 = bs.getBits(psps->vui_parameters.hrd_parameters.au_cpb_removal_delay_length_minus1 + 1);
+
+  bool NalHrdBpPresentFlag = psps->vui_parameters.hrd_parameters.nal_hrd_parameters_present_flag;
+  if(NalHrdBpPresentFlag)
+  {
+    std::size_t CpbCnt = psps->vui_parameters.hrd_parameters.cpb_cnt_minus1[0];
+    pSeiPayload -> nal_initial_cpb_removal_delay.resize(CpbCnt + 1);
+    pSeiPayload -> nal_initial_cpb_removal_offset.resize(CpbCnt + 1);
+    pSeiPayload -> nal_initial_alt_cpb_removal_delay.resize(CpbCnt + 1);
+    pSeiPayload -> nal_initial_alt_cpb_removal_offset.resize(CpbCnt + 1);
+    for(std::size_t i=0; i<= CpbCnt; i++)
+    {
+      pSeiPayload -> nal_initial_cpb_removal_delay[i] = bs.getBits(psps->vui_parameters.hrd_parameters.initial_cpb_removal_delay_length_minus1 + 1);
+      pSeiPayload -> nal_initial_cpb_removal_offset[i] = bs.getBits(psps->vui_parameters.hrd_parameters.initial_cpb_removal_delay_length_minus1 + 1);
+
+      if(psps->vui_parameters.hrd_parameters.sub_pic_hrd_params_present_flag || pSeiPayload->irap_cpb_params_present_flag)
+      {
+        pSeiPayload -> nal_initial_alt_cpb_removal_delay[i] = bs.getBits(psps->vui_parameters.hrd_parameters.initial_cpb_removal_delay_length_minus1 + 1);
+        pSeiPayload -> nal_initial_alt_cpb_removal_offset[i] = bs.getBits(psps->vui_parameters.hrd_parameters.initial_cpb_removal_delay_length_minus1 + 1);
+      }
+    }
+  }
+
+  bool VclHrdBpPresentFlag = psps->vui_parameters.hrd_parameters.vcl_hrd_parameters_present_flag;
+  if(VclHrdBpPresentFlag)
+  {
+    std::size_t CpbCnt = psps->vui_parameters.hrd_parameters.cpb_cnt_minus1[0];
+
+    pSeiPayload -> vcl_initial_cpb_removal_delay.resize(CpbCnt + 1);
+    pSeiPayload -> vcl_initial_cpb_removal_offset.resize(CpbCnt + 1);
+    pSeiPayload -> vcl_initial_alt_cpb_removal_delay.resize(CpbCnt + 1);
+    pSeiPayload -> vcl_initial_alt_cpb_removal_offset.resize(CpbCnt + 1);
+
+    for(std::size_t i=0; i<= CpbCnt; i++)
+    {
+      pSeiPayload -> vcl_initial_cpb_removal_delay[i] = bs.getBits(psps->vui_parameters.hrd_parameters.initial_cpb_removal_delay_length_minus1 + 1);
+      pSeiPayload -> vcl_initial_cpb_removal_offset[i] = bs.getBits(psps->vui_parameters.hrd_parameters.initial_cpb_removal_delay_length_minus1 + 1);
+
+      if(psps->vui_parameters.hrd_parameters.sub_pic_hrd_params_present_flag || pSeiPayload->irap_cpb_params_present_flag)
+      {
+        pSeiPayload -> vcl_initial_alt_cpb_removal_delay[i] = bs.getBits(psps->vui_parameters.hrd_parameters.initial_cpb_removal_delay_length_minus1 + 1);
+        pSeiPayload -> vcl_initial_alt_cpb_removal_offset[i] = bs.getBits(psps->vui_parameters.hrd_parameters.initial_cpb_removal_delay_length_minus1 + 1);
+      }
+    }
+  }
+}
+
+
+void HevcParserImpl::processPicTiming(std::shared_ptr<PicTiming> pSeiPayload, BitstreamReader &bs)
+{
+  std::shared_ptr<SPS> psps;
+
+  if(m_spsMap.size())
+    psps = m_spsMap.begin() -> second;
+
+  if(!psps)
+    return;
+
+  if(psps->vui_parameters.frame_field_info_present_flag)
+  {
+    pSeiPayload -> pic_struct = bs.getBits(4);
+    pSeiPayload -> source_scan_type = bs.getBits(2);
+    pSeiPayload -> duplicate_flag = bs.getBits(1);
+  }
+
+  bool CpbDpbDelaysPresentFlag = psps->vui_parameters.hrd_parameters.nal_hrd_parameters_present_flag ||
+                                  psps->vui_parameters.hrd_parameters.vcl_hrd_parameters_present_flag;
+
+  if(CpbDpbDelaysPresentFlag)
+  {
+    pSeiPayload -> au_cpb_removal_delay_minus1 = bs.getBits(psps->vui_parameters.hrd_parameters.au_cpb_removal_delay_length_minus1 + 1);
+    pSeiPayload -> pic_dpb_output_delay = bs.getBits(psps->vui_parameters.hrd_parameters.dpb_output_delay_length_minus1 + 1);
+
+    if(psps->vui_parameters.hrd_parameters.sub_pic_hrd_params_present_flag)
+    {
+      pSeiPayload -> pic_dpb_output_du_delay = bs.getBits(psps->vui_parameters.hrd_parameters.dpb_output_delay_du_length_minus1 + 1);
+    }
+
+    if(psps->vui_parameters.hrd_parameters.sub_pic_hrd_params_present_flag && 
+        psps->vui_parameters.hrd_parameters.sub_pic_cpb_params_in_pic_timing_sei_flag)
+    {
+      pSeiPayload -> num_decoding_units_minus1 = bs.getGolombU();
+      pSeiPayload -> du_common_cpb_removal_delay_flag = bs.getBits(1);
+
+      if(pSeiPayload -> du_common_cpb_removal_delay_flag)
+        pSeiPayload -> du_common_cpb_removal_delay_increment_minus1 = bs.getBits(psps->vui_parameters.hrd_parameters.du_cpb_removal_delay_increment_length_minus1 + 1);
+
+      pSeiPayload -> num_nalus_in_du_minus1.resize(pSeiPayload -> num_decoding_units_minus1 + 1);
+      pSeiPayload -> du_cpb_removal_delay_increment_minus1.resize(pSeiPayload -> num_decoding_units_minus1 + 1);
+
+      for(std::size_t i=0; i<=pSeiPayload -> num_decoding_units_minus1; i++)
+      {
+        pSeiPayload -> num_nalus_in_du_minus1[i] = bs.getGolombU();
+
+        if(!pSeiPayload -> du_common_cpb_removal_delay_flag && i<pSeiPayload -> num_decoding_units_minus1)
+        {
+          pSeiPayload -> du_cpb_removal_delay_increment_minus1[i] = bs.getBits(psps->vui_parameters.hrd_parameters.du_cpb_removal_delay_increment_length_minus1 + 1);
+        }
+      }
+    }
   }
 }

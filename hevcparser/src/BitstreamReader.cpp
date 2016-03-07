@@ -1,4 +1,4 @@
-#include "BitstreamReader.h"
+  #include "BitstreamReader.h"
 
 #include <climits>
 #include <stdexcept>
@@ -86,7 +86,25 @@ uint32_t BitstreamReader::getBits(std::size_t num)
 
 void BitstreamReader::skipBits(std::size_t num)
 {
-  m_posBase += num / 8;
+  if(m_posBase >= 2)
+  {
+    if(m_ptr[m_posBase - 2] == 0 && m_ptr[m_posBase - 1] == 0 && m_ptr[m_posBase] == 3)
+      m_posBase++;
+  }
+
+  uint32_t scipBytes = num / 8;
+
+
+  while(scipBytes)
+  {
+    scipBytes--;
+    m_posBase++;
+    if(m_posBase >= 2)
+    {
+      if(m_ptr[m_posBase - 2] == 0 && m_ptr[m_posBase - 1] == 0 && m_ptr[m_posBase] == 3)
+        m_posBase++;
+    }
+  }
 
   if(m_posInBase > num % 8)
     m_posInBase -= num % 8;
