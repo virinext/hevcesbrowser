@@ -940,6 +940,15 @@ void SyntaxViewer::createSEI(std::shared_ptr<HEVC::SEI> pSEI)
         break;
       }         
 
+      case HEVC::SeiMessage::RECOVERY_POINT:
+      {
+        std::shared_ptr<HEVC::RecoveryPoint> pSeiMessage = std::dynamic_pointer_cast<HEVC::RecoveryPoint>(pSEI -> sei_message[i].sei_payload);
+        QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("recovery_point(" + QString::number(payloadSize) + ")"));
+        pitem -> addChild(pitemSei);
+        createRecoveryPoint(pSeiMessage, pitemSei);
+        break;
+      }
+
       case HEVC::SeiMessage::ACTIVE_PARAMETER_SETS:
       {
         std::shared_ptr<HEVC::ActiveParameterSets> pSeiMessage = std::dynamic_pointer_cast<HEVC::ActiveParameterSets>(pSEI -> sei_message[i].sei_payload);
@@ -1887,6 +1896,13 @@ void SyntaxViewer::createPicTiming(std::shared_ptr<HEVC::PicTiming> pSei, QTreeW
   }
 }
 
+
+void SyntaxViewer::createRecoveryPoint(std::shared_ptr<HEVC::RecoveryPoint> pSei, QTreeWidgetItem *pItem)
+{
+  pItem -> addChild(new QTreeWidgetItem(QStringList("recovery_poc_cnt = " + QString::number(pSei->recovery_poc_cnt))));
+  pItem -> addChild(new QTreeWidgetItem(QStringList("exact_match_flag = " + QString::number(pSei->exact_match_flag))));
+  pItem -> addChild(new QTreeWidgetItem(QStringList("broken_link_flag = " + QString::number(pSei->broken_link_flag))));
+}
 
 
 void SyntaxViewer::onItemCollapsed(QTreeWidgetItem * item)

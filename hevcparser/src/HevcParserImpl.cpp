@@ -766,6 +766,15 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
         break;
       }
 
+      case SeiMessage::RECOVERY_POINT:
+      {
+        std::shared_ptr<RecoveryPoint> pseiPayload(new RecoveryPoint);
+        BitstreamReader tmpBs = bs;
+        processRecoveryPoint(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
+
       case SeiMessage::ACTIVE_PARAMETER_SETS:
       {
         std::shared_ptr<ActiveParameterSets> pseiPayload(new ActiveParameterSets);
@@ -1676,4 +1685,12 @@ void HevcParserImpl::processPicTiming(std::shared_ptr<PicTiming> pSeiPayload, Bi
       }
     }
   }
+}
+
+
+void HevcParserImpl::processRecoveryPoint(std::shared_ptr<RecoveryPoint> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> recovery_poc_cnt = bs.getGolombS();
+  pSeiPayload -> exact_match_flag = bs.getBits(1);
+  pSeiPayload -> broken_link_flag = bs.getBits(1);
 }

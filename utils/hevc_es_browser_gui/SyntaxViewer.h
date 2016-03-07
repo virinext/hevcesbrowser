@@ -54,6 +54,7 @@ private:
     void createUserDataUnregistered(std::shared_ptr<HEVC::UserDataUnregistered> pSei, QTreeWidgetItem *pItem);
     void createBufferingPeriod(std::shared_ptr<HEVC::BufferingPeriod> pSei, QTreeWidgetItem *pItem);
     void createPicTiming(std::shared_ptr<HEVC::PicTiming> pSei, QTreeWidgetItem *pItem);
+    void createRecoveryPoint(std::shared_ptr<HEVC::RecoveryPoint> pSei, QTreeWidgetItem *pItem);
     void createActiveParameterSets(std::shared_ptr<HEVC::ActiveParameterSets> pSeiPayload, QTreeWidgetItem *pItem);
     void createMasteringDisplayInfo(std::shared_ptr<HEVC::MasteringDisplayInfo> pSei, QTreeWidgetItem *pItem);
 

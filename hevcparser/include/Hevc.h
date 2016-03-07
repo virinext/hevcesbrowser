@@ -322,6 +322,16 @@ namespace HEVC
     void toDefault();
   };  
 
+  class RecoveryPoint: public SeiPayload
+  {
+  public:
+    uint32_t                           recovery_poc_cnt;
+    uint8_t                            exact_match_flag;
+    uint8_t                            broken_link_flag;
+    void toDefault() {};
+  };  
+
+
   class ActiveParameterSets: public SeiPayload
   {
   public:

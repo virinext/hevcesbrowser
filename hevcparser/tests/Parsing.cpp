@@ -1692,6 +1692,19 @@ BOOST_AUTO_TEST_CASE(ffmpeg_default)
   BOOST_CHECK_EQUAL(consumer.m_nalus[4].m_info.m_position, 0x3c0);
   BOOST_CHECK_EQUAL(consumer.m_nalus[4].m_pnalu -> getType(), NAL_SEI_PREFIX);
 
+  std::shared_ptr<SEI> psei = std::static_pointer_cast<SEI>(consumer.m_nalus[4].m_pnalu);
+  
+  BOOST_CHECK_EQUAL(psei -> sei_message.size(), 1);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_type_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_type_byte, 6);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_size_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_size_byte, 1);
+
+  std::shared_ptr<RecoveryPoint> precPoint = std::static_pointer_cast<RecoveryPoint>(psei -> sei_message[0].sei_payload);
+  BOOST_CHECK_EQUAL(precPoint -> recovery_poc_cnt, 0);
+  BOOST_CHECK_EQUAL(precPoint -> exact_match_flag, 1);
+  BOOST_CHECK_EQUAL(precPoint -> broken_link_flag, 0);
+
   BOOST_CHECK_EQUAL(consumer.m_nalus[5].m_info.m_position, 0x3c9);
   BOOST_CHECK_EQUAL(consumer.m_nalus[5].m_pnalu -> getType(), NAL_IDR_W_RADL);
   std::shared_ptr<Slice> pslice = std::static_pointer_cast<Slice>(consumer.m_nalus[5].m_pnalu);
