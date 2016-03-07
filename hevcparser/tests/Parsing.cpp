@@ -2437,4 +2437,46 @@ BOOST_AUTO_TEST_CASE(TestCase1_LifeOfPie_ReEncoded1080pX265_HDR_part)
   BOOST_CHECK_EQUAL(ppt -> pic_dpb_output_delay, 2);
 }
 
+
+BOOST_AUTO_TEST_CASE(x265_cll)
+{
+  Parser *pparser = Parser::create();
+  
+  Consumer consumer;
+  
+  pparser -> addConsumer(&consumer);
+  
+  std::ifstream in(getSourceDir() + "/samples/x265_cll.hevc", std::ios::binary);
+  
+  in.seekg(0, std::ios::end);
+  std::size_t size = in.tellg();
+  in.seekg(0, std::ios::beg);
+  
+  char *pdata = new char[size];
+  in.read(pdata, size);
+  size = in.gcount();
+  pparser -> process((const uint8_t *)pdata, size);
+    
+  pparser -> releaseConsumer(&consumer);
+  Parser::release(pparser);
+  
+
+  BOOST_CHECK_EQUAL(consumer.m_nalus[3].m_info.m_position, 0x53);
+  BOOST_CHECK_EQUAL(consumer.m_nalus[3].m_pnalu -> getType(), NAL_SEI_PREFIX);
+  
+  std::shared_ptr<SEI> psei = std::static_pointer_cast<SEI>(consumer.m_nalus[3].m_pnalu);
+  
+  BOOST_CHECK_EQUAL(psei -> sei_message.size(), 1);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_type_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_type_byte, 144);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].num_payload_size_ff_bytes, 0);
+  BOOST_CHECK_EQUAL(psei -> sei_message[0].last_payload_size_byte, 4);
+
+  std::shared_ptr<ContentLightLevelInfo> pcll = std::static_pointer_cast<ContentLightLevelInfo>(psei -> sei_message[0].sei_payload);
+
+  BOOST_CHECK_EQUAL(pcll -> max_content_light_level, 16000);
+  BOOST_CHECK_EQUAL(pcll -> max_pic_average_light_level, 32000);
+}
+
+
 BOOST_AUTO_TEST_SUITE_END();

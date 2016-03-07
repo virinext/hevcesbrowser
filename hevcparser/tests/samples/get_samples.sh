@@ -12,3 +12,4 @@ wget https://www.dropbox.com/s/ghqcmvvv6n78hb4/f265_default.hevc?dl=0 -O f265_de
 wget https://www.dropbox.com/s/xqrj1igvvopdonv/homer_default.hevc?dl=0 -O homer_default.hevc -nc
 wget https://www.dropbox.com/s/o2ushkw4z4sxlln/BQSquare_416x240_60_qp37.bin?dl=0 -O BQSquare_416x240_60_qp37.bin -nc
 wget https://www.dropbox.com/s/uoluk07t65k804m/TestCase1_LifeOfPie_ReEncoded1080pX265_HDR_part.hevc?dl=0 -O TestCase1_LifeOfPie_ReEncoded1080pX265_HDR_part.hevc -nc
+wget https://www.dropbox.com/s/uoaaeu9cwi3wqw3/x265_cll.hevc?dl=0 -O x265_cll.hevc -nc

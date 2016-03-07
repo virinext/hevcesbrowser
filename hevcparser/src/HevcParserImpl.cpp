@@ -792,6 +792,15 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
         msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(psei);
         break;
       }
+
+      case SeiMessage::CONTENT_LIGHT_LEVEL_INFO:
+      {
+        std::shared_ptr<ContentLightLevelInfo> pseiPayload(new ContentLightLevelInfo);
+        BitstreamReader tmpBs = bs;
+        processContentLightLevelInfo(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
     }
 
     bs.skipBits(payloadSize * 8);
@@ -1693,4 +1702,10 @@ void HevcParserImpl::processRecoveryPoint(std::shared_ptr<RecoveryPoint> pSeiPay
   pSeiPayload -> recovery_poc_cnt = bs.getGolombS();
   pSeiPayload -> exact_match_flag = bs.getBits(1);
   pSeiPayload -> broken_link_flag = bs.getBits(1);
+}
+
+void HevcParserImpl::processContentLightLevelInfo(std::shared_ptr<ContentLightLevelInfo> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> max_content_light_level = bs.getBits(16);
+  pSeiPayload -> max_pic_average_light_level = bs.getBits(16);
 }

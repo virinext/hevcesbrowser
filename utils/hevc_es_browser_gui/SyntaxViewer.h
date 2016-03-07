@@ -57,6 +57,7 @@ private:
     void createRecoveryPoint(std::shared_ptr<HEVC::RecoveryPoint> pSei, QTreeWidgetItem *pItem);
     void createActiveParameterSets(std::shared_ptr<HEVC::ActiveParameterSets> pSeiPayload, QTreeWidgetItem *pItem);
     void createMasteringDisplayInfo(std::shared_ptr<HEVC::MasteringDisplayInfo> pSei, QTreeWidgetItem *pItem);
+    void createContentLightLevelInfo(std::shared_ptr<HEVC::ContentLightLevelInfo> pSeiPayload, QTreeWidgetItem *pItem);
 
     std::map<uint32_t, std::shared_ptr<HEVC::VPS> >          m_vpsMap;
     std::map<uint32_t, std::shared_ptr<HEVC::SPS> >          m_spsMap;

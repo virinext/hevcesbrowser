@@ -969,6 +969,16 @@ void SyntaxViewer::createSEI(std::shared_ptr<HEVC::SEI> pSEI)
         break;
       }
 
+      case HEVC::SeiMessage::CONTENT_LIGHT_LEVEL_INFO:
+      {
+        std::shared_ptr<HEVC::ContentLightLevelInfo> pSeiMessage = std::dynamic_pointer_cast<HEVC::ContentLightLevelInfo>(pSEI -> sei_message[i].sei_payload);
+
+        QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("content_light_level_info(" + QString::number(payloadSize) + ")"));
+        pitem -> addChild(pitemSei);
+        createContentLightLevelInfo(pSeiMessage, pitemSei);
+        break;
+      }
+
       default:
         pitem -> addChild(new QTreeWidgetItem(QStringList("sei_payload(" + QString::number(payloadType) + ", " + QString::number(payloadSize) + ")")));
     }
@@ -1902,6 +1912,13 @@ void SyntaxViewer::createRecoveryPoint(std::shared_ptr<HEVC::RecoveryPoint> pSei
   pItem -> addChild(new QTreeWidgetItem(QStringList("recovery_poc_cnt = " + QString::number(pSei->recovery_poc_cnt))));
   pItem -> addChild(new QTreeWidgetItem(QStringList("exact_match_flag = " + QString::number(pSei->exact_match_flag))));
   pItem -> addChild(new QTreeWidgetItem(QStringList("broken_link_flag = " + QString::number(pSei->broken_link_flag))));
+}
+
+
+void SyntaxViewer::createContentLightLevelInfo(std::shared_ptr<HEVC::ContentLightLevelInfo> pSeiPayload, QTreeWidgetItem *pItem)
+{
+  pItem -> addChild(new QTreeWidgetItem(QStringList("max_content_light_level = " + QString::number(pSeiPayload->max_content_light_level))));
+  pItem -> addChild(new QTreeWidgetItem(QStringList("max_pic_average_light_level = " + QString::number(pSeiPayload->max_pic_average_light_level))));
 }
 
 

@@ -359,6 +359,16 @@ namespace HEVC
   };
 
 
+  class ContentLightLevelInfo: public SeiPayload
+  {
+  public:
+    uint16_t      max_content_light_level;
+    uint16_t      max_pic_average_light_level;
+
+    void toDefault() {};
+  };  
+
+
   class PredWeightTable
   {
   public:
