@@ -61,7 +61,12 @@ private:
     void createSOPDescription(std::shared_ptr<HEVC::SOPDescription> pSei, QTreeWidgetItem *pItem);
     void createActiveParameterSets(std::shared_ptr<HEVC::ActiveParameterSets> pSeiPayload, QTreeWidgetItem *pItem);
     void createTemporalLevel0Index(std::shared_ptr<HEVC::TemporalLevel0Index> pSeiPayload, QTreeWidgetItem *pItem);
+    void createTimeCode(std::shared_ptr<HEVC::TimeCode> pSei, QTreeWidgetItem *pItem);
     void createMasteringDisplayInfo(std::shared_ptr<HEVC::MasteringDisplayInfo> pSei, QTreeWidgetItem *pItem);
+    void createSegmRectFramePacking(std::shared_ptr<HEVC::SegmRectFramePacking> pSei, QTreeWidgetItem *pItem);
+    void createKneeFunctionInfo(std::shared_ptr<HEVC::KneeFunctionInfo> pSei, QTreeWidgetItem *pItem);
+    void createChromaResamplingFilterHint(std::shared_ptr<HEVC::ChromaResamplingFilterHint> pSeiPayload, QTreeWidgetItem *pItem);
+    void createColourRemappingInfo(std::shared_ptr<HEVC::ColourRemappingInfo> pSeiPayload, QTreeWidgetItem *pItem);
     void createContentLightLevelInfo(std::shared_ptr<HEVC::ContentLightLevelInfo> pSeiPayload, QTreeWidgetItem *pItem);
 
     std::map<uint32_t, std::shared_ptr<HEVC::VPS> >          m_vpsMap;

@@ -248,7 +248,14 @@ namespace HEVC
         DECODED_PICTURE_HASH                 = 132,
         SCALABLE_NESTING                     = 133,
         REGION_REFRESH_INFO                  = 134,
+        NO_DISPLAY                           = 135,
+        TIME_CODE                            = 136,        
         MASTERING_DISPLAY_INFO               = 137,
+        SEGM_RECT_FRAME_PACKING              = 138,
+        TEMP_MOTION_CONSTRAINED_TILE_SETS    = 139,
+        CHROMA_RESAMPLING_FILTER_HINT        = 140,
+        KNEE_FUNCTION_INFO                   = 141,
+        COLOUR_REMAPPING_INFO                = 142,
         CONTENT_LIGHT_LEVEL_INFO             = 144,
     };
 
@@ -439,6 +446,29 @@ namespace HEVC
     void toDefault() {};
   };
 
+  class TimeCode: public SeiPayload
+  {
+  public:
+    uint8_t                       num_clock_ts;
+    std::vector<uint8_t>          clock_time_stamp_flag;
+    std::vector<uint8_t>          nuit_field_based_flag;
+    std::vector<uint8_t>          counting_type;
+    std::vector<uint8_t>          full_timestamp_flag;
+    std::vector<uint8_t>          discontinuity_flag;
+    std::vector<uint8_t>          cnt_dropped_flag;
+    std::vector<uint16_t>         n_frames;
+    std::vector<uint8_t>          seconds_value;
+    std::vector<uint8_t>          minutes_value;
+    std::vector<uint8_t>          hours_value;
+    std::vector<uint8_t>          seconds_flag;
+    std::vector<uint8_t>          minutes_flag;
+    std::vector<uint8_t>          hours_flag;
+    std::vector<uint8_t>          time_offset_length;
+    std::vector<uint32_t>         time_offset_value;
+
+    void toDefault() {};
+  };
+
   class MasteringDisplayInfo: public SeiPayload
   {
   public:
@@ -452,6 +482,78 @@ namespace HEVC
     void toDefault();
   };
 
+  class SegmRectFramePacking: public SeiPayload
+  {
+  public:
+    uint8_t      segmented_rect_frame_packing_arrangement_cancel_flag;
+    uint8_t      segmented_rect_content_interpretation_type;
+    uint8_t      segmented_rect_frame_packing_arrangement_persistence;
+
+    void toDefault();
+  };
+
+  class KneeFunctionInfo: public SeiPayload
+  {
+  public:
+    uint32_t                  knee_function_id;
+    uint8_t                   knee_function_cancel_flag;
+    uint8_t                   knee_function_persistence_flag;
+    uint32_t                  input_d_range;
+    uint32_t                  input_disp_luminance;
+    uint32_t                  output_d_range;
+    uint32_t                  output_disp_luminance;
+    uint32_t                  num_knee_points_minus1;
+    std::vector<uint16_t>     input_knee_point;
+    std::vector<uint16_t>     output_knee_point;
+
+    void toDefault();
+  };
+
+  class ChromaResamplingFilterHint: public SeiPayload
+  {
+  public:
+    uint8_t                   ver_chroma_filter_idc;
+    uint8_t                   hor_chroma_filter_idc;
+    uint8_t                   ver_filtering_field_processing_flag;
+    uint32_t                  target_format_idc;
+    uint32_t                  num_vertical_filters;
+    std::vector<uint32_t>     ver_tap_length_minus_1;
+    std::vector<
+     std::vector<int32_t> >   ver_filter_coeff;
+
+    uint32_t                  num_horizontal_filters;
+    std::vector<uint32_t>     hor_tap_length_minus_1;
+    std::vector<
+     std::vector<int32_t> >   hor_filter_coeff;
+
+    void toDefault();
+  };  
+
+  class ColourRemappingInfo: public SeiPayload
+  {
+  public:
+    uint32_t                     colour_remap_id;
+    uint8_t                      colour_remap_cancel_flag;
+    uint8_t                      colour_remap_persistence_flag;
+    uint8_t                      colour_remap_video_signal_info_present_flag;
+    uint8_t                      colour_remap_full_range_flag;
+    uint8_t                      colour_remap_primaries;
+    uint8_t                      colour_remap_transfer_function;
+    uint8_t                      colour_remap_matrix_coefficients;
+    uint8_t                      colour_remap_input_bit_depth;
+    uint8_t                      colour_remap_bit_depth;
+    uint8_t                      pre_lut_num_val_minus1[3];
+    std::vector<uint32_t>        pre_lut_coded_value[3];
+    std::vector<uint32_t>        pre_lut_target_value[3];
+    uint8_t                      colour_remap_matrix_present_flag;
+    uint8_t                      log2_matrix_denom;
+    int32_t                      colour_remap_coeffs[3][3];
+    uint8_t                      post_lut_num_val_minus1[3];
+    std::vector<uint32_t>        post_lut_coded_value[3];
+    std::vector<uint32_t>        post_lut_target_value[3];
+
+    void toDefault() {};
+  };  
 
   class ContentLightLevelInfo: public SeiPayload
   {

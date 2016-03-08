@@ -829,12 +829,57 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
         break;
       }
 
+      case SeiMessage::TIME_CODE:
+      {
+        std::shared_ptr<TimeCode> psei(new TimeCode);
+        BitstreamReader tmpBs = bs;
+        processTimeCode(psei, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(psei);
+        break;
+      }
+
       case SeiMessage::MASTERING_DISPLAY_INFO:
       {
         std::shared_ptr<MasteringDisplayInfo> psei(new MasteringDisplayInfo);
         BitstreamReader tmpBs = bs;
         processMasteringDisplayInfo(psei, tmpBs);
         msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(psei);
+        break;
+      }
+
+      case SeiMessage::SEGM_RECT_FRAME_PACKING:
+      {
+        std::shared_ptr<SegmRectFramePacking> psei(new SegmRectFramePacking);
+        BitstreamReader tmpBs = bs;
+        processSegmRectFramePacking(psei, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(psei);
+        break;        
+      }
+
+      case SeiMessage::KNEE_FUNCTION_INFO:
+      {
+        std::shared_ptr<KneeFunctionInfo> psei(new KneeFunctionInfo);
+        BitstreamReader tmpBs = bs;
+        processKneeFunctionInfo(psei, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(psei);
+        break;        
+      }
+
+      case SeiMessage::CHROMA_RESAMPLING_FILTER_HINT:
+      {
+        std::shared_ptr<ChromaResamplingFilterHint> psei(new ChromaResamplingFilterHint);
+        BitstreamReader tmpBs = bs;
+        processChromaResamplingFilterHint(psei, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(psei);
+        break;        
+      }
+
+      case SeiMessage::COLOUR_REMAPPING_INFO:
+      {
+        std::shared_ptr<ColourRemappingInfo> pseiPayload(new ColourRemappingInfo);
+        BitstreamReader tmpBs = bs;
+        processColourRemappingInfo(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
         break;
       }
 
@@ -1899,4 +1944,229 @@ void HevcParserImpl::processTemporalLevel0Index(std::shared_ptr<TemporalLevel0In
 {
   pSeiPayload -> temporal_sub_layer_zero_idx = bs.getBits(8);
   pSeiPayload -> irap_pic_id = bs.getBits(8);
+}
+
+void HevcParserImpl::processSegmRectFramePacking(std::shared_ptr<SegmRectFramePacking> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> segmented_rect_frame_packing_arrangement_cancel_flag = bs.getBits(1);
+  if(!pSeiPayload -> segmented_rect_frame_packing_arrangement_cancel_flag)
+  {
+    pSeiPayload -> segmented_rect_content_interpretation_type = bs.getBits(2);
+    pSeiPayload -> segmented_rect_frame_packing_arrangement_persistence = bs.getBits(1);
+  }
+}
+
+void HevcParserImpl::processTimeCode(std::shared_ptr<TimeCode> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> num_clock_ts = bs.getBits(2);
+
+  pSeiPayload -> clock_time_stamp_flag.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> nuit_field_based_flag.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> counting_type.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> full_timestamp_flag.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> discontinuity_flag.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> cnt_dropped_flag.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> n_frames.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> seconds_value.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> minutes_value.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> hours_value.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> seconds_flag.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> seconds_value.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> minutes_flag.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> minutes_value.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> hours_flag.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> hours_value.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> time_offset_length.resize(pSeiPayload -> num_clock_ts);
+  pSeiPayload -> time_offset_value.resize(pSeiPayload -> num_clock_ts);
+
+
+  for(std::size_t i=0; i<pSeiPayload -> num_clock_ts; i++)
+  {
+    pSeiPayload -> clock_time_stamp_flag[i] = bs.getBits(1);
+
+    if(pSeiPayload -> clock_time_stamp_flag[i])
+    {
+      pSeiPayload -> nuit_field_based_flag[i] = bs.getBits(1);
+      pSeiPayload -> counting_type[i] = bs.getBits(5);
+      pSeiPayload -> full_timestamp_flag[i] = bs.getBits(1);
+      pSeiPayload -> discontinuity_flag[i] = bs.getBits(1);
+      pSeiPayload -> cnt_dropped_flag[i] = bs.getBits(1);
+      pSeiPayload -> n_frames[i] = bs.getBits(9);
+
+      if(pSeiPayload -> full_timestamp_flag[i])
+      {
+        pSeiPayload -> seconds_value[i] = bs.getBits(6);
+        pSeiPayload -> minutes_value[i] = bs.getBits(6);
+        pSeiPayload -> hours_value[i] = bs.getBits(5);
+      }
+      else
+      {
+        pSeiPayload -> seconds_flag[i] = bs.getBits(1);
+        if(pSeiPayload -> seconds_flag[i])
+        {
+          pSeiPayload -> seconds_value[i] = bs.getBits(6);
+          pSeiPayload -> minutes_flag[i] = bs.getBits(1);
+          if(pSeiPayload -> minutes_flag[i])
+          {
+            pSeiPayload -> minutes_value[i] = bs.getBits(6);
+            pSeiPayload -> hours_flag[i] = bs.getBits(1);
+            if(pSeiPayload -> hours_flag[i])
+            {
+              pSeiPayload -> hours_value[i] = bs.getBits(5);
+            }
+
+          }
+        }
+      }
+
+      pSeiPayload -> time_offset_length[i] = bs.getBits(5);
+      if(pSeiPayload -> time_offset_length[i])
+      {
+        pSeiPayload -> time_offset_value[i] = bs.getBits(pSeiPayload -> time_offset_length[i]);
+      }
+    }
+  }
+}
+
+void HevcParserImpl::processKneeFunctionInfo(std::shared_ptr<KneeFunctionInfo> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> knee_function_id = bs.getGolombU();
+  pSeiPayload -> knee_function_cancel_flag = bs.getBits(1);
+
+  if(!pSeiPayload -> knee_function_cancel_flag)
+  {
+    pSeiPayload -> knee_function_persistence_flag = bs.getBits(1);
+    pSeiPayload -> input_d_range = bs.getBits(32);
+    pSeiPayload -> input_disp_luminance = bs.getBits(32);
+    pSeiPayload -> output_d_range = bs.getBits(32);
+    pSeiPayload -> output_disp_luminance = bs.getBits(32);
+    pSeiPayload -> num_knee_points_minus1 = bs.getGolombU();
+
+    pSeiPayload -> input_knee_point.resize(pSeiPayload -> num_knee_points_minus1 + 1);
+    pSeiPayload -> output_knee_point.resize(pSeiPayload -> num_knee_points_minus1 + 1);
+
+    for(std::size_t i=0; i<=pSeiPayload -> num_knee_points_minus1; i++)
+    {
+      pSeiPayload -> input_knee_point[i] = bs.getBits(10);
+      pSeiPayload -> output_knee_point[i] = bs.getBits(10);
+    }
+  }
+}
+
+void HevcParserImpl::processChromaResamplingFilterHint(std::shared_ptr<ChromaResamplingFilterHint> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> ver_chroma_filter_idc = bs.getBits(8);
+  pSeiPayload -> hor_chroma_filter_idc = bs.getBits(8);
+  pSeiPayload -> ver_filtering_field_processing_flag = bs.getBits(1);
+
+  if(pSeiPayload -> ver_chroma_filter_idc == 1 || pSeiPayload -> hor_chroma_filter_idc == 1)
+  {
+    pSeiPayload -> target_format_idc = bs.getGolombU();
+    if(pSeiPayload -> ver_chroma_filter_idc == 1)
+    {
+      pSeiPayload -> num_vertical_filters = bs.getGolombU();
+      pSeiPayload -> ver_tap_length_minus_1.resize(pSeiPayload -> num_vertical_filters);
+      pSeiPayload -> ver_filter_coeff.resize(pSeiPayload -> num_vertical_filters);
+
+      for(std::size_t i=0; i<pSeiPayload -> num_vertical_filters; i++)
+      {
+        pSeiPayload -> ver_tap_length_minus_1[i] = bs.getGolombU();
+        pSeiPayload -> ver_filter_coeff[i].resize(pSeiPayload -> ver_tap_length_minus_1[i] + 1);
+
+        for(std::size_t j=0; j<=pSeiPayload -> ver_tap_length_minus_1[i]; j++)
+        {
+          pSeiPayload -> ver_filter_coeff[i][j] = bs.getGolombS();
+        }
+      }
+    }
+
+    if(pSeiPayload -> hor_chroma_filter_idc == 1)
+    {
+      pSeiPayload -> num_horizontal_filters = bs.getGolombU();
+      pSeiPayload -> hor_tap_length_minus_1.resize(pSeiPayload -> num_horizontal_filters);
+      pSeiPayload -> hor_filter_coeff.resize(pSeiPayload -> num_horizontal_filters);
+
+      for(std::size_t i=0; i<pSeiPayload -> num_horizontal_filters; i++)
+      {
+        pSeiPayload -> hor_tap_length_minus_1[i] = bs.getGolombU();
+        pSeiPayload -> hor_filter_coeff[i].resize(pSeiPayload -> hor_tap_length_minus_1[i]+ 1);
+
+        for(std::size_t j=0; j<=pSeiPayload -> hor_tap_length_minus_1[i]; j++)
+        {
+          pSeiPayload -> hor_filter_coeff[i][j] = bs.getGolombS();
+        }
+      }
+    }
+  }
+}
+
+void HevcParserImpl::processColourRemappingInfo(std::shared_ptr<ColourRemappingInfo> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> colour_remap_id = bs.getGolombU();
+  pSeiPayload -> colour_remap_cancel_flag = bs.getBits(1);
+
+  if(!pSeiPayload -> colour_remap_cancel_flag)
+  {
+    pSeiPayload -> colour_remap_persistence_flag = bs.getBits(1);
+    pSeiPayload -> colour_remap_video_signal_info_present_flag = bs.getBits(1);
+
+    if(pSeiPayload -> colour_remap_video_signal_info_present_flag)
+    {
+      pSeiPayload -> colour_remap_full_range_flag = bs.getBits(1);
+      pSeiPayload -> colour_remap_primaries = bs.getBits(8);
+      pSeiPayload -> colour_remap_transfer_function = bs.getBits(8);
+      pSeiPayload -> colour_remap_matrix_coefficients = bs.getBits(8);      
+    }
+    pSeiPayload -> colour_remap_input_bit_depth = bs.getBits(8);
+    pSeiPayload -> colour_remap_bit_depth = bs.getBits(8);
+
+    for(std::size_t i=0 ; i<3 ; i++)
+    {
+      pSeiPayload -> pre_lut_num_val_minus1[i] = bs.getBits(8);
+
+
+      if(pSeiPayload -> pre_lut_num_val_minus1> 0)
+      {
+        pSeiPayload -> pre_lut_coded_value[i].resize(pSeiPayload -> pre_lut_num_val_minus1[i]+1);
+        pSeiPayload -> pre_lut_target_value[i].resize(pSeiPayload -> pre_lut_num_val_minus1[i]+1);
+  
+        for (std::size_t j=0 ; j<=pSeiPayload -> pre_lut_num_val_minus1[i]; j++)
+        {
+          pSeiPayload -> pre_lut_coded_value[i][j] = bs.getBits(((pSeiPayload -> colour_remap_input_bit_depth   + 7 ) >> 3 ) << 3);
+          pSeiPayload -> pre_lut_target_value[i][j] = bs.getBits(((pSeiPayload -> colour_remap_bit_depth + 7 ) >> 3 ) << 3);
+        }
+      }
+    }
+
+    pSeiPayload -> colour_remap_matrix_present_flag = bs.getBits(1);
+
+    if(pSeiPayload -> colour_remap_matrix_present_flag)
+    {
+      pSeiPayload -> log2_matrix_denom = bs.getBits(4);
+      for (std::size_t i=0 ; i<3 ; i++)
+      {
+        for (std::size_t j=0 ; j<3 ; j++)
+        {
+          pSeiPayload -> colour_remap_coeffs[i][j] = bs.getGolombS();
+        }
+      }
+    }
+
+    for(std::size_t i=0 ; i<3 ; i++)
+    {
+      pSeiPayload -> post_lut_num_val_minus1[i] = bs.getBits(8);
+      
+      if(pSeiPayload -> post_lut_num_val_minus1[i] > 0)
+      {
+        pSeiPayload -> post_lut_coded_value[i].resize(pSeiPayload -> post_lut_num_val_minus1[i] + 1);
+        pSeiPayload -> post_lut_target_value[i].resize(pSeiPayload -> post_lut_num_val_minus1[i] + 1);
+
+        for (std::size_t j=0 ; j<=pSeiPayload -> post_lut_num_val_minus1[i] ; j++ )
+        {
+          pSeiPayload -> post_lut_coded_value[i][j] = bs.getBits(((pSeiPayload -> colour_remap_bit_depth + 7 ) >> 3 ) << 3);
+          pSeiPayload -> post_lut_target_value[i][j] = bs.getBits(((pSeiPayload -> colour_remap_bit_depth + 7 ) >> 3 ) << 3);
+        }
+      }
+    }
+  }
 }

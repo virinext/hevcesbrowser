@@ -51,7 +51,12 @@ namespace HEVC
       void processFramePacking(std::shared_ptr<FramePacking> pSeiPayload, BitstreamReader &bs);
       void processDisplayOrientation(std::shared_ptr<DisplayOrientation> pSeiPayload, BitstreamReader &bs);
       void processSOPDescription(std::shared_ptr<SOPDescription> pSeiPayload, BitstreamReader &bs);
+      void processTimeCode(std::shared_ptr<TimeCode> pSeiPayload, BitstreamReader &bs);
       void processMasteringDisplayInfo(std::shared_ptr<MasteringDisplayInfo> pcolourVolume, BitstreamReader &bs);
+      void processSegmRectFramePacking(std::shared_ptr<SegmRectFramePacking> pSeiPayload, BitstreamReader &bs);
+      void processKneeFunctionInfo(std::shared_ptr<KneeFunctionInfo> pSeiPayload, BitstreamReader &bs);
+      void processChromaResamplingFilterHint(std::shared_ptr<ChromaResamplingFilterHint> pSeiPayload, BitstreamReader &bs);
+      void processColourRemappingInfo(std::shared_ptr<ColourRemappingInfo> pSeiPayload, BitstreamReader &bs);
       void processContentLightLevelInfo(std::shared_ptr<ContentLightLevelInfo> pSeiPayload, BitstreamReader &bs);
 
       void onWarning(const std::string &warning, const Info *pInfo, WarningType type);
