@@ -52,6 +52,10 @@ private:
 
     void createDecodedPictureHash(std::shared_ptr<HEVC::DecodedPictureHash> pDecPictHash, QTreeWidgetItem *pItem);
     void createUserDataUnregistered(std::shared_ptr<HEVC::UserDataUnregistered> pSei, QTreeWidgetItem *pItem);
+    void createSceneInfo(std::shared_ptr<HEVC::SceneInfo> pSei, QTreeWidgetItem *pItem);
+    void createFullFrameSnapshot(std::shared_ptr<HEVC::FullFrameSnapshot> pSei, QTreeWidgetItem *pItem);
+    void createProgressiveRefinementSegmentStart(std::shared_ptr<HEVC::ProgressiveRefinementSegmentStart> pSeiPayload, QTreeWidgetItem *pItem);
+    void createProgressiveRefinementSegmentEnd(std::shared_ptr<HEVC::ProgressiveRefinementSegmentEnd> pSeiPayload, QTreeWidgetItem *pItem);
     void createBufferingPeriod(std::shared_ptr<HEVC::BufferingPeriod> pSei, QTreeWidgetItem *pItem);
     void createPicTiming(std::shared_ptr<HEVC::PicTiming> pSei, QTreeWidgetItem *pItem);
     void createRecoveryPoint(std::shared_ptr<HEVC::RecoveryPoint> pSei, QTreeWidgetItem *pItem);
@@ -61,6 +65,7 @@ private:
     void createSOPDescription(std::shared_ptr<HEVC::SOPDescription> pSei, QTreeWidgetItem *pItem);
     void createActiveParameterSets(std::shared_ptr<HEVC::ActiveParameterSets> pSeiPayload, QTreeWidgetItem *pItem);
     void createTemporalLevel0Index(std::shared_ptr<HEVC::TemporalLevel0Index> pSeiPayload, QTreeWidgetItem *pItem);
+    void createRegionRefreshInfo(std::shared_ptr<HEVC::RegionRefreshInfo> pSeiPayload, QTreeWidgetItem *pItem);
     void createTimeCode(std::shared_ptr<HEVC::TimeCode> pSei, QTreeWidgetItem *pItem);
     void createMasteringDisplayInfo(std::shared_ptr<HEVC::MasteringDisplayInfo> pSei, QTreeWidgetItem *pItem);
     void createSegmRectFramePacking(std::shared_ptr<HEVC::SegmRectFramePacking> pSei, QTreeWidgetItem *pItem);

@@ -42,11 +42,16 @@ namespace HEVC
 
       void processDecodedPictureHash(std::shared_ptr<DecodedPictureHash> pdecPicHash, BitstreamReader &bs);
       void processUserDataUnregistered(std::shared_ptr<UserDataUnregistered> pSeiPayload, BitstreamReader &bs, std::size_t payloadSize);
+      void processSceneInfo(std::shared_ptr<SceneInfo> pSeiPayload, BitstreamReader &bs);
+      void processFullFrameSnapshot(std::shared_ptr<FullFrameSnapshot> pSeiPayload, BitstreamReader &bs);
+      void processProgressiveRefinementSegmentStart(std::shared_ptr<ProgressiveRefinementSegmentStart> pSeiPayload, BitstreamReader &bs);
+      void processProgressiveRefinementSegmentEnd(std::shared_ptr<ProgressiveRefinementSegmentEnd> pSeiPayload, BitstreamReader &bs);
       void processBufferingPeriod(std::shared_ptr<BufferingPeriod> pSeiPayload, BitstreamReader &bs);
       void processPicTiming(std::shared_ptr<PicTiming> pSeiPayload, BitstreamReader &bs);
       void processRecoveryPoint(std::shared_ptr<RecoveryPoint> pSeiPayload, BitstreamReader &bs);
       void processActiveParameterSets(std::shared_ptr<ActiveParameterSets> pSeiPayload, BitstreamReader &bs);
       void processTemporalLevel0Index(std::shared_ptr<TemporalLevel0Index> pSeiPayload, BitstreamReader &bs);
+      void processRegionRefreshInfo(std::shared_ptr<RegionRefreshInfo> pSeiPayload, BitstreamReader &bs);
       void processToneMapping(std::shared_ptr<ToneMapping> pSeiPayload, BitstreamReader &bs);
       void processFramePacking(std::shared_ptr<FramePacking> pSeiPayload, BitstreamReader &bs);
       void processDisplayOrientation(std::shared_ptr<DisplayOrientation> pSeiPayload, BitstreamReader &bs);

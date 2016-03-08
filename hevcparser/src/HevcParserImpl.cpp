@@ -747,6 +747,14 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
         break;
       }
 
+      case SeiMessage::FILLER_PAYLOAD:
+      {
+        std::shared_ptr<FillerPayload> pseiPayload(new FillerPayload);
+        pseiPayload->toDefault();
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
+
       case SeiMessage::PICTURE_TIMING:
       {
         std::shared_ptr<PicTiming> pseiPayload(new PicTiming);
@@ -765,6 +773,42 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
         msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
         break;
       }
+
+      case SeiMessage::SCENE_INFO:
+      {
+        std::shared_ptr<SceneInfo> pseiPayload(new SceneInfo);
+        BitstreamReader tmpBs = bs;
+        processSceneInfo(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
+
+      case SeiMessage::FULL_FRAME_SNAPSHOT:
+      {
+        std::shared_ptr<FullFrameSnapshot> pseiPayload(new FullFrameSnapshot);
+        BitstreamReader tmpBs = bs;
+        processFullFrameSnapshot(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
+
+      case SeiMessage::PROGRESSIVE_REFINEMENT_SEGMENT_START:
+      {
+        std::shared_ptr<ProgressiveRefinementSegmentStart> pseiPayload(new ProgressiveRefinementSegmentStart);
+        BitstreamReader tmpBs = bs;
+        processProgressiveRefinementSegmentStart(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
+
+      case SeiMessage::PROGRESSIVE_REFINEMENT_SEGMENT_END:
+      {
+        std::shared_ptr<ProgressiveRefinementSegmentEnd> pseiPayload(new ProgressiveRefinementSegmentEnd);
+        BitstreamReader tmpBs = bs;
+        processProgressiveRefinementSegmentEnd(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }      
 
       case SeiMessage::RECOVERY_POINT:
       {
@@ -825,6 +869,15 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
         std::shared_ptr<TemporalLevel0Index> pseiPayload(new TemporalLevel0Index);
         BitstreamReader tmpBs = bs;
         processTemporalLevel0Index(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
+
+      case SeiMessage::REGION_REFRESH_INFO:
+      {
+        std::shared_ptr<RegionRefreshInfo> pseiPayload(new RegionRefreshInfo);
+        BitstreamReader tmpBs = bs;
+        processRegionRefreshInfo(pseiPayload, tmpBs);
         msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
         break;
       }
@@ -2169,4 +2222,38 @@ void HevcParserImpl::processColourRemappingInfo(std::shared_ptr<ColourRemappingI
       }
     }
   }
+}
+
+void HevcParserImpl::processSceneInfo(std::shared_ptr<SceneInfo> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> scene_info_present_flag = bs.getBits(1);
+  if(pSeiPayload -> scene_info_present_flag)
+  {
+    pSeiPayload -> prev_scene_id_valid_flag = bs.getBits(1);
+    pSeiPayload -> scene_id = bs.getGolombU();
+    pSeiPayload -> scene_transition_type = bs.getGolombU();
+    if(pSeiPayload -> scene_transition_type > 3)
+      pSeiPayload -> second_scene_id = bs.getGolombU();
+  }
+}
+
+void HevcParserImpl::processFullFrameSnapshot(std::shared_ptr<FullFrameSnapshot> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> snapshot_id = bs.getGolombU();
+}
+
+void HevcParserImpl::processProgressiveRefinementSegmentStart(std::shared_ptr<ProgressiveRefinementSegmentStart> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> progressive_refinement_id = bs.getGolombU();
+  pSeiPayload -> pic_order_cnt_delta = bs.getGolombU();
+}
+
+void HevcParserImpl::processProgressiveRefinementSegmentEnd(std::shared_ptr<ProgressiveRefinementSegmentEnd> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> progressive_refinement_id = bs.getGolombU();
+}
+
+void HevcParserImpl::processRegionRefreshInfo(std::shared_ptr<RegionRefreshInfo> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> refreshed_region_flag = bs.getBits(1);
 }

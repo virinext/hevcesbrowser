@@ -290,6 +290,43 @@ namespace HEVC
     void toDefault() {};
   };
 
+  class SceneInfo: public SeiPayload
+  {
+  public:
+    uint8_t                               scene_info_present_flag;
+    uint8_t                               prev_scene_id_valid_flag;
+    uint32_t                              scene_id;
+    uint32_t                              scene_transition_type;
+    uint32_t                              second_scene_id;
+
+    void toDefault() {};
+  };
+
+  class FullFrameSnapshot: public SeiPayload
+  {
+  public:
+    uint32_t                              snapshot_id;
+
+    void toDefault() {};
+  };
+
+  class ProgressiveRefinementSegmentStart: public SeiPayload
+  {
+  public:
+    uint32_t                              progressive_refinement_id;
+    uint32_t                              pic_order_cnt_delta;
+
+    void toDefault() {};
+  };
+
+  class ProgressiveRefinementSegmentEnd: public SeiPayload
+  {
+  public:
+    uint32_t                              progressive_refinement_id;
+
+    void toDefault() {};
+  };
+
   class BufferingPeriod: public SeiPayload
   {
   public:
@@ -309,6 +346,12 @@ namespace HEVC
     std::vector<uint32_t>              vcl_initial_alt_cpb_removal_offset;
 
     void toDefault();
+  };
+
+  class FillerPayload: public SeiPayload
+  {
+  public:
+    void toDefault() {};
   };
 
   class PicTiming: public SeiPayload
@@ -360,6 +403,14 @@ namespace HEVC
 
     void toDefault() {};
   };
+
+  class RegionRefreshInfo: public SeiPayload
+  {
+  public:
+    uint8_t                 refreshed_region_flag;
+
+    void toDefault() {};
+  };  
 
   class ToneMapping: public SeiPayload
   {
