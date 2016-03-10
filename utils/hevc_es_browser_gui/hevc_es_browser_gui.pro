@@ -27,6 +27,7 @@ HEADERS += CommonInfoViewer.h                            \
 	    SyntaxViewer.h                                   \
 	    WarningsViewer.h                                 \
 	    StreamInfoViewer.h                               \
+	    HDRInfoViewer.h                                  \
 	    ProfileConformanceAnalyzer.h                     \
 	    ../common/ConvToString.h                         \
 	    ../../external/QHexView/include/QHexView.h
@@ -38,6 +39,7 @@ SOURCES += CommonInfoViewer.cpp                          \
 	    SyntaxViewer.cpp                                 \
 	    WarningsViewer.cpp                               \
 	    StreamInfoViewer.cpp                             \
+	    HDRInfoViewer.cpp                                \
   	    ProfileConformanceAnalyzer.cpp                   \
 	    ../common/ConvToString.cpp                       \
 	    ../../external/QHexView/src/QHexView.cpp

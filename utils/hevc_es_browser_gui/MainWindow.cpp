@@ -22,6 +22,7 @@
 #include "CentralWidget.h"
 #include "WarningsViewer.h"
 #include "StreamInfoViewer.h"
+#include "HDRInfoViewer.h"
 #include "ProfileConformanceAnalyzer.h"
 
 #include "version_info.h"
@@ -32,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags):
   QMainWindow(parent, flags)
   ,m_pwarnViewer(new WarningsViewer)
   ,m_pinfoViewer(new StreamInfoViewer)
+  ,m_phdrInfoViewer(new HDRInfoViewer)
 {
   QToolBar *ptb = addToolBar("Menu");
 
@@ -45,6 +47,10 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags):
   QAction *pactShowInfo = ptb -> addAction("Info...");
   connect(pactShowInfo, SIGNAL(triggered()), SLOT(slotShowInfoViewer()));
 
+  QAction *pactShowHDRInfo = ptb -> addAction("HDR Info...");
+  connect(pactShowHDRInfo, SIGNAL(triggered()), SLOT(slotShowHDRInfoViewer()));
+
+
   QMenu *pmenu = menuBar() -> addMenu("&File");
   pmenu -> addAction(pactOpen);
   addAction (pactOpen);
@@ -52,6 +58,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags):
   pmenu -> addSeparator();
   pmenu -> addAction(pactShowWarn);
   pmenu -> addAction(pactShowInfo);
+  pmenu -> addAction(pactShowHDRInfo);
 
   pmenu -> addSeparator();
   pmenu -> addAction("Exit", this, SLOT(close()));
@@ -83,6 +90,7 @@ void MainWindow::process(const QString &fileName)
   pparser -> addConsumer(pcntwgt -> m_pcomInfoViewer.data());
   pparser -> addConsumer(dynamic_cast<WarningsViewer *> (m_pwarnViewer));
   pparser -> addConsumer(dynamic_cast<StreamInfoViewer *> (m_pinfoViewer));
+  pparser -> addConsumer(dynamic_cast<HDRInfoViewer *> (m_phdrInfoViewer));
 
   ProfileConformanceAnalyzer profConfAnalyzer;
   profConfAnalyzer.m_pconsumer = dynamic_cast<WarningsViewer *> (m_pwarnViewer);
@@ -159,6 +167,7 @@ void MainWindow::slotOpen()
     pcntwgt -> m_psyntaxViewer -> clear();
     dynamic_cast<WarningsViewer *> (m_pwarnViewer) -> clear();
     dynamic_cast<StreamInfoViewer *> (m_pinfoViewer) -> clear();
+    dynamic_cast<HDRInfoViewer *> (m_phdrInfoViewer) -> clear();
 
     process(fileName);
     QFileInfo info(fileName);
@@ -185,6 +194,13 @@ void MainWindow::slotShowInfoViewer()
 }
 
 
+void MainWindow::slotShowHDRInfoViewer()
+{
+  m_phdrInfoViewer -> show();
+  m_phdrInfoViewer -> raise();
+}
+
+
 void MainWindow::closeEvent(QCloseEvent *pevent)
 {
   saveCustomData();
@@ -193,7 +209,8 @@ void MainWindow::closeEvent(QCloseEvent *pevent)
   
   m_pwarnViewer -> close();
   m_pinfoViewer -> close();
-  
+  m_phdrInfoViewer -> close();
+
   QWidget::closeEvent(pevent);
 }
 

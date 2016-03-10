@@ -14,6 +14,7 @@ class MainWindow: public QMainWindow
     void slotOpen();
     void slotShowWarningsViewer();
     void slotShowInfoViewer();
+    void slotShowHDRInfoViewer();
     void slotAbout();
 
 private:
@@ -24,6 +25,7 @@ private:
 
     QWidget      *m_pwarnViewer;
     QWidget      *m_pinfoViewer;
+    QWidget      *m_phdrInfoViewer;
 };
 
 
