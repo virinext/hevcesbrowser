@@ -103,28 +103,28 @@ QString colourPrimariesToString(int value)
   switch(value)
   {
     case 1:
-      result = "ITU-R BT.709-5";
+      result = "bt709";
       break;
     case 2:
       result = "Unspecified";
       break;
     case 4:
-      result = "ITU-R BT.470-6 System M";
+      result = "bt470m";
       break;
     case 5:
-      result = "ITU-R BT.601-6 625";
+      result = "bt470bg";
       break;
     case 6:
-      result = "ITU-R BT.601-6 525";
+      result = "smpte170m";
       break;
     case 7:
-      result = "SMPTE 240M";
+      result = "smpte240m";
       break;
     case 8:
-      result = "Generic film";
+      result = "film";
       break;
     case 9:
-      result = "ITU-R BT.2020";
+      result = "bt2020";
       break;
 
     case 0:
@@ -144,46 +144,55 @@ QString transferCharacteristicsToString(int value)
   switch(value)
   {
     case 1:
-      result = "ITU-R BT.709-5";
+      result = "bt709";
       break;
     case 2:
       result = "Unspecified";
       break;
     case 4:
-      result = "ITU-R BT.470-6 System M";
+      result = "bt470m";
       break;
     case 5:
-      result = "ITU-R BT.470-6 System B, G";
+      result = "bt470bg";
       break;
     case 6:
-      result = "ITU-R BT.601-6 525";
+      result = "smpte170m";
       break;
     case 7:
-      result = "SMPTE 240M";
+      result = "smpte240m";
       break;
     case 8:
-      result = "Linear transfer characteristics";
+      result = "linear";
       break;
     case 9:
-      result = "Logarithmic transfer characteristic (100:1 range)";
+      result = "log100";
       break;
     case 10:
-      result = "Logarithmic transfer characteristic (100 * Sqrt( 10 ) : 1 range)";
+      result = "log316";
       break;
     case 11:
-      result = "IEC 61966-2-4";
+      result = "iec61966-2-4";
       break;
     case 12:
-      result = "ITU-R BT.1361 extended colour gamut system";
+      result = "bt1361e";
       break;
     case 13:
-      result = "IEC 61966-2-1";
+      result = "iec61966-2-1";
       break;
     case 14:
-      result = "ITU-R BT.2020 for 10 bit system";
+      result = "bt2020-10";
       break;
     case 15:
-      result = "ITU-R BT.2020 for 12 bit system";
+      result = "bt2020-12";
+      break;
+    case 16:
+      result = "smpte-st-2084";
+      break;
+    case 17:
+      result = "smpte-st-428";
+      break;
+    case 18:
+      result = "arib-std-b67";
       break;
 
     case 0:
@@ -203,34 +212,34 @@ QString matrixCoeficientsToString(int value)
   switch(value)
   {
     case 0:
-      result = "IEC 61966-2-1";
+      result = "GBR";
       break;    
     case 1:
-      result = "ITU-R BT.709-5";
+      result = "bt709";
       break;
     case 2:
       result = "Unspecified";
       break;
     case 4:
-      result = "Title 47 - CFR";
+      result = "fcc";
       break;
     case 5:
-      result = "ITU-R BT.470-6 System B, G";
+      result = "bt470bg";
       break;
     case 6:
-      result = "ITU-R BT.601-6 525";
+      result = "smpte170m";
       break;
     case 7:
-      result = "SMPTE 240M";
+      result = "smpte240m";
       break;
     case 8:
-      result = "Generic film";
+      result = "YCgCo";
       break;
     case 9:
-      result = "ITU-R BT.2020 non-constant luminance system";
+      result = "bt2020nc";
       break;
     case 10:
-      result = "ITU-R BT.2020 constant luminance system";
+      result = "bt2020c";
       break;
 
     case 3:
@@ -290,7 +299,7 @@ void HDRInfoViewer::update()
 
   if(m_pMasteringDisplayInfo)
   {
-    QString mdiStr = QString("G(%1,%2), B(%3,%4), R(%5v,%6), WP(%7,%8),L(%9,%10)")
+    QString mdiStr = QString("G(%1,%2), B(%3,%4), R(%5,%6), WP(%7,%8),L(%9,%10)")
         .arg(m_pMasteringDisplayInfo->display_primary_x[0])
         .arg(m_pMasteringDisplayInfo->display_primary_y[0])
         .arg(m_pMasteringDisplayInfo->display_primary_x[1])
