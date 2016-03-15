@@ -101,8 +101,10 @@ void MainWindow::process(const QString &fileName)
   QProgressBar *pprogressBar = new QProgressBar(NULL);
   pprogressBar -> setWindowTitle("Opening...");
   pprogressBar -> setMinimum(0);
-  pprogressBar -> setMaximum(file.size());
+  pprogressBar -> setMaximum(100);
   pprogressBar -> setValue(0);
+
+  std::size_t fileSize = file.size();
 
   Qt::WindowFlags flags = pprogressBar -> windowFlags();
 
@@ -119,7 +121,7 @@ void MainWindow::process(const QString &fileName)
     }
 
     file.seek(position);
-    pprogressBar -> setValue(position);
+    pprogressBar -> setValue(position * 100 / fileSize);
     QCoreApplication::processEvents();
 
     if(!pprogressBar -> isVisible())
