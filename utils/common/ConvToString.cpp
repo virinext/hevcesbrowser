@@ -1,5 +1,7 @@
 #include "ConvToString.h"
 
+#include <string>
+
 
 std::string ConvToString::NALUnitType(HEVC::NALUnitType type)
 {

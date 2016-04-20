@@ -8,7 +8,7 @@ DESTDIR = ../../build
 MOC_DIR = ../../build/qt
 OBJECTS_DIR = ../../build/qt
 
-QMAKE_CXXFLAGS += -std=c++11
+CONFIG += c++11
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -46,5 +46,5 @@ SOURCES += CommonInfoViewer.cpp                          \
 
 
 LIBS += -lhevcparser
-LIBPATH += ../../build
+QMAKE_LIBDIR += ../../build
 
