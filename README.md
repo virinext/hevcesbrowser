@@ -29,8 +29,8 @@ Building requirements:
 
 * boost (for testing only)
 
-* qt
-
+* qt5
+  - brew: `brew install qt5`
 
 
 Building:
@@ -46,7 +46,7 @@ cd project
 
 cmake ../
 
-make 
+make
 
 cd ../utils/hevc_es_browser_gui/
 
