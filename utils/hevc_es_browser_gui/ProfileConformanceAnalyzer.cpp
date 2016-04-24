@@ -29,7 +29,7 @@ std::string ProfileConformanceAnalyzer::profileName(uint32_t profile)
       name = "Main Still Picture";
       break;
 
-    case std::numeric_limits<std::size_t>::max():
+    case std::numeric_limits<uint32_t>::max():
       name = "NOT PRESENT";
       break;
 
@@ -81,11 +81,11 @@ std::vector<uint32_t> ProfileConformanceAnalyzer::columnWidthInLumaSamples(std::
   else
   {
     colWidth[pPPS -> num_tile_columns_minus1] = PicWidthInCtbsY;
-    for(std::size_t i=0; i < pPPS -> num_tile_columns_minus1; i++) 
+    for(std::size_t i=0; i < pPPS -> num_tile_columns_minus1; i++)
     {
       colWidth[i] = pPPS -> column_width_minus1[i] + 1;
       colWidth[pPPS -> num_tile_columns_minus1] -= colWidth[i];
-    }      
+    }
   }
 
   for(std::size_t i=0; i <= pPPS -> num_tile_columns_minus1; i++)
@@ -121,7 +121,7 @@ std::vector<uint32_t> ProfileConformanceAnalyzer::rowHeightInLumaSamples(std::sh
   {
     rowHeight[pPPS -> num_tile_rows_minus1] = PicHeightInCtbsY;
 
-    for(std::size_t i=0; i < pPPS -> num_tile_rows_minus1; i++) 
+    for(std::size_t i=0; i < pPPS -> num_tile_rows_minus1; i++)
     {
       rowHeight[i] = pPPS -> row_height_minus1[i] + 1;
       rowHeight[pPPS -> num_tile_rows_minus1] -= rowHeight[i];
@@ -149,7 +149,7 @@ void ProfileConformanceAnalyzer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUn
       if(m_profile != std::numeric_limits<uint32_t>::max() && m_profile != pVPS -> profile_tier_level.general_profile_idc)
       {
         std::stringstream ss;
-        ss <<  "Profile was changed from " 
+        ss <<  "Profile was changed from "
            << m_profile << " (" << profileName(m_profile) << ") "
            << "to "
            << pVPS -> profile_tier_level.general_profile_idc << " (" << profileName(pVPS -> profile_tier_level.general_profile_idc) <<  ") ";
