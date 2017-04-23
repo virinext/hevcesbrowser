@@ -160,29 +160,31 @@ void MainWindow::slotOpen()
   if(settings.value("MainWindow/PrevDir").toString().length())
   {
     dir = settings.value("MainWindow/PrevDir").toString();
-
   }
   
   QString fileName = QFileDialog::getOpenFileName(this, "HEVC ES File", dir);
-  if(!fileName.isEmpty())
-  {
-    CentralWidget *pcntwgt = dynamic_cast<CentralWidget *>(centralWidget());
-    pcntwgt -> m_pcomInfoViewer -> clear();
-    pcntwgt -> m_psyntaxViewer -> clear();
-    dynamic_cast<WarningsViewer *> (m_pwarnViewer) -> clear();
-    dynamic_cast<StreamInfoViewer *> (m_pinfoViewer) -> clear();
-    dynamic_cast<HDRInfoViewer *> (m_phdrInfoViewer) -> clear();
-
-    process(fileName);
-    QFileInfo info(fileName);
-    settings.setValue("MainWindow/PrevDir", info.absoluteDir().absolutePath());
-
-    setWindowTitle(info.fileName());
-
-  }
+  openFile(fileName);
 }
 
+void MainWindow::openFile(const QString &fileName)
+{
+    if(!fileName.isEmpty())
+    {
+      QSettings settings("HEVCESBrowser", "HEVCESBrowser");
+      CentralWidget *pcntwgt = dynamic_cast<CentralWidget *>(centralWidget());
+      pcntwgt -> m_pcomInfoViewer -> clear();
+      pcntwgt -> m_psyntaxViewer -> clear();
+      dynamic_cast<WarningsViewer *> (m_pwarnViewer) -> clear();
+      dynamic_cast<StreamInfoViewer *> (m_pinfoViewer) -> clear();
+      dynamic_cast<HDRInfoViewer *> (m_phdrInfoViewer) -> clear();
 
+      process(fileName);
+      QFileInfo info(fileName);
+      settings.setValue("MainWindow/PrevDir", info.absoluteDir().absolutePath());
+
+      setWindowTitle(info.fileName());
+    }
+}
 
 void MainWindow::slotShowWarningsViewer()
 {
@@ -256,17 +258,6 @@ void MainWindow::dropEvent(QDropEvent *e)
         QSettings settings("HEVCESBrowser", "HEVCESBrowser");
         QUrl url = e->mimeData()->urls().first();
         qDebug() << url;
-
-        CentralWidget *pcntwgt = dynamic_cast<CentralWidget *>(centralWidget());
-        pcntwgt -> m_pcomInfoViewer -> clear();
-        pcntwgt -> m_psyntaxViewer -> clear();
-        dynamic_cast<WarningsViewer *> (m_pwarnViewer) -> clear();
-        dynamic_cast<StreamInfoViewer *> (m_pinfoViewer) -> clear();
-        dynamic_cast<HDRInfoViewer *> (m_phdrInfoViewer) -> clear();
-
-        QFileInfo info(url.toLocalFile());
-        process(info.filePath());
-        settings.setValue("MainWindow/PrevDir", info.absoluteDir().absolutePath());
-        setWindowTitle(info.fileName());
+        openFile(url.toLocalFile());
     }
 }

@@ -22,6 +22,7 @@ class MainWindow: public QMainWindow
 
 
 private:
+    void openFile(const QString &fileName);
     void process(const QString &fileName);
     virtual void closeEvent(QCloseEvent *);
     void saveCustomData();
