@@ -257,6 +257,12 @@ void MainWindow::dropEvent(QDropEvent *e)
         QUrl url = e->mimeData()->urls().first();
         qDebug() << url;
 
+        CentralWidget *pcntwgt = dynamic_cast<CentralWidget *>(centralWidget());
+        pcntwgt -> m_pcomInfoViewer -> clear();
+        pcntwgt -> m_psyntaxViewer -> clear();
+        dynamic_cast<WarningsViewer *> (m_pwarnViewer) -> clear();
+        dynamic_cast<StreamInfoViewer *> (m_pinfoViewer) -> clear();
+        dynamic_cast<HDRInfoViewer *> (m_phdrInfoViewer) -> clear();
 
         QFileInfo info(url.toLocalFile());
         process(info.filePath());
