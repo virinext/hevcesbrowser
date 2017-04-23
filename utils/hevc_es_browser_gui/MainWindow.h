@@ -11,7 +11,8 @@ class MainWindow: public QMainWindow
   public:
     MainWindow(QWidget *parent = 0, Qt::WindowFlags flags = 0);
     void dragEnterEvent(QDragEnterEvent *);
-    void dropEvent(QDropEvent *);
+    void dropEvent(QDropEvent *);    
+    void openFile(const QString &fileName);
 
   public slots:
     void slotOpen();
@@ -21,8 +22,7 @@ class MainWindow: public QMainWindow
     void slotAbout();
 
 
-private:
-    void openFile(const QString &fileName);
+private:    
     void process(const QString &fileName);
     virtual void closeEvent(QCloseEvent *);
     void saveCustomData();

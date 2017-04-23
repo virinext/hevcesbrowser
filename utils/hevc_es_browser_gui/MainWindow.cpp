@@ -168,7 +168,9 @@ void MainWindow::slotOpen()
 
 void MainWindow::openFile(const QString &fileName)
 {
-    if(!fileName.isEmpty())
+    QFileInfo info(fileName);
+
+    if(!fileName.isEmpty() && info.exists() && info.isFile())
     {
       QSettings settings("HEVCESBrowser", "HEVCESBrowser");
       CentralWidget *pcntwgt = dynamic_cast<CentralWidget *>(centralWidget());
@@ -257,7 +259,6 @@ void MainWindow::dropEvent(QDropEvent *e)
     {
         QSettings settings("HEVCESBrowser", "HEVCESBrowser");
         QUrl url = e->mimeData()->urls().first();
-        qDebug() << url;
         openFile(url.toLocalFile());
     }
 }
