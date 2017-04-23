@@ -2,6 +2,7 @@
 #define MAIN_WINDOW_H_
 
 #include <QMainWindow>
+#include <QMimeData>
 
 
 class MainWindow: public QMainWindow
@@ -9,6 +10,8 @@ class MainWindow: public QMainWindow
   Q_OBJECT
   public:
     MainWindow(QWidget *parent = 0, Qt::WindowFlags flags = 0);
+    void dragEnterEvent(QDragEnterEvent *);
+    void dropEvent(QDropEvent *);
 
   public slots:
     void slotOpen();
@@ -16,6 +19,7 @@ class MainWindow: public QMainWindow
     void slotShowInfoViewer();
     void slotShowHDRInfoViewer();
     void slotAbout();
+
 
 private:
     void process(const QString &fileName);

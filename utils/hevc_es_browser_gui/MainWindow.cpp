@@ -66,6 +66,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags):
   pmenu = menuBar() -> addMenu("&Help");
   pmenu -> addAction ("About HEVCESBrowser...", this, SLOT(slotAbout()));
 
+  setAcceptDrops(true);
+
 
   CentralWidget *pwgt = new CentralWidget(this);
   setCentralWidget(pwgt);
@@ -238,4 +240,27 @@ void MainWindow::slotAbout()
   message += QString("<center>Version: ") + VERSION_STR + "</center>";
   message += "<center>GUI Based on Qt</center>";
   QMessageBox::about(this, "About", message);
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *e)
+{
+    if (e->mimeData()->hasUrls()) {
+        e->acceptProposedAction();
+    }
+}
+
+void MainWindow::dropEvent(QDropEvent *e)
+{
+    if(e->mimeData()->urls().size() > 0)
+    {
+        QSettings settings("HEVCESBrowser", "HEVCESBrowser");
+        QUrl url = e->mimeData()->urls().first();
+        qDebug() << url;
+
+
+        QFileInfo info(url.toLocalFile());
+        process(info.filePath());
+        settings.setValue("MainWindow/PrevDir", info.absoluteDir().absolutePath());
+        setWindowTitle(info.fileName());
+    }
 }
