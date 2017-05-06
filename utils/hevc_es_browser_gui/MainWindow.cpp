@@ -66,6 +66,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags):
   pmenu = menuBar() -> addMenu("&Help");
   pmenu -> addAction ("About HEVCESBrowser...", this, SLOT(slotAbout()));
 
+  setAcceptDrops(true);
+
 
   CentralWidget *pwgt = new CentralWidget(this);
   setCentralWidget(pwgt);
@@ -158,29 +160,33 @@ void MainWindow::slotOpen()
   if(settings.value("MainWindow/PrevDir").toString().length())
   {
     dir = settings.value("MainWindow/PrevDir").toString();
-
   }
   
   QString fileName = QFileDialog::getOpenFileName(this, "HEVC ES File", dir);
-  if(!fileName.isEmpty())
-  {
-    CentralWidget *pcntwgt = dynamic_cast<CentralWidget *>(centralWidget());
-    pcntwgt -> m_pcomInfoViewer -> clear();
-    pcntwgt -> m_psyntaxViewer -> clear();
-    dynamic_cast<WarningsViewer *> (m_pwarnViewer) -> clear();
-    dynamic_cast<StreamInfoViewer *> (m_pinfoViewer) -> clear();
-    dynamic_cast<HDRInfoViewer *> (m_phdrInfoViewer) -> clear();
-
-    process(fileName);
-    QFileInfo info(fileName);
-    settings.setValue("MainWindow/PrevDir", info.absoluteDir().absolutePath());
-
-    setWindowTitle(info.fileName());
-
-  }
+  openFile(fileName);
 }
 
+void MainWindow::openFile(const QString &fileName)
+{
+    QFileInfo info(fileName);
 
+    if(!fileName.isEmpty() && info.exists() && info.isFile())
+    {
+      QSettings settings("HEVCESBrowser", "HEVCESBrowser");
+      CentralWidget *pcntwgt = dynamic_cast<CentralWidget *>(centralWidget());
+      pcntwgt -> m_pcomInfoViewer -> clear();
+      pcntwgt -> m_psyntaxViewer -> clear();
+      dynamic_cast<WarningsViewer *> (m_pwarnViewer) -> clear();
+      dynamic_cast<StreamInfoViewer *> (m_pinfoViewer) -> clear();
+      dynamic_cast<HDRInfoViewer *> (m_phdrInfoViewer) -> clear();
+
+      process(fileName);
+      QFileInfo info(fileName);
+      settings.setValue("MainWindow/PrevDir", info.absoluteDir().absolutePath());
+
+      setWindowTitle(info.fileName());
+    }
+}
 
 void MainWindow::slotShowWarningsViewer()
 {
@@ -238,4 +244,21 @@ void MainWindow::slotAbout()
   message += QString("<center>Version: ") + VERSION_STR + "</center>";
   message += "<center>GUI Based on Qt</center>";
   QMessageBox::about(this, "About", message);
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *e)
+{
+    if (e->mimeData()->hasUrls()) {
+        e->acceptProposedAction();
+    }
+}
+
+void MainWindow::dropEvent(QDropEvent *e)
+{
+    if(e->mimeData()->urls().size() > 0)
+    {
+        QSettings settings("HEVCESBrowser", "HEVCESBrowser");
+        QUrl url = e->mimeData()->urls().first();
+        openFile(url.toLocalFile());
+    }
 }

@@ -1,16 +1,21 @@
 compiler:
   - gcc
 
+dist: trusty
+
+language:
+  - cpp
+
 before_install:
-  - yes | sudo add-apt-repository ppa:ubuntu-sdk-team/ppa
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo add-apt-repository -y ppa:ubuntu-sdk-team/ppa
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get update -qq
-  - yes | sudo apt-get install qtdeclarative5-dev
-  - yes | sudo apt-get install libboost-all-dev
+  - sudo apt-get -y install qtdeclarative5-dev
+  - sudo apt-get -y install libboost-all-dev
   - sudo apt-get install -qq g++-4.8 gcc-4.8
   - export CXX="g++-4.8" CC="gcc-4.8"
   - git submodule update --init --recursive
-  - git submodule update --recursive  
+  - git submodule update --recursive
 
 script:
   - cmake -DCMAKE_BUILD_TYPE=Release
