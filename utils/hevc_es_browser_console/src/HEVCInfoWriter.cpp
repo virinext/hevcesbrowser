@@ -478,7 +478,7 @@ void HEVCInfoWriter::writeSEI(std::shared_ptr<HEVC::SEI> pSEI, std::ostream &out
       }
     }
 
-    out << "\t\t" << "last_payload_type_byte = " << (int) pSEI -> sei_message[i].last_payload_size_byte << std::endl;
+    out << "\t\t" << "last_payload_size_byte = " << (int) pSEI -> sei_message[i].last_payload_size_byte << std::endl;
     payloadSize += pSEI -> sei_message[i].last_payload_size_byte;
 
     out << "\t\t" << "sei_payload( " << (int) payloadType << ", " << (int) payloadSize << " )" << std::endl;
