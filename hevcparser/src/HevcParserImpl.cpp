@@ -2178,7 +2178,7 @@ void HevcParserImpl::processColourRemappingInfo(std::shared_ptr<ColourRemappingI
       pSeiPayload -> pre_lut_num_val_minus1[i] = bs.getBits(8);
 
 
-      if(pSeiPayload -> pre_lut_num_val_minus1> 0)
+      if(pSeiPayload -> pre_lut_num_val_minus1[i] > 0)
       {
         pSeiPayload -> pre_lut_coded_value[i].resize(pSeiPayload -> pre_lut_num_val_minus1[i]+1);
         pSeiPayload -> pre_lut_target_value[i].resize(pSeiPayload -> pre_lut_num_val_minus1[i]+1);
