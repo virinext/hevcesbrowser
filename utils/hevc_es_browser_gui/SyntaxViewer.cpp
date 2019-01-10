@@ -2502,12 +2502,12 @@ void SyntaxViewer::createColourRemappingInfo(std::shared_ptr<HEVC::ColourRemappi
     {
       ploop -> addChild(new QTreeWidgetItem(QStringList("pre_lut_num_val_minus1[" + QString::number(i) + "] = " + QString::number(pSei -> pre_lut_num_val_minus1[i]))));
 
-      if(pSei -> pre_lut_num_val_minus1> 0)
+      if(pSei -> pre_lut_num_val_minus1[i] > 0)
       {
-        QTreeWidgetItem *pitemIfSecond = new QTreeWidgetItem(QStringList("if( pre_lut_num_val_minus1 > 0 )"));
+        QTreeWidgetItem *pitemIfSecond = new QTreeWidgetItem(QStringList("if( pre_lut_num_val_minus1[" + QString::number(i) + "] > 0 )"));
         ploop -> addChild(pitemIfSecond);
 
-        QTreeWidgetItem *ploopSecond = new QTreeWidgetItem(QStringList("for( j = 0; j <= pre_lut_num_val_minus1; j++ )"));
+        QTreeWidgetItem *ploopSecond = new QTreeWidgetItem(QStringList("for( j = 0; j <= pre_lut_num_val_minus1[" + QString::number(i) + "]; j++ )"));
         pitemIfSecond -> addChild(ploopSecond);
   
         for (std::size_t j=0 ; j<=pSei -> pre_lut_num_val_minus1[i]; j++)
@@ -2550,12 +2550,12 @@ void SyntaxViewer::createColourRemappingInfo(std::shared_ptr<HEVC::ColourRemappi
     {
       ploop -> addChild(new QTreeWidgetItem(QStringList("post_lut_num_val_minus1[" + QString::number(i) + "] = " + QString::number(pSei -> post_lut_num_val_minus1[i]))));
 
-      if(pSei -> post_lut_num_val_minus1> 0)
+      if(pSei -> post_lut_num_val_minus1[i] > 0)
       {
-        QTreeWidgetItem *pitemIfSecond = new QTreeWidgetItem(QStringList("if( post_lut_num_val_minus1 > 0 )"));
+        QTreeWidgetItem *pitemIfSecond = new QTreeWidgetItem(QStringList("if( post_lut_num_val_minus1[" + QString::number(i) + "] > 0 )"));
         ploop -> addChild(pitemIfSecond);
 
-        QTreeWidgetItem *ploopSecond = new QTreeWidgetItem(QStringList("for( j = 0; j <= post_lut_num_val_minus1; j++ )"));
+        QTreeWidgetItem *ploopSecond = new QTreeWidgetItem(QStringList("for( j = 0; j <= post_lut_num_val_minus1[" + QString::number(i) + "]; j++ )"));
         pitemIfSecond -> addChild(ploopSecond);
   
         for (std::size_t j=0 ; j<=pSei -> post_lut_num_val_minus1[i]; j++)
