@@ -2512,8 +2512,8 @@ void SyntaxViewer::createColourRemappingInfo(std::shared_ptr<HEVC::ColourRemappi
   
         for (std::size_t j=0 ; j<=pSei -> pre_lut_num_val_minus1[i]; j++)
         {
-          ploopSecond -> addChild(new QTreeWidgetItem(QStringList("colour_remap_input_bit_depth[" + QString::number(i) + "][" + QString::number(j) + "] = " + QString::number(pSei -> pre_lut_coded_value[i][j]))));
-          ploopSecond -> addChild(new QTreeWidgetItem(QStringList("colour_remap_bit_depth[" + QString::number(i) + "][" + QString::number(j) + "] = " + QString::number(pSei -> pre_lut_target_value[i][j]))));
+          ploopSecond -> addChild(new QTreeWidgetItem(QStringList("pre_lut_coded_value[" + QString::number(i) + "][" + QString::number(j) + "] = " + QString::number(pSei -> pre_lut_coded_value[i][j]))));
+          ploopSecond -> addChild(new QTreeWidgetItem(QStringList("pre_lut_target_value[" + QString::number(i) + "][" + QString::number(j) + "] = " + QString::number(pSei -> pre_lut_target_value[i][j]))));
         }
       }
     }
