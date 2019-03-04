@@ -1631,6 +1631,7 @@ PredWeightTable HevcParserImpl::processPredWeightTable(BitstreamReader &bs, std:
       }
     }
   } 
+  return pwt;
 }
 
 
