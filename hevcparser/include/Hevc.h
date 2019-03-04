@@ -830,7 +830,7 @@ namespace HEVC
       uint32_t                 slice_type;
       uint8_t                  pic_output_flag;
       uint8_t                  colour_plane_id;
-      uint32_t                 pic_order_cnt_lsb;
+      uint32_t                 slice_pic_order_cnt_lsb;
       uint8_t                  short_term_ref_pic_set_sps_flag;
       ShortTermRefPicSet       short_term_ref_pic_set;
       uint8_t                  short_term_ref_pic_set_idx;

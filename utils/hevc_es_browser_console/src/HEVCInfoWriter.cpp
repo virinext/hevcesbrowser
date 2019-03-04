@@ -424,7 +424,7 @@ void HEVCInfoWriter::writeSlice(std::shared_ptr<HEVC::Slice> pSlice, std::ostrea
     if(!IdrPicFlag)
     {
       out << "\t" << "if( nal_unit_type != IDR_W_RADL && nal_unit_type != IDR_N_LP )" << std::endl;
-      out << "\t\t" << "pic_order_cnt_lsb = " << pSlice -> pic_order_cnt_lsb << std::endl;
+      out << "\t\t" << "slice_pic_order_cnt_lsb = " << pSlice -> slice_pic_order_cnt_lsb << std::endl;
       out << "\t\t" << "short_term_ref_pic_set_sps_flag = " << (int) pSlice -> short_term_ref_pic_set_sps_flag << std::endl;
 
       if(!pSlice -> short_term_ref_pic_set_sps_flag)
