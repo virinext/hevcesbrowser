@@ -293,14 +293,14 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
     {
       if(m_spsMap[spsId] -> log2_max_pic_order_cnt_lsb_minus4 + 4 >= 32)
       {
-        onWarning("Slice: pic_order_cnt_lsb size more then 32 bits", &info, Parser::OUT_OF_RANGE);
+        onWarning("Slice: slice_pic_order_cnt_lsb size more then 32 bits", &info, Parser::OUT_OF_RANGE);
 
         pslice -> m_processFailed = true;
 
         return;
       }
 
-      pslice -> pic_order_cnt_lsb = bs.getBits(m_spsMap[spsId] -> log2_max_pic_order_cnt_lsb_minus4 + 4);
+      pslice -> slice_pic_order_cnt_lsb = bs.getBits(m_spsMap[spsId] -> log2_max_pic_order_cnt_lsb_minus4 + 4);
       pslice -> short_term_ref_pic_set_sps_flag = bs.getBits(1);
 
       if(!pslice -> short_term_ref_pic_set_sps_flag)
@@ -1631,6 +1631,7 @@ PredWeightTable HevcParserImpl::processPredWeightTable(BitstreamReader &bs, std:
       }
     }
   } 
+  return pwt;
 }
 
 

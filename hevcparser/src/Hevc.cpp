@@ -1097,7 +1097,7 @@ void Slice::toDefault()
   slice_type = 0;
   pic_output_flag = 1;
   colour_plane_id = 0;
-  pic_order_cnt_lsb = 0;
+  slice_pic_order_cnt_lsb = 0;
   short_term_ref_pic_set_sps_flag = 0;
   short_term_ref_pic_set_idx = 0;
   num_ref_idx_l0_active_minus1 = 0;

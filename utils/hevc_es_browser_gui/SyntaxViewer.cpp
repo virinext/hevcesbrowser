@@ -585,7 +585,7 @@ void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
       pitemDepend = new QTreeWidgetItem(QStringList("if (nal_unit_type != IDR_W_RADL && nal_unit_type != IDR_N_LP)"));
       pitem -> addChild(pitemDepend);
 
-      pitemDepend -> addChild(new QTreeWidgetItem(QStringList("pic_order_cnt_lsb = " + QString::number(pSlice -> pic_order_cnt_lsb))));
+      pitemDepend -> addChild(new QTreeWidgetItem(QStringList("slice_pic_order_cnt_lsb = " + QString::number(pSlice -> slice_pic_order_cnt_lsb))));
 
       QTreeWidgetItem *pitemThird = new QTreeWidgetItem(QStringList("short_term_ref_pic_set_sps_flag = " + QString::number(pSlice -> short_term_ref_pic_set_sps_flag)));
       pitemDepend -> addChild(pitemThird);

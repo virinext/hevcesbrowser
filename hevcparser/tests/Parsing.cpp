@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(SURFING_FIRST_30)
   BOOST_CHECK_EQUAL(pslice -> dependent_slice_segment_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_reserved_undetermined_flag.size(), 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 1);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 4);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 4);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 1);
   
   
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(SURFING_FIRST_30)
   BOOST_CHECK_EQUAL(pslice -> dependent_slice_segment_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_reserved_undetermined_flag.size(), 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 1);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 1);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 1);
 
   
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(SURFING_FIRST_30)
   BOOST_CHECK_EQUAL(pslice -> dependent_slice_segment_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_reserved_undetermined_flag.size(), 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 2);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 2);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 1);
   
 
@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE(SURFING_FIRST_30)
   BOOST_CHECK_EQUAL(pslice -> dependent_slice_segment_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_reserved_undetermined_flag.size(), 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 3);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 3);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 1);
 
   BOOST_CHECK_EQUAL(consumer.m_nalus[7].m_pnalu -> getType(), NAL_TRAIL_N);
@@ -441,7 +441,7 @@ BOOST_AUTO_TEST_CASE(SINTEL_FIRST_30)
   BOOST_CHECK_EQUAL(pslice -> dependent_slice_segment_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_reserved_undetermined_flag.size(), 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 2);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 2);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 1);
 
   BOOST_CHECK_EQUAL(consumer.m_nalus[6].m_info.m_position, 0x000002E3);
@@ -453,7 +453,7 @@ BOOST_AUTO_TEST_CASE(SINTEL_FIRST_30)
   BOOST_CHECK_EQUAL(pslice -> dependent_slice_segment_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_reserved_undetermined_flag.size(), 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 1);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 1);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 1);
 
 
@@ -725,7 +725,7 @@ BOOST_AUTO_TEST_CASE(VIDEO_H265)
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> dependent_slice_segment_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 1);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 5);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 5);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set.num_negative_pics, 1);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set.num_positive_pics, 0);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set.delta_poc_s0_minus1[0], 4);
@@ -754,7 +754,7 @@ BOOST_AUTO_TEST_CASE(VIDEO_H265)
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> dependent_slice_segment_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 3);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 3);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set.num_negative_pics, 1);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set.num_positive_pics, 1);
@@ -782,7 +782,7 @@ BOOST_AUTO_TEST_CASE(VIDEO_H265)
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> dependent_slice_segment_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 1);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 1);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set.num_negative_pics, 1);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set.num_positive_pics, 2);
@@ -815,7 +815,7 @@ BOOST_AUTO_TEST_CASE(VIDEO_H265)
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> dependent_slice_segment_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 2);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 2);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set.num_negative_pics, 1);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set.num_positive_pics, 2);
@@ -847,7 +847,7 @@ BOOST_AUTO_TEST_CASE(VIDEO_H265)
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> dependent_slice_segment_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 4);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 4);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set.num_negative_pics, 2);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set.num_positive_pics, 1);
@@ -1063,7 +1063,7 @@ BOOST_AUTO_TEST_CASE(E_11345V_4T2_record_part)
   BOOST_CHECK_EQUAL(pslice -> dependent_slice_segment_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 2);
 
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 20);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 20);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 0);
 
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set.num_negative_pics, 4);
@@ -1088,7 +1088,7 @@ BOOST_AUTO_TEST_CASE(E_11345V_4T2_record_part)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 17);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 17);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 0);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set.num_negative_pics, 3);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set.num_positive_pics, 1);
@@ -1392,7 +1392,7 @@ BOOST_AUTO_TEST_CASE(TearsOfSteel_720p_h265_part)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 8);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 8);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 1);
 
   BOOST_CHECK_EQUAL(pslice -> num_entry_point_offsets, 11);
@@ -1418,7 +1418,7 @@ BOOST_AUTO_TEST_CASE(TearsOfSteel_720p_h265_part)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 4);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 4);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 1);
 
   BOOST_CHECK_EQUAL(pslice -> num_entry_point_offsets, 11);
@@ -1544,7 +1544,7 @@ BOOST_AUTO_TEST_CASE(Jellyfish_3_Mbps_1080p_hevc_part)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 1);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 4);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 4);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 0);
 
   BOOST_CHECK_EQUAL(pslice -> num_entry_point_offsets, 16);
@@ -1565,7 +1565,7 @@ BOOST_AUTO_TEST_CASE(Jellyfish_3_Mbps_1080p_hevc_part)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 2);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 2);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 0);
 
   BOOST_CHECK_EQUAL(pslice -> num_entry_point_offsets, 16);
@@ -1586,7 +1586,7 @@ BOOST_AUTO_TEST_CASE(Jellyfish_3_Mbps_1080p_hevc_part)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 1);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 1);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 0);
 
   BOOST_CHECK_EQUAL(pslice -> num_entry_point_offsets, 16);
@@ -1731,7 +1731,7 @@ BOOST_AUTO_TEST_CASE(ffmpeg_default)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 1);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 3);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 3);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 0);
 
   BOOST_CHECK_EQUAL(pslice -> num_entry_point_offsets, 16);
@@ -1752,7 +1752,7 @@ BOOST_AUTO_TEST_CASE(ffmpeg_default)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 2);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 2);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 0);
 
   BOOST_CHECK_EQUAL(pslice -> num_entry_point_offsets, 16);
@@ -1773,7 +1773,7 @@ BOOST_AUTO_TEST_CASE(ffmpeg_default)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 1);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 1);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 0);
 
   BOOST_CHECK_EQUAL(pslice -> num_entry_point_offsets, 16);
@@ -1932,7 +1932,7 @@ BOOST_AUTO_TEST_CASE(f265_default)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 1);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 2);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 2);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 0);
 
   BOOST_CHECK_EQUAL(pslice -> five_minus_max_num_merge_cand, 3);
@@ -1947,7 +1947,7 @@ BOOST_AUTO_TEST_CASE(f265_default)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 1);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 1);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 0);
 
   BOOST_CHECK_EQUAL(pslice -> five_minus_max_num_merge_cand, 3);
@@ -1962,7 +1962,7 @@ BOOST_AUTO_TEST_CASE(f265_default)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 1);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 3);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 3);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 0);
 
   BOOST_CHECK_EQUAL(pslice -> five_minus_max_num_merge_cand, 3);
@@ -2069,7 +2069,7 @@ BOOST_AUTO_TEST_CASE(homer_default)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 1);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 1);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 1);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 1);
 
   BOOST_CHECK_EQUAL(pslice -> five_minus_max_num_merge_cand, 3);
@@ -2087,7 +2087,7 @@ BOOST_AUTO_TEST_CASE(homer_default)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 1);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 2);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 2);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 1);
 
   BOOST_CHECK_EQUAL(pslice -> five_minus_max_num_merge_cand, 3);
@@ -2105,7 +2105,7 @@ BOOST_AUTO_TEST_CASE(homer_default)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 1);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 3);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 3);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 1);
 
   BOOST_CHECK_EQUAL(pslice -> five_minus_max_num_merge_cand, 3);
@@ -2122,7 +2122,7 @@ BOOST_AUTO_TEST_CASE(homer_default)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 1);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 4);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 4);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 1);
 
   BOOST_CHECK_EQUAL(pslice -> five_minus_max_num_merge_cand, 3);
@@ -2139,7 +2139,7 @@ BOOST_AUTO_TEST_CASE(homer_default)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 1);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 5);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 5);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 1);
 
   BOOST_CHECK_EQUAL(pslice -> five_minus_max_num_merge_cand, 3);
@@ -2244,7 +2244,7 @@ BOOST_AUTO_TEST_CASE(BQSquare_416x240_60_qp37)
   BOOST_CHECK_EQUAL(pslice -> first_slice_segment_in_pic_flag, 1);
   BOOST_CHECK_EQUAL(pslice -> slice_pic_parameter_set_id, 0);
   BOOST_CHECK_EQUAL(pslice -> slice_type, 0);
-  BOOST_CHECK_EQUAL(pslice -> pic_order_cnt_lsb, 87);
+  BOOST_CHECK_EQUAL(pslice -> slice_pic_order_cnt_lsb, 87);
   BOOST_CHECK_EQUAL(pslice -> short_term_ref_pic_set_sps_flag, 0);
 
   BOOST_CHECK_EQUAL(pslice -> five_minus_max_num_merge_cand, 0);
