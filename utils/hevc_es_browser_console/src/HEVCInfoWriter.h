@@ -17,6 +17,13 @@ class HEVCInfoWriter: public HEVC::Parser::Consumer
 
   protected:
 
+    struct NALUInfo
+    {
+      std::shared_ptr<HEVC::NALUnit>     m_pNALUnit;
+      HEVC::Parser::Info                 m_info;
+    };
+
+    void writeNALHeader(const NALUInfo& naluInfo, std::ostream &out);
     void writeVPS(std::shared_ptr<HEVC::VPS> pVPS, std::ostream &out);
     void writeSPS(std::shared_ptr<HEVC::SPS> pSPS, std::ostream &out);
     void writePPS(std::shared_ptr<HEVC::PPS> pPPS, std::ostream &out);
@@ -30,14 +37,7 @@ class HEVCInfoWriter: public HEVC::Parser::Consumer
     void writeShortTermRefPicSet(std::size_t stRpsIdx, std::size_t num_short_term_ref_pic_sets, const std::vector<HEVC::ShortTermRefPicSet> &refPicSets, std::ostream &out, const std::string &prefix);
     void writeVuiParameters(const HEVC::VuiParameters &vui, std::size_t sps_max_sub_layers_minus1, std::ostream &out, const std::string &prefix);
 
-    struct NALUInfo
-    {
-      std::shared_ptr<HEVC::NALUnit>     m_pNALUnit;
-      HEVC::Parser::Info                 m_info;
-    };
-    
     std::vector<NALUInfo>    m_nalus;
-
 
     std::map<uint32_t, std::shared_ptr<HEVC::VPS> >          m_vpsMap;
     std::map<uint32_t, std::shared_ptr<HEVC::SPS> >          m_spsMap;

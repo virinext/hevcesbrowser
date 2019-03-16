@@ -21,8 +21,7 @@ void HEVCInfoWriter::write(std::ostream &out)
   out << "Syntax elements (count = " << m_nalus.size() << "):" << std::endl;
   for(std::size_t i=0; i<m_nalus.size(); i++)
   {
-    out << std::hex << "0x" << m_nalus[i].m_info.m_position << std::dec << ": ";
-    out << ConvToString::NALUnitType(m_nalus[i].m_pNALUnit -> m_nalUnitType) << std::endl;
+    writeNALHeader(m_nalus[i], out);
 
     switch(m_nalus[i].m_pNALUnit -> m_nalUnitType)
     {
@@ -90,6 +89,12 @@ void HEVCInfoWriter::write(std::ostream &out)
   }
 }
 
+
+void HEVCInfoWriter::writeNALHeader(const NALUInfo& naluInfo, std::ostream &out)
+{
+  out << std::hex << "0x" << naluInfo.m_info.m_position << std::dec << ": ";
+  out << ConvToString::NALUnitType(naluInfo.m_pNALUnit -> m_nalUnitType) << std::endl;
+}
 
 void HEVCInfoWriter::writeVPS(std::shared_ptr<HEVC::VPS> pVPS, std::ostream &out)
 {
