@@ -15,7 +15,7 @@ set(TEST_SOURCES
 )
 
 ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)
-add_executable(hevcparser_test ${TEST_SOURCES}) 
+add_executable(hevcparser_test ${TEST_SOURCES})
 target_link_libraries(hevcparser_test hevcparser ${Boost_LIBRARIES})
 add_dependencies(hevcparser_test hevcparser)
 

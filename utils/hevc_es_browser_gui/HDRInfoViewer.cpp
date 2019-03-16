@@ -20,7 +20,7 @@ HDRInfoViewer::HDRInfoViewer(QWidget *pwgt):
 
 void HDRInfoViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const HEVC::Parser::Info *pInfo)
 {
-  switch(pNALUnit -> m_nalUnitType)
+  switch(pNALUnit -> m_nalHeader.type)
   {
     case HEVC::NAL_SPS:
     {
@@ -43,7 +43,7 @@ void HDRInfoViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const HEV
         payloadType += pSEI -> sei_message[i].last_payload_type_byte;
 
         switch(payloadType)
-        {      
+        {
           case HEVC::SeiMessage::MASTERING_DISPLAY_INFO:
             m_pMasteringDisplayInfo = std::dynamic_pointer_cast<HEVC::MasteringDisplayInfo>(pSEI -> sei_message[i].sei_payload);
             break;
@@ -51,7 +51,7 @@ void HDRInfoViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const HEV
           case HEVC::SeiMessage::CONTENT_LIGHT_LEVEL_INFO:
              m_pCLLInfo = std::dynamic_pointer_cast<HEVC::ContentLightLevelInfo>(pSEI -> sei_message[i].sei_payload);
 
-          default: 
+          default:
             break;
         }
       }
@@ -213,7 +213,7 @@ QString matrixCoeficientsToString(int value)
   {
     case 0:
       result = "GBR";
-      break;    
+      break;
     case 1:
       result = "bt709";
       break;
@@ -256,11 +256,11 @@ void HDRInfoViewer::update()
   QListWidget::clear();
 
   int colour_primaries = 2;
-  int transfer_characteristics = 2; 
+  int transfer_characteristics = 2;
   int matrix_coeffs = 2;
 
-  if(m_psps && m_psps -> vui_parameters_present_flag && 
-      m_psps -> vui_parameters.video_signal_type_present_flag && 
+  if(m_psps && m_psps -> vui_parameters_present_flag &&
+      m_psps -> vui_parameters.video_signal_type_present_flag &&
       m_psps -> vui_parameters.colour_description_present_flag)
   {
     colour_primaries = m_psps -> vui_parameters.colour_primaries;
@@ -270,7 +270,7 @@ void HDRInfoViewer::update()
 
   int chroma_loc_top = 0;
   int chroma_loc_bottom = 0;
-  if(m_psps && m_psps -> vui_parameters_present_flag && 
+  if(m_psps && m_psps -> vui_parameters_present_flag &&
     m_psps -> vui_parameters.chroma_loc_info_present_flag)
   {
     chroma_loc_top = m_psps -> vui_parameters.chroma_sample_loc_type_top_field;
@@ -278,11 +278,11 @@ void HDRInfoViewer::update()
   }
 
   int video_full_range_flag = 0;
-  if(m_psps && m_psps -> vui_parameters_present_flag && 
+  if(m_psps && m_psps -> vui_parameters_present_flag &&
     m_psps -> vui_parameters.video_signal_type_present_flag)
   {
     video_full_range_flag = m_psps -> vui_parameters.video_full_range_flag;
-  }  
+  }
 
   addItem(QString("Colour primaries: ") +colourPrimariesToString(colour_primaries));
   addItem(QString("Transfer characteristics: ") + transferCharacteristicsToString(transfer_characteristics));

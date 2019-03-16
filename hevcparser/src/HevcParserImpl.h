@@ -22,7 +22,7 @@ namespace HEVC
 
     protected:
       void processNALUnit(const uint8_t *pdata, std::size_t size, const Parser::Info &info);
-      NALUnitType processNALUnitHeader(BitstreamReader &bs);
+      void processNALUnitHeader(BitstreamReader &bs, NALHeader* header);
       void processVPS(std::shared_ptr<VPS> pvps, BitstreamReader &bs, const Parser::Info &info);
       void processSPS(std::shared_ptr<SPS> psps, BitstreamReader &bs, const Parser::Info &info);
       void processPPS(std::shared_ptr<PPS> ppps, BitstreamReader &bs, const Parser::Info &info);

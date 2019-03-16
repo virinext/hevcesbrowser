@@ -22,7 +22,7 @@ private:
   const uint8_t              *m_ptr;
   std::size_t                 m_size;
   std::size_t                 m_posBase;
-  std::size_t                 m_posInBase;  
+  std::size_t                 m_posInBase;
 };
 
 

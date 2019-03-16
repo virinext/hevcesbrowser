@@ -3,6 +3,7 @@ project(hevcesbrowser_console)
 set(SOURCES
 	src/main.cpp
 	src/HEVCInfoWriter.cpp
+	src/HEVCInfoAltWriter.cpp
 	../common/ConvToString.cpp
 )
 
@@ -19,6 +20,6 @@ set(LIBS
 	${Boost_LIBRARIES}
 )
 
-add_executable(hevcesbrowser_console ${SOURCES}) 
+add_executable(hevcesbrowser_console ${SOURCES})
 target_link_libraries(hevcesbrowser_console ${LIBS})
 add_dependencies(hevcesbrowser_console hevcparser)

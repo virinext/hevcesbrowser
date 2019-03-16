@@ -13,7 +13,7 @@
 class CentralWidget: public QWidget
 {
   Q_OBJECT
-  
+
   public:
     CentralWidget(QWidget *pwgt = NULL);
     ~CentralWidget();
@@ -22,7 +22,7 @@ class CentralWidget: public QWidget
     QSharedPointer<SyntaxViewer>                   m_psyntaxViewer;
     QSharedPointer<QHexView>                       m_phexViewer;
 
- 
+
     void saveCustomData();
   private:
   	void readCustomData();

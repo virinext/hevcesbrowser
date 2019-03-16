@@ -29,9 +29,9 @@ namespace HEVC
           virtual void onNALUnit(std::shared_ptr<NALUnit> pNALUnit, const Info *pInfo) = 0;
           virtual void onWarning(const std::string &warning, const Info *pInfo, WarningType type) = 0;
       };
-      
+
       virtual ~Parser();
-      
+
       virtual std::size_t process(const uint8_t *pdata, std::size_t size, std::size_t offset = 0) = 0;
       virtual void addConsumer(Consumer *pconsumer) = 0;
       virtual void releaseConsumer(Consumer *pconsumer) = 0;

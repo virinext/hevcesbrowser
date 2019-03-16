@@ -4,8 +4,8 @@
 
 using namespace HEVC;
 
-NALUnit::NALUnit(NALUnitType type):
-  m_nalUnitType(type)
+NALUnit::NALUnit(NALHeader header):
+  m_nalHeader(header)
   ,m_processFailed(false)
 {
 }
@@ -18,15 +18,15 @@ NALUnit::~NALUnit()
 
 NALUnitType NALUnit::getType() const
 {
-  return m_nalUnitType;
+  return m_nalHeader.type;
 }
- 
- 
+
+
 std::shared_ptr<NALUnit> NALUnit::copy() const
 {
   std::shared_ptr<NALUnit> res;
 
-  switch(m_nalUnitType)
+  switch(m_nalHeader.type)
   {
     case NAL_VPS:
     {
@@ -39,7 +39,7 @@ std::shared_ptr<NALUnit> NALUnit::copy() const
       res = std::shared_ptr<NALUnit>(new SPS(*((SPS *) this)));
       break;
     }
-    
+
     case NAL_PPS:
     {
       res = std::shared_ptr<NALUnit>(new PPS(*((PPS *) this)));
@@ -75,37 +75,37 @@ std::shared_ptr<NALUnit> NALUnit::copy() const
   return res;
 }
 
-HEVC::VPS::VPS(): NALUnit(HEVC::NAL_VPS) 
-{ 
-  toDefault();
-}
-
-
-HEVC::SPS::SPS(): NALUnit(NAL_SPS) 
+HEVC::VPS::VPS(): NALUnit({HEVC::NAL_VPS, 0, 0})
 {
   toDefault();
 }
 
 
-HEVC::PPS::PPS(): NALUnit(NAL_PPS) 
+HEVC::SPS::SPS(): NALUnit({HEVC::NAL_SPS, 0, 0})
+{
+  toDefault();
+}
+
+
+HEVC::PPS::PPS(): NALUnit({HEVC::NAL_PPS, 0, 0})
 {
   toDefault();
 };
 
 
-HEVC::AUD::AUD(): NALUnit(NAL_AUD) 
+HEVC::AUD::AUD(): NALUnit({HEVC::NAL_AUD, 0, 0})
 {
   toDefault();
 };
 
 
-HEVC::SEI::SEI(NALUnitType type): NALUnit(type) 
+HEVC::SEI::SEI(NALHeader header): NALUnit(header)
 {
   toDefault();
 };
 
 
-HEVC::Slice::Slice(NALUnitType type): NALUnit(type) 
+HEVC::Slice::Slice(NALHeader header): NALUnit(header)
 {
   toDefault();
 };
@@ -274,7 +274,7 @@ bool HEVC::SPS::operator == (const HEVC::SPS &sps) const
 
   if(scaling_list_enabled_flag != sps.scaling_list_enabled_flag)
     return false;
-  
+
   if(!(scaling_list_data == sps.scaling_list_data))
     return false;
 
@@ -837,7 +837,7 @@ bool RefPicListModification::operator == (const RefPicListModification &obj) con
 
 void ProfileTierLevel::toDefault()
 {
-    general_profile_space = 0;  
+    general_profile_space = 0;
     general_tier_flag = 0;
     general_profile_idc = 0;
     general_profile_compatibility_flag[32];
@@ -954,7 +954,7 @@ void VuiParameters::toDefault()
     max_bytes_per_pic_denom = 2;
     max_bits_per_min_cu_denom = 1;
     log2_max_mv_length_horizontal = 15;
-    log2_max_mv_length_vertical = 15;  
+    log2_max_mv_length_vertical = 15;
 }
 
 

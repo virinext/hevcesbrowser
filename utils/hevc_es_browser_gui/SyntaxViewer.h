@@ -16,12 +16,12 @@
 class SyntaxViewer: public QTreeWidget
 {
   Q_OBJECT
-  
+
   public:
     SyntaxViewer(QWidget *pwgt = NULL);
 
     void updateItemsState();
-    
+
   public slots:
     void onNalUChanged(std::shared_ptr<HEVC::NALUnit>, ParserInfo info);
 
@@ -89,8 +89,8 @@ private:
 
       std::map<QString, bool>       m_state;
     };
-    
-    
+
+
     SyntaxViewerState     m_state;
 };
 

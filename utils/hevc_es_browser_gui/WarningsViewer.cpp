@@ -126,7 +126,7 @@ void WarningsViewer::readCustomData()
 {
   QSettings settings("HEVCESBrowser", "HEVCESBrowser");
   restoreGeometry(settings.value("WarningsViewer/geometry").toByteArray());
-  
+
   if(settings.contains("WarningsViewer/OffsetWidth"))
     m_ptable -> setColumnWidth(0, settings.value("WarningsViewer/OffsetWidth").toInt());
 

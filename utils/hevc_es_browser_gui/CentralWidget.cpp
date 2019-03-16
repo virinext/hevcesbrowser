@@ -10,7 +10,7 @@
 
 #include "types.h"
 
-//typedef 
+//typedef
 
 CentralWidget::CentralWidget(QWidget *pwgt):
   QWidget(pwgt)
@@ -34,7 +34,7 @@ CentralWidget::CentralWidget(QWidget *pwgt):
 
     m_psyntaxViewer -> header()->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     m_psyntaxViewer -> header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-    m_psyntaxViewer -> header()->setStretchLastSection(false); 
+    m_psyntaxViewer -> header()->setStretchLastSection(false);
 
     QObject::connect(m_pcomInfoViewer.data(),
       SIGNAL(naluSelected(std::shared_ptr<HEVC::NALUnit>, ParserInfo)),

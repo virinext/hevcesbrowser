@@ -17,12 +17,12 @@ CommonInfoViewer::CommonInfoViewer(QWidget *pwgt):
   setEditTriggers(QAbstractItemView::NoEditTriggers);
   setSelectionBehavior(QAbstractItemView::SelectRows);
   setSelectionMode(QAbstractItemView::SingleSelection);
-  
-  QObject::connect(selectionModel(), 
+
+  QObject::connect(selectionModel(),
          SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
          this,
          SLOT(onSelectionChanged(const QItemSelection &, const QItemSelection &)));
-  
+
   readCustomData();
 }
 
@@ -45,11 +45,11 @@ void CommonInfoViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const 
   if(row > 0)
     item(row - 1, 1) -> setText(QString::number(pInfo -> m_position - m_nalus[m_nalus.size() - 2].m_info.m_position));
 
-  setItem(row, 2, new QTableWidgetItem(QString((ConvToString::NALUnitType(pNALUnit -> m_nalUnitType)).c_str())));
+  setItem(row, 2, new QTableWidgetItem(QString((ConvToString::NALUnitType(pNALUnit -> m_nalHeader.type)).c_str())));
 
   using namespace HEVC;
 
-  switch(pNALUnit -> m_nalUnitType)
+  switch(pNALUnit -> m_nalHeader.type)
   {
     case NAL_VPS:
     {
@@ -64,7 +64,7 @@ void CommonInfoViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const 
 
       break;
     }
-    
+
     case NAL_SPS:
     {
       setItem(row, 3, new QTableWidgetItem("Sequence parameter set"));
@@ -79,7 +79,7 @@ void CommonInfoViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const 
 
       break;
     }
-    
+
     case NAL_PPS:
     {
       setItem(row, 3, new QTableWidgetItem("Picture parameter set"));
@@ -102,7 +102,7 @@ void CommonInfoViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const 
       break;
     }
 
-    
+
     case NAL_TRAIL_R:
     case NAL_TSA_R:
     case NAL_STSA_R:
@@ -124,7 +124,7 @@ void CommonInfoViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const 
         setItem(row, 3, new QTableWidgetItem("Dependent Slice"));
       else
       {
-        switch(pSlice -> slice_type)       
+        switch(pSlice -> slice_type)
         {
           case HEVC::Slice::B_SLICE:
             setItem(row, 3, new QTableWidgetItem("B Slice"));
@@ -181,7 +181,7 @@ void CommonInfoViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const 
 void CommonInfoViewer::onSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
 {
   QModelIndexList idxs = selected.indexes();
-  
+
   if(!idxs.empty())
     emit naluSelected(m_nalus[idxs.begin() -> row()].m_pNALUnit, m_nalus[idxs.begin() -> row()].m_info);
 }
@@ -191,7 +191,7 @@ void CommonInfoViewer::clear()
 {
   setRowCount(0);
 
-  m_nalus.clear(); 
+  m_nalus.clear();
 }
 
 
@@ -208,7 +208,7 @@ void CommonInfoViewer::saveCustomData()
 void CommonInfoViewer::readCustomData()
 {
   QSettings settings("HEVCESBrowser", "HEVCESBrowser");
-  
+
   if(settings.contains("CommonInfoViewer/0Width"))
     setColumnWidth(0, settings.value("CommonInfoViewer/0Width").toInt());
 
