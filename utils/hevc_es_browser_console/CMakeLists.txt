@@ -3,6 +3,7 @@ project(hevcesbrowser_console)
 set(SOURCES
 	src/main.cpp
 	src/HEVCInfoWriter.cpp
+	src/HEVCInfoAltWriter.cpp
 	../common/ConvToString.cpp
 )
 

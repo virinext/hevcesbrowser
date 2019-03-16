@@ -6,6 +6,7 @@
 #include <HevcParser.h>
 
 #include "HEVCInfoWriter.h"
+#include "HEVCInfoAltWriter.h"
 
 
 int main(int argc, char **argv)
@@ -16,6 +17,7 @@ int main(int argc, char **argv)
     po::options_description desc("Options");
     desc.add_options()
       ("help", "produce help message")
+      ("altwriter", "user alternative writer")
       ("input,i", po::value<std::string>(), "path to in file")
       ("output,o", po::value<std::string>(), "path to out file")
     ;
@@ -69,10 +71,14 @@ int main(int argc, char **argv)
     }
 
     in.read(pdata, size);
-    
+
     HEVC::Parser *pparser = HEVC::Parser::create();
-    HEVCInfoWriter writer;
-    pparser -> addConsumer(&writer);
+    HEVCInfoWriter* writer = nullptr;
+    if (vm.count("altwriter"))
+        writer = new HEVCInfoAltWriter();
+    else
+        writer = new HEVCInfoWriter();
+    pparser -> addConsumer(writer);
 
     pparser -> process((const uint8_t *)pdata, size);
       
@@ -81,7 +87,8 @@ int main(int argc, char **argv)
     
     *pout << vm["input"].as<std::string>() << std::endl;
     *pout << "=======================" << std::endl;
-    writer.write(*pout);
+    writer->write(*pout);
+    delete writer;
   }
   catch(std::exception& e) {
     std::cerr << "Error: " << e.what() << "\n";
