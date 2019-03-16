@@ -16,9 +16,9 @@ class WarningsViewer:
   Q_OBJECT
   public:
     WarningsViewer(QWidget *pwgt = NULL);
-    
+
     void clear();
-    
+
     virtual void onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const HEVC::Parser::Info *pInfo);
     virtual void onWarning(const std::string &warning, const HEVC::Parser::Info *pInfo, HEVC::Parser::WarningType);
 

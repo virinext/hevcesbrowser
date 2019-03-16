@@ -20,8 +20,8 @@ NALUnitType NALUnit::getType() const
 {
   return m_nalHeader.type;
 }
- 
- 
+
+
 std::shared_ptr<NALUnit> NALUnit::copy() const
 {
   std::shared_ptr<NALUnit> res;
@@ -39,7 +39,7 @@ std::shared_ptr<NALUnit> NALUnit::copy() const
       res = std::shared_ptr<NALUnit>(new SPS(*((SPS *) this)));
       break;
     }
-    
+
     case NAL_PPS:
     {
       res = std::shared_ptr<NALUnit>(new PPS(*((PPS *) this)));
@@ -76,7 +76,7 @@ std::shared_ptr<NALUnit> NALUnit::copy() const
 }
 
 HEVC::VPS::VPS(): NALUnit({HEVC::NAL_VPS, 0, 0})
-{ 
+{
   toDefault();
 }
 
@@ -274,7 +274,7 @@ bool HEVC::SPS::operator == (const HEVC::SPS &sps) const
 
   if(scaling_list_enabled_flag != sps.scaling_list_enabled_flag)
     return false;
-  
+
   if(!(scaling_list_data == sps.scaling_list_data))
     return false;
 
@@ -837,7 +837,7 @@ bool RefPicListModification::operator == (const RefPicListModification &obj) con
 
 void ProfileTierLevel::toDefault()
 {
-    general_profile_space = 0;  
+    general_profile_space = 0;
     general_tier_flag = 0;
     general_profile_idc = 0;
     general_profile_compatibility_flag[32];
@@ -954,7 +954,7 @@ void VuiParameters::toDefault()
     max_bytes_per_pic_denom = 2;
     max_bits_per_min_cu_denom = 1;
     log2_max_mv_length_horizontal = 15;
-    log2_max_mv_length_vertical = 15;  
+    log2_max_mv_length_vertical = 15;
 }
 
 

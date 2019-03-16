@@ -20,6 +20,6 @@ set(LIBS
 	${Boost_LIBRARIES}
 )
 
-add_executable(hevcesbrowser_console ${SOURCES}) 
+add_executable(hevcesbrowser_console ${SOURCES})
 target_link_libraries(hevcesbrowser_console ${LIBS})
 add_dependencies(hevcesbrowser_console hevcparser)

@@ -22,7 +22,7 @@ uint32_t HEVC::log2(uint32_t k)
       res += 16;
   }
 
-  
+
   if (k & 0xff00) {
       k >>= 8;
       res += 8;
@@ -66,15 +66,15 @@ uint32_t HEVC::calcNumPocTotalCurr(std::shared_ptr<HEVC::Slice> pslice, std::sha
     strps = psps -> short_term_ref_pic_set[currRpsIdx];
   else
     strps = pslice -> short_term_ref_pic_set;
-  
+
   for(std::size_t i = 0; i < strps.num_negative_pics; i++)
     if (strps.used_by_curr_pic_s0_flag[i])
       NumPocTotalCurr++;
-  
+
   for(std::size_t i = 0; i < strps.num_positive_pics; i++)
     if (strps.used_by_curr_pic_s1_flag[i])
       NumPocTotalCurr++;
-  
+
   for(std::size_t i = 0;i < (pslice -> num_long_term_sps + pslice -> num_long_term_pics); i++)
     if (UsedByCurrPicLt[i])
       NumPocTotalCurr++;

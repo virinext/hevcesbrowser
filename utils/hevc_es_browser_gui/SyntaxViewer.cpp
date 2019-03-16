@@ -43,21 +43,21 @@ void SyntaxViewer::onNalUChanged(std::shared_ptr<HEVC::NALUnit> pNalU, ParserInf
       createVPS(pVPS);
       break;
     }
-    
+
     case NAL_SPS:
     {
       std::shared_ptr<HEVC::SPS> pSPS = std::dynamic_pointer_cast<HEVC::SPS>(pNalU);
       createSPS(pSPS);
       break;
     }
-    
+
     case NAL_PPS:
     {
       std::shared_ptr<HEVC::PPS> pPPS = std::dynamic_pointer_cast<HEVC::PPS>(pNalU);
       createPPS(pPPS);
       break;
     }
-    
+
     case NAL_TRAIL_R:
     case NAL_TRAIL_N:
     case NAL_TSA_N:
@@ -118,7 +118,7 @@ void SyntaxViewer::createVPS(std::shared_ptr<HEVC::VPS> pVPS)
   pvpsItem -> addChild(new QTreeWidgetItem(QStringList("vps_sub_layer_ordering_info_present_flag = " + QString::number(pVPS -> vps_sub_layer_ordering_info_present_flag))));
 
   QTreeWidgetItem *ploop = new QTreeWidgetItem(QStringList("for( i = ( vps_sub_layer_ordering_info_present_flag ? 0 : vps_max_sub_layers_minus1 ); i <= vps_max_sub_layers_minus1; i++ )"));
-  
+
   pvpsItem -> addChild(ploop);
 
   for(std::size_t i = (pVPS -> vps_sub_layer_ordering_info_present_flag ? 0 : pVPS -> vps_max_sub_layers_minus1); i <= pVPS -> vps_max_sub_layers_minus1; i++)
@@ -162,7 +162,7 @@ void SyntaxViewer::createVPS(std::shared_ptr<HEVC::VPS> pVPS)
 
   pvpsItem -> addChild(new QTreeWidgetItem(QStringList("vps_timing_info_present_flag = " + QString::number(pVPS -> vps_timing_info_present_flag))));
 
-  if(pVPS -> vps_timing_info_present_flag) 
+  if(pVPS -> vps_timing_info_present_flag)
   {
     QTreeWidgetItem *pitem = new QTreeWidgetItem(QStringList("if( vps_timing_info_present_flag )"));
     pvpsItem -> addChild(pitem);
@@ -260,7 +260,7 @@ void SyntaxViewer::createSPS(std::shared_ptr<HEVC::SPS> pSPS)
   pitem = new QTreeWidgetItem(QStringList("for( i = ( sps_sub_layer_ordering_info_present_flag ? 0 : sps_max_sub_layers_minus1 );i <= sps_max_sub_layers_minus1; i++ )"));
   pspsItem -> addChild(pitem);
 
-  for(std::size_t i = (pSPS -> sps_sub_layer_ordering_info_present_flag ? 0 : pSPS -> sps_max_sub_layers_minus1); i <= pSPS -> sps_max_sub_layers_minus1; i++ ) 
+  for(std::size_t i = (pSPS -> sps_sub_layer_ordering_info_present_flag ? 0 : pSPS -> sps_max_sub_layers_minus1); i <= pSPS -> sps_max_sub_layers_minus1; i++ )
   {
     pitem -> addChild(new QTreeWidgetItem(QStringList("sps_max_dec_pic_buffering_minus1[" + QString::number(i) + "] = " + QString::number(pSPS -> sps_max_dec_pic_buffering_minus1[i]))));
     pitem -> addChild(new QTreeWidgetItem(QStringList("sps_max_num_reorder_pics[" + QString::number(i) + "] = " + QString::number(pSPS -> sps_max_num_reorder_pics[i]))));
@@ -426,7 +426,7 @@ void SyntaxViewer::createPPS(std::shared_ptr<HEVC::PPS> pPPS)
       }
       if(pPPS -> num_tile_columns_minus1 > 0)
         str += QString::number(pPPS -> column_width_minus1[pPPS -> num_tile_columns_minus1 - 1]) + " \n}";
-      else 
+      else
         str += "}";
 
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList(str)));
@@ -440,7 +440,7 @@ void SyntaxViewer::createPPS(std::shared_ptr<HEVC::PPS> pPPS)
       }
       if(pPPS -> num_tile_rows_minus1 > 0)
         str += QString::number(pPPS -> row_height_minus1[pPPS -> num_tile_rows_minus1 - 1]) + " \n}";
-      else 
+      else
         str += "}";
 
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList(str)));
@@ -560,7 +560,7 @@ void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
 
     pitem -> addChild(new QTreeWidgetItem(QStringList(str)));
     pitem -> addChild(new QTreeWidgetItem(QStringList("slice_type = " + QString::number(pSlice -> slice_type))));
-    
+
     if(pPPS -> output_flag_present_flag)
     {
       pitemDepend = new QTreeWidgetItem(QStringList("if (output_flag_present_flag)"));
@@ -577,7 +577,7 @@ void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
       pitemDepend = new QTreeWidgetItem(QStringList("if (sps -> separate_colour_plane_flag)"));
       pitem -> addChild(pitemDepend);
       pitemDepend -> addChild(new QTreeWidgetItem(QStringList("colour_plane_id = " + QString::number(pSlice -> colour_plane_id))));
-    }    
+    }
     bool IdrPicFlag = pSlice -> m_nalHeader.type == HEVC::NAL_IDR_W_RADL || pSlice -> m_nalHeader.type == HEVC::NAL_IDR_N_LP;
 
     if(!IdrPicFlag)
@@ -626,7 +626,7 @@ void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
 
         for(std::size_t i=0; i < num_long_term; i++)
         {
-          if(i < pSlice -> num_long_term_sps) 
+          if(i < pSlice -> num_long_term_sps)
           {
             QTreeWidgetItem *pitem1 = new QTreeWidgetItem(QStringList("if (i < num_long_term_sps)"));
             pitemLoop -> addChild(pitem1);
@@ -709,7 +709,7 @@ void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
 
 
           createRefPicListModification(pSlice -> ref_pic_lists_modification, pitemRplMod);
-        }        
+        }
       }
 
       if(pSlice -> slice_type == SLICE_B)
@@ -799,7 +799,7 @@ void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
       }
     }
 
-    if(pPPS -> pps_loop_filter_across_slices_enabled_flag && 
+    if(pPPS -> pps_loop_filter_across_slices_enabled_flag &&
       (pSlice -> slice_sao_luma_flag || pSlice -> slice_sao_chroma_flag || !pSlice -> slice_deblocking_filter_disabled_flag))
     {
       pitemDepend = new QTreeWidgetItem(QStringList("if (pps_loop_filter_across_slices_enabled_flag && (slice_sao_luma_flag || slice_sao_chroma_flag || !slice_deblocking_filter_disabled_flag ))"));
@@ -870,7 +870,7 @@ void SyntaxViewer::createSEI(std::shared_ptr<HEVC::SEI> pSEI)
 
     QTreeWidgetItem *pitem = new QTreeWidgetItem(QStringList("sei_message(" + QString::number(i) + ")"));
     pitemSEI -> addChild(pitem);
-    
+
     if(pSEI -> sei_message[i].num_payload_type_ff_bytes)
     {
       QTreeWidgetItem *pitemSecond = new QTreeWidgetItem(QStringList("while( next_bits( 8 ) == 0xFF )"));
@@ -969,14 +969,14 @@ void SyntaxViewer::createSEI(std::shared_ptr<HEVC::SEI> pSEI)
         pitem -> addChild(pitemSei);
         createBufferingPeriod(pSeiMessage, pitemSei);
         break;
-      }      
+      }
 
       case HEVC::SeiMessage::FILLER_PAYLOAD:
       {
         QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("filler_payload(" + QString::number(payloadSize) + ")"));
         pitem -> addChild(pitemSei);
         break;
-      }      
+      }
 
       case HEVC::SeiMessage::PICTURE_TIMING:
       {
@@ -985,7 +985,7 @@ void SyntaxViewer::createSEI(std::shared_ptr<HEVC::SEI> pSEI)
         pitem -> addChild(pitemSei);
         createPicTiming(pSeiMessage, pitemSei);
         break;
-      }         
+      }
 
       case HEVC::SeiMessage::RECOVERY_POINT:
       {
@@ -1200,7 +1200,7 @@ void SyntaxViewer::createProfileTierLevel(const HEVC::ProfileTierLevel &ptl, QTr
 
     if(ptl.sub_layer_level_present_flag[i])
       needLoop = true;
-  }      
+  }
 
   if(needLoop)
   {
@@ -1429,7 +1429,7 @@ void SyntaxViewer::createHrdParameters(const HEVC::HrdParameters &hrd, uint8_t c
     QTreeWidgetItem *pitem = new QTreeWidgetItem(QStringList("for( i = 0; i <= maxNumSubLayersMinus1; i++ )"));
     pHrdItem -> addChild(pitem);
 
-    for(std::size_t i = 0; i < hrd.fixed_pic_rate_general_flag.size(); i++ ) 
+    for(std::size_t i = 0; i < hrd.fixed_pic_rate_general_flag.size(); i++ )
     {
       pitem -> addChild(new QTreeWidgetItem(QStringList("fixed_pic_rate_general_flag[" + QString::number(i) + "] = " + QString::number(hrd.fixed_pic_rate_general_flag[i]))));
 
@@ -1566,7 +1566,7 @@ void SyntaxViewer::createShortTermRefPicSet(std::size_t stRpsIdx, const HEVC::Sh
       }
     }
   }
-  else 
+  else
   {
     QTreeWidgetItem *pitem = new QTreeWidgetItem(QStringList("if( !inter_ref_pic_set_prediction_flag )"));
     pStrpsItem -> addChild(pitem);
@@ -1577,7 +1577,7 @@ void SyntaxViewer::createShortTermRefPicSet(std::size_t stRpsIdx, const HEVC::Sh
     QTreeWidgetItem *pitemLoop = new QTreeWidgetItem(QStringList("for( i = 0; i < num_negative_pics; i++ )"));
     pitem -> addChild(pitemLoop);
 
-    for(std::size_t i=0; i<rpset.num_negative_pics; i++) 
+    for(std::size_t i=0; i<rpset.num_negative_pics; i++)
     {
       pitemLoop -> addChild(new QTreeWidgetItem(QStringList("delta_poc_s0_minus1[" + QString::number(i) + "] = " + QString::number(rpset.delta_poc_s0_minus1[i]))));
       pitemLoop -> addChild(new QTreeWidgetItem(QStringList("used_by_curr_pic_s0_flag[" + QString::number(i) + "] = " + QString::number(rpset.used_by_curr_pic_s0_flag[i]))));
@@ -1586,7 +1586,7 @@ void SyntaxViewer::createShortTermRefPicSet(std::size_t stRpsIdx, const HEVC::Sh
     pitemLoop = new QTreeWidgetItem(QStringList("for( i = 0; i < num_positive_pics; i++ )"));
     pitem -> addChild(pitemLoop);
 
-    for(std::size_t i=0; i<rpset.num_positive_pics; i++) 
+    for(std::size_t i=0; i<rpset.num_positive_pics; i++)
     {
       pitemLoop -> addChild(new QTreeWidgetItem(QStringList("delta_poc_s1_minus1[" + QString::number(i) + "] = " + QString::number(rpset.delta_poc_s1_minus1[i]))));
       pitemLoop -> addChild(new QTreeWidgetItem(QStringList("used_by_curr_pic_s1_flag[" + QString::number(i) + "] = " + QString::number(rpset.used_by_curr_pic_s1_flag[i]))));
@@ -1607,7 +1607,7 @@ void SyntaxViewer::createScalingListData(const HEVC::ScalingListData &scdata, QT
 
   for(std::size_t sizeId = 0; sizeId < 4; sizeId++)
   {
-    for(std::size_t matrixId = 0; matrixId<((sizeId == 3)?2:6); matrixId++) 
+    for(std::size_t matrixId = 0; matrixId<((sizeId == 3)?2:6); matrixId++)
     {
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList("scaling_list_pred_mode_flag[" + QString::number(sizeId) + "][" + QString::number(matrixId) + "] = " + QString::number(scdata.scaling_list_pred_mode_flag[sizeId][matrixId]))));
 
@@ -1630,7 +1630,7 @@ void SyntaxViewer::createScalingListData(const HEVC::ScalingListData &scdata, QT
         pitem = new QTreeWidgetItem(QStringList("for( i = 0; i < coefNum; i++ )"));
         pitemSecond -> addChild(pitem);
 
-        for(std::size_t i = 0; i < coefNum; i++) 
+        for(std::size_t i = 0; i < coefNum; i++)
         {
           pitem -> addChild(new QTreeWidgetItem(QStringList("scaling_list_delta_coef[" + QString::number(sizeId) + "][" + QString::number(matrixId) + "][" + QString::number(i) + "] = " + QString::number(scdata.scaling_list_delta_coef[sizeId][matrixId][i]))));
         }
@@ -1775,7 +1775,7 @@ void SyntaxViewer::createPredWeightTable(const HEVC::PredWeightTable &pwt, std::
         pitem -> addChild(new QTreeWidgetItem(QStringList("delta_chroma_offset_l1[" + QString::number(i) + "] = { " + QString::number(pwt.delta_chroma_offset_l1[i][0]) + ", " + QString::number(pwt.delta_chroma_offset_l1[i][1]) + " } ")));
       }
     }
-  } 
+  }
 
 }
 
@@ -1859,26 +1859,26 @@ void SyntaxViewer::createActiveParameterSets(std::shared_ptr<HEVC::ActiveParamet
 
 void SyntaxViewer::createUserDataUnregistered(std::shared_ptr<HEVC::UserDataUnregistered> pSei, QTreeWidgetItem *pItem)
 {
-  QString str = 
-    QString("%1").arg(pSei -> uuid_iso_iec_11578[0], 2, 16, QChar('0')).toLower() + 
-    QString("%1").arg(pSei -> uuid_iso_iec_11578[1], 2, 16, QChar('0')).toLower() + 
+  QString str =
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[0], 2, 16, QChar('0')).toLower() +
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[1], 2, 16, QChar('0')).toLower() +
     QString("%1").arg(pSei -> uuid_iso_iec_11578[2], 2, 16, QChar('0')).toLower() +
     QString("%1").arg(pSei -> uuid_iso_iec_11578[3], 2, 16, QChar('0')).toLower() +
     "-" +
-    QString("%1").arg(pSei -> uuid_iso_iec_11578[4], 2, 16, QChar('0')).toLower() + 
-    QString("%1").arg(pSei -> uuid_iso_iec_11578[5], 2, 16, QChar('0')).toLower() + 
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[4], 2, 16, QChar('0')).toLower() +
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[5], 2, 16, QChar('0')).toLower() +
     "-" +
-    QString("%1").arg(pSei -> uuid_iso_iec_11578[6], 2, 16, QChar('0')).toLower() + 
-    QString("%1").arg(pSei -> uuid_iso_iec_11578[7], 2, 16, QChar('0')).toLower() + 
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[6], 2, 16, QChar('0')).toLower() +
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[7], 2, 16, QChar('0')).toLower() +
     "-" +
-    QString("%1").arg(pSei -> uuid_iso_iec_11578[8], 2, 16, QChar('0')).toLower() + 
-    QString("%1").arg(pSei -> uuid_iso_iec_11578[9], 2, 16, QChar('0')).toLower() + 
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[8], 2, 16, QChar('0')).toLower() +
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[9], 2, 16, QChar('0')).toLower() +
     "-" +
-    QString("%1").arg(pSei -> uuid_iso_iec_11578[10], 2, 16, QChar('0')).toLower() + 
-    QString("%1").arg(pSei -> uuid_iso_iec_11578[11], 2, 16, QChar('0')).toLower() + 
-    QString("%1").arg(pSei -> uuid_iso_iec_11578[12], 2, 16, QChar('0')).toLower() + 
-    QString("%1").arg(pSei -> uuid_iso_iec_11578[13], 2, 16, QChar('0')).toLower() + 
-    QString("%1").arg(pSei -> uuid_iso_iec_11578[14], 2, 16, QChar('0')).toLower() + 
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[10], 2, 16, QChar('0')).toLower() +
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[11], 2, 16, QChar('0')).toLower() +
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[12], 2, 16, QChar('0')).toLower() +
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[13], 2, 16, QChar('0')).toLower() +
+    QString("%1").arg(pSei -> uuid_iso_iec_11578[14], 2, 16, QChar('0')).toLower() +
     QString("%1").arg(pSei -> uuid_iso_iec_11578[15], 2, 16, QChar('0')).toLower();
 
   pItem -> addChild(new QTreeWidgetItem(QStringList("uuid_iso_iec_11578 = " + str)));
@@ -2023,7 +2023,7 @@ void SyntaxViewer::createPicTiming(std::shared_ptr<HEVC::PicTiming> pSei, QTreeW
       pitemDuDelay -> addChild(new QTreeWidgetItem(QStringList("pic_dpb_output_du_delay = " + QString::number(pSei->pic_dpb_output_du_delay))));
     }
 
-    if(psps->vui_parameters.hrd_parameters.sub_pic_hrd_params_present_flag && 
+    if(psps->vui_parameters.hrd_parameters.sub_pic_hrd_params_present_flag &&
         psps->vui_parameters.hrd_parameters.sub_pic_cpb_params_in_pic_timing_sei_flag)
     {
       QTreeWidgetItem *pitemIf = new QTreeWidgetItem(QStringList("if( CpbDpbDelaysPresentFlag )"));
@@ -2174,7 +2174,7 @@ void SyntaxViewer::createToneMapping(std::shared_ptr<HEVC::ToneMapping> pSei, QT
       {
         ploop -> addChild(new QTreeWidgetItem(QStringList("start_of_coded_interval[" + QString::number(i) + "] = " + QString::number(pSei -> start_of_coded_interval[i]))));
       }
-      
+
     }
     else if(pSei -> tone_map_model_id == 3)
     {
@@ -2184,7 +2184,7 @@ void SyntaxViewer::createToneMapping(std::shared_ptr<HEVC::ToneMapping> pSei, QT
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList("num_pivots = " + QString::number(pSei->num_pivots))));
 
       QTreeWidgetItem *ploop = new QTreeWidgetItem(QStringList("for( i = 0; i < num_pivots; i++ )"));
-      pitemSecond -> addChild(ploop);      
+      pitemSecond -> addChild(ploop);
 
       for(std::size_t i=0; i<pSei -> num_pivots; i++)
       {
@@ -2204,7 +2204,7 @@ void SyntaxViewer::createToneMapping(std::shared_ptr<HEVC::ToneMapping> pSei, QT
         pitemSecond -> addChild(pitemThird);
 
         pitemThird -> addChild(new QTreeWidgetItem(QStringList("camera_iso_speed_value = " + QString::number(pSei->camera_iso_speed_value))));
-      }      
+      }
 
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList("exposure_index_idc = " + QString::number(pSei->exposure_index_idc))));
       if(pSei -> exposure_index_idc == 255)
@@ -2213,7 +2213,7 @@ void SyntaxViewer::createToneMapping(std::shared_ptr<HEVC::ToneMapping> pSei, QT
         pitemSecond -> addChild(pitemThird);
 
         pitemThird -> addChild(new QTreeWidgetItem(QStringList("exposure_index_value = " + QString::number(pSei->exposure_index_value))));
-      } 
+      }
 
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList("exposure_compensation_value_sign_flag = " + QString::number(pSei->exposure_compensation_value_sign_flag))));
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList("exposure_compensation_value_numerator = " + QString::number(pSei->exposure_compensation_value_numerator))));
@@ -2222,7 +2222,7 @@ void SyntaxViewer::createToneMapping(std::shared_ptr<HEVC::ToneMapping> pSei, QT
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList("extended_range_white_level = " + QString::number(pSei->extended_range_white_level))));
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList("nominal_black_level_code_value = " + QString::number(pSei->nominal_black_level_code_value))));
       pitemSecond -> addChild(new QTreeWidgetItem(QStringList("nominal_white_level_code_value = " + QString::number(pSei->nominal_white_level_code_value))));
-      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("extended_white_level_code_value = " + QString::number(pSei->extended_white_level_code_value))));            
+      pitemSecond -> addChild(new QTreeWidgetItem(QStringList("extended_white_level_code_value = " + QString::number(pSei->extended_white_level_code_value))));
     }
   }
 }
@@ -2234,7 +2234,7 @@ void SyntaxViewer::createSOPDescription(std::shared_ptr<HEVC::SOPDescription> pS
   pItem -> addChild(new QTreeWidgetItem(QStringList("num_entries_in_sop_minus1 = " + QString::number(pSei->num_entries_in_sop_minus1))));
 
   QTreeWidgetItem *ploop = new QTreeWidgetItem(QStringList("for( i = 0; i <= num_entries_in_sop_minus1; i++ )"));
-  pItem -> addChild(ploop);      
+  pItem -> addChild(ploop);
 
   for(std::size_t i=0; i<=pSei -> num_entries_in_sop_minus1; i++)
   {
@@ -2247,7 +2247,7 @@ void SyntaxViewer::createSOPDescription(std::shared_ptr<HEVC::SOPDescription> pS
       ploop -> addChild(pitemIf);
 
       pitemIf -> addChild(new QTreeWidgetItem(QStringList("sop_short_term_rps_idx[" + QString::number(i) + "] = " + QString::number(pSei -> sop_short_term_rps_idx[i]))));
-    }    
+    }
 
     if(i > 0)
     {
@@ -2465,7 +2465,7 @@ void SyntaxViewer::createChromaResamplingFilterHint(std::shared_ptr<HEVC::Chroma
         }
       }
     }
-  }  
+  }
 }
 
 
@@ -2509,7 +2509,7 @@ void SyntaxViewer::createColourRemappingInfo(std::shared_ptr<HEVC::ColourRemappi
 
         QTreeWidgetItem *ploopSecond = new QTreeWidgetItem(QStringList("for( j = 0; j <= pre_lut_num_val_minus1[" + QString::number(i) + "]; j++ )"));
         pitemIfSecond -> addChild(ploopSecond);
-  
+
         for (std::size_t j=0 ; j<=pSei -> pre_lut_num_val_minus1[i]; j++)
         {
           ploopSecond -> addChild(new QTreeWidgetItem(QStringList("pre_lut_coded_value[" + QString::number(i) + "][" + QString::number(j) + "] = " + QString::number(pSei -> pre_lut_coded_value[i][j]))));
@@ -2536,7 +2536,7 @@ void SyntaxViewer::createColourRemappingInfo(std::shared_ptr<HEVC::ColourRemappi
         for (std::size_t j=0 ; j<2 ; j++)
         {
           str += QString::number(pSei -> colour_remap_coeffs[i][j]) + ", ";
-        }        
+        }
         str += QString::number(pSei -> colour_remap_coeffs[i][2]) + " }";
 
         ploop -> addChild(new QTreeWidgetItem(QStringList(str)));
@@ -2557,7 +2557,7 @@ void SyntaxViewer::createColourRemappingInfo(std::shared_ptr<HEVC::ColourRemappi
 
         QTreeWidgetItem *ploopSecond = new QTreeWidgetItem(QStringList("for( j = 0; j <= post_lut_num_val_minus1[" + QString::number(i) + "]; j++ )"));
         pitemIfSecond -> addChild(ploopSecond);
-  
+
         for (std::size_t j=0 ; j<=pSei -> post_lut_num_val_minus1[i]; j++)
         {
           ploopSecond -> addChild(new QTreeWidgetItem(QStringList("post_lut_coded_value[" + QString::number(i) + "][" + QString::number(j) + "] = " + QString::number(pSei -> post_lut_coded_value[i][j]))));
@@ -2633,7 +2633,7 @@ void SyntaxViewer::updateItemsState()
 {
   QTreeWidgetItemIterator itr(this);
 
-  for(;*itr; itr++) 
+  for(;*itr; itr++)
     (*itr)-> setExpanded(m_state.isActive((*itr)));
 }
 

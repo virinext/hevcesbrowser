@@ -67,12 +67,12 @@ void StreamInfoViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const 
             break;
 
           case HEVC::Slice::NONE_SLICE:
-            break;    
+            break;
         }
       }
       else
       {
-        switch(pSlice -> slice_type)       
+        switch(pSlice -> slice_type)
         {
           case HEVC::Slice::B_SLICE:
             m_BNumber++;

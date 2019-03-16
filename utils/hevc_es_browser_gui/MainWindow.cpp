@@ -71,7 +71,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags):
 
   CentralWidget *pwgt = new CentralWidget(this);
   setCentralWidget(pwgt);
-  
+
   readCustomData();
 }
 
@@ -161,7 +161,7 @@ void MainWindow::slotOpen()
   {
     dir = settings.value("MainWindow/PrevDir").toString();
   }
-  
+
   QString fileName = QFileDialog::getOpenFileName(this, "HEVC ES File", dir);
   openFile(fileName);
 }
@@ -214,7 +214,7 @@ void MainWindow::closeEvent(QCloseEvent *pevent)
   saveCustomData();
   CentralWidget *pcntwgt = dynamic_cast<CentralWidget *>(centralWidget());
   pcntwgt -> m_pcomInfoViewer -> saveCustomData();
-  
+
   m_pwarnViewer -> close();
   m_pinfoViewer -> close();
   m_phdrInfoViewer -> close();
@@ -233,7 +233,7 @@ void MainWindow::saveCustomData()
 void MainWindow::readCustomData()
 {
   QSettings settings("HEVCESBrowser", "HEVCESBrowser");
-  restoreGeometry(settings.value("MainWindow/geometry").toByteArray()); 
+  restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
 }
 
 void MainWindow::slotAbout()

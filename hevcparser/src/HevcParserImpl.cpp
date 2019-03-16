@@ -222,10 +222,10 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
   if(!ppps)
   {
     std::stringstream ss;
-    ss << "Slice: slice_pic_parameter_set_id = " 
+    ss << "Slice: slice_pic_parameter_set_id = "
       << (int) pslice -> slice_pic_parameter_set_id
       << ", but PPS with this id not exists";
-    
+
     onWarning(ss.str(), &info, Parser::REFERENCE_STRUCT_NOT_PRESENT);
 
     pslice -> m_processFailed = true;
@@ -337,7 +337,7 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
 
         for(std::size_t i=0; i < num_long_term; i++)
         {
-          if(i < pslice -> num_long_term_sps) 
+          if(i < pslice -> num_long_term_sps)
           {
             if(m_spsMap[spsId] -> num_long_term_ref_pics_sps > 1)
             {
@@ -415,10 +415,10 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
         if(pslice -> pred_weight_table.luma_log2_weight_denom > 7)
         {
           std::stringstream ss;
-          ss << "pred_weight_table.luma_log2_weight_denom = " 
-            << (int) pslice -> pred_weight_table.luma_log2_weight_denom 
+          ss << "pred_weight_table.luma_log2_weight_denom = "
+            << (int) pslice -> pred_weight_table.luma_log2_weight_denom
             << ", but must be in range (0-7)";
-          
+
           onWarning(ss.str(), &info, Parser::OUT_OF_RANGE);
         }
       }
@@ -450,7 +450,7 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
       pslice -> slice_deblocking_filter_disabled_flag = ppps -> pps_deblocking_filter_disabled_flag;
     }
 
-    if(ppps -> pps_loop_filter_across_slices_enabled_flag && 
+    if(ppps -> pps_loop_filter_across_slices_enabled_flag &&
       (pslice -> slice_sao_luma_flag || pslice -> slice_sao_chroma_flag || !pslice -> slice_deblocking_filter_disabled_flag))
     {
       pslice -> slice_loop_filter_across_slices_enabled_flag = bs.getBits(1);
@@ -468,8 +468,8 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
       if(pslice -> offset_len_minus1 > 31)
       {
         std::stringstream ss;
-        ss << "offset_len_minus1 = " 
-          << (int) pslice -> offset_len_minus1 
+        ss << "offset_len_minus1 = "
+          << (int) pslice -> offset_len_minus1
           << ", but must be in range (0-31)";
 
         onWarning(ss.str(), &info, Parser::OUT_OF_RANGE);
@@ -718,7 +718,7 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
     if(payloadSize > bs.availableInNalU())
     {
       std::stringstream ss;
-      ss << "SEI: sei message payload size more then nal unit size (payloadSize=" 
+      ss << "SEI: sei message payload size more then nal unit size (payloadSize="
           << payloadSize
           <<")";
 
@@ -808,7 +808,7 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
         processProgressiveRefinementSegmentEnd(pseiPayload, tmpBs);
         msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
         break;
-      }      
+      }
 
       case SeiMessage::RECOVERY_POINT:
       {
@@ -906,7 +906,7 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
         BitstreamReader tmpBs = bs;
         processSegmRectFramePacking(psei, tmpBs);
         msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(psei);
-        break;        
+        break;
       }
 
       case SeiMessage::KNEE_FUNCTION_INFO:
@@ -915,7 +915,7 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
         BitstreamReader tmpBs = bs;
         processKneeFunctionInfo(psei, tmpBs);
         msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(psei);
-        break;        
+        break;
       }
 
       case SeiMessage::CHROMA_RESAMPLING_FILTER_HINT:
@@ -924,7 +924,7 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
         BitstreamReader tmpBs = bs;
         processChromaResamplingFilterHint(psei, tmpBs);
         msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(psei);
-        break;        
+        break;
       }
 
       case SeiMessage::COLOUR_REMAPPING_INFO:
@@ -1295,7 +1295,7 @@ ShortTermRefPicSet HevcParserImpl::processShortTermRefPicSet(std::size_t stRpsId
     if(rpset.num_positive_pics > psps -> sps_max_dec_pic_buffering_minus1[psps -> sps_max_sub_layers_minus1])
     {
       onWarning("ShortTermRefPicSet: num_positive_pics > sps_max_dec_pic_buffering_minus1", &info, Parser::OUT_OF_RANGE);
-      return rpset;      
+      return rpset;
     }
 
     rpset.delta_poc_s0_minus1.resize(rpset.num_negative_pics);
@@ -1597,7 +1597,7 @@ PredWeightTable HevcParserImpl::processPredWeightTable(BitstreamReader &bs, std:
   if(pslice -> slice_type == SLICE_B)
   {
     pwt.luma_weight_l1_flag.resize(pslice -> num_ref_idx_l1_active_minus1 + 1);
-    
+
     for(std::size_t i=0; i<=pslice -> num_ref_idx_l1_active_minus1; i++)
       pwt.luma_weight_l1_flag[i] = bs.getBits(1);
 
@@ -1630,7 +1630,7 @@ PredWeightTable HevcParserImpl::processPredWeightTable(BitstreamReader &bs, std:
         }
       }
     }
-  } 
+  }
   return pwt;
 }
 
@@ -1815,7 +1815,7 @@ void HevcParserImpl::processPicTiming(std::shared_ptr<PicTiming> pSeiPayload, Bi
       pSeiPayload -> pic_dpb_output_du_delay = bs.getBits(psps->vui_parameters.hrd_parameters.dpb_output_delay_du_length_minus1 + 1);
     }
 
-    if(psps->vui_parameters.hrd_parameters.sub_pic_hrd_params_present_flag && 
+    if(psps->vui_parameters.hrd_parameters.sub_pic_hrd_params_present_flag &&
         psps->vui_parameters.hrd_parameters.sub_pic_cpb_params_in_pic_timing_sei_flag)
     {
       pSeiPayload -> num_decoding_units_minus1 = bs.getGolombU();
@@ -2169,7 +2169,7 @@ void HevcParserImpl::processColourRemappingInfo(std::shared_ptr<ColourRemappingI
       pSeiPayload -> colour_remap_full_range_flag = bs.getBits(1);
       pSeiPayload -> colour_remap_primaries = bs.getBits(8);
       pSeiPayload -> colour_remap_transfer_function = bs.getBits(8);
-      pSeiPayload -> colour_remap_matrix_coefficients = bs.getBits(8);      
+      pSeiPayload -> colour_remap_matrix_coefficients = bs.getBits(8);
     }
     pSeiPayload -> colour_remap_input_bit_depth = bs.getBits(8);
     pSeiPayload -> colour_remap_bit_depth = bs.getBits(8);
@@ -2183,7 +2183,7 @@ void HevcParserImpl::processColourRemappingInfo(std::shared_ptr<ColourRemappingI
       {
         pSeiPayload -> pre_lut_coded_value[i].resize(pSeiPayload -> pre_lut_num_val_minus1[i]+1);
         pSeiPayload -> pre_lut_target_value[i].resize(pSeiPayload -> pre_lut_num_val_minus1[i]+1);
-  
+
         for (std::size_t j=0 ; j<=pSeiPayload -> pre_lut_num_val_minus1[i]; j++)
         {
           pSeiPayload -> pre_lut_coded_value[i][j] = bs.getBits(((pSeiPayload -> colour_remap_input_bit_depth   + 7 ) >> 3 ) << 3);
@@ -2209,7 +2209,7 @@ void HevcParserImpl::processColourRemappingInfo(std::shared_ptr<ColourRemappingI
     for(std::size_t i=0 ; i<3 ; i++)
     {
       pSeiPayload -> post_lut_num_val_minus1[i] = bs.getBits(8);
-      
+
       if(pSeiPayload -> post_lut_num_val_minus1[i] > 0)
       {
         pSeiPayload -> post_lut_coded_value[i].resize(pSeiPayload -> post_lut_num_val_minus1[i] + 1);

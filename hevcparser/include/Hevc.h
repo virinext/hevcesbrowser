@@ -10,7 +10,7 @@
 namespace HEVC
 {
 
-  enum NALUnitType 
+  enum NALUnitType
   {
     NAL_TRAIL_N    = 0,
     NAL_TRAIL_R    = 1,
@@ -28,7 +28,7 @@ namespace HEVC
     NAL_IDR_W_RADL = 19,
     NAL_IDR_N_LP   = 20,
     NAL_CRA_NUT    = 21,
-    NAL_IRAP_VCL23 = 23, 
+    NAL_IRAP_VCL23 = 23,
     NAL_VPS        = 32,
     NAL_SPS        = 33,
     NAL_PPS        = 34,
@@ -67,7 +67,7 @@ namespace HEVC
     std::vector<uint8_t>   sub_layer_profile_space;
     std::vector<uint8_t>   sub_layer_tier_flag;
     std::vector<uint8_t>   sub_layer_profile_idc;
-    std::vector< std::vector< uint8_t> > 
+    std::vector< std::vector< uint8_t> >
                            sub_layer_profile_compatibility_flag;
     std::vector<uint8_t>   sub_layer_progressive_source_flag;
     std::vector<uint8_t>   sub_layer_interlaced_source_flag;
@@ -82,7 +82,7 @@ namespace HEVC
 
   class SubLayerHrdParameters
   {
-  public:    
+  public:
     std::vector<uint32_t>       bit_rate_value_minus1;
     std::vector<uint32_t>       cpb_size_value_minus1;
     std::vector<uint32_t>       cpb_size_du_value_minus1;
@@ -111,7 +111,7 @@ namespace HEVC
 
   class HrdParameters
   {
-  public:    
+  public:
     uint8_t               nal_hrd_parameters_present_flag;
     uint8_t               vcl_hrd_parameters_present_flag;
     uint8_t               sub_pic_hrd_params_present_flag;
@@ -130,9 +130,9 @@ namespace HEVC
     std::vector<uint32_t> elemental_duration_in_tc_minus1;
     std::vector<uint8_t>  low_delay_hrd_flag;
     std::vector<uint32_t> cpb_cnt_minus1;
-    std::vector<SubLayerHrdParameters> 
+    std::vector<SubLayerHrdParameters>
                           nal_sub_layer_hrd_parameters;
-    std::vector<SubLayerHrdParameters> 
+    std::vector<SubLayerHrdParameters>
                           vcl_sub_layer_hrd_parameters;
 
     void toDefault();
@@ -142,7 +142,7 @@ namespace HEVC
 
   class ShortTermRefPicSet
   {
-  public:    
+  public:
     uint8_t                   inter_ref_pic_set_prediction_flag;
     uint32_t                  delta_idx_minus1;
     uint8_t                   delta_rps_sign;
@@ -158,9 +158,9 @@ namespace HEVC
 
     void toDefault();
 
-    bool operator == (const ShortTermRefPicSet &) const;    
+    bool operator == (const ShortTermRefPicSet &) const;
   };
-  
+
   class RefPicListModification
   {
   public:
@@ -176,7 +176,7 @@ namespace HEVC
 
   class VuiParameters
   {
-  public:    
+  public:
     uint8_t          aspect_ratio_info_present_flag;
     uint8_t          aspect_ratio_idc;
     uint16_t         sar_width;
@@ -220,7 +220,7 @@ namespace HEVC
 
     void toDefault();
 
-    bool operator == (const VuiParameters &) const;    
+    bool operator == (const VuiParameters &) const;
 
   };
 
@@ -260,7 +260,7 @@ namespace HEVC
         SCALABLE_NESTING                     = 133,
         REGION_REFRESH_INFO                  = 134,
         NO_DISPLAY                           = 135,
-        TIME_CODE                            = 136,        
+        TIME_CODE                            = 136,
         MASTERING_DISPLAY_INFO               = 137,
         SEGM_RECT_FRAME_PACKING              = 138,
         TEMP_MOTION_CONSTRAINED_TILE_SETS    = 139,
@@ -381,7 +381,7 @@ namespace HEVC
     std::vector<uint32_t>              du_cpb_removal_delay_increment_minus1;
 
     void toDefault();
-  };  
+  };
 
   class RecoveryPoint: public SeiPayload
   {
@@ -390,7 +390,7 @@ namespace HEVC
     uint8_t                            exact_match_flag;
     uint8_t                            broken_link_flag;
     void toDefault() {};
-  };  
+  };
 
 
   class ActiveParameterSets: public SeiPayload
@@ -421,7 +421,7 @@ namespace HEVC
     uint8_t                 refreshed_region_flag;
 
     void toDefault() {};
-  };  
+  };
 
   class ToneMapping: public SeiPayload
   {
@@ -589,7 +589,7 @@ namespace HEVC
      std::vector<int32_t> >   hor_filter_coeff;
 
     void toDefault();
-  };  
+  };
 
   class ColourRemappingInfo: public SeiPayload
   {
@@ -615,7 +615,7 @@ namespace HEVC
     std::vector<uint32_t>        post_lut_target_value[3];
 
     void toDefault() {};
-  };  
+  };
 
   class ContentLightLevelInfo: public SeiPayload
   {
@@ -624,7 +624,7 @@ namespace HEVC
     uint16_t      max_pic_average_light_level;
 
     void toDefault() {};
-  };  
+  };
 
 
   class PredWeightTable
@@ -658,7 +658,7 @@ namespace HEVC
       NALUnit(NALHeader header);
       virtual ~NALUnit();
       virtual NALUnitType getType() const;
-      
+
       std::shared_ptr<NALUnit> copy() const;
 
       bool            m_processFailed;
@@ -683,7 +683,7 @@ namespace HEVC
       std::vector<uint32_t>     vps_max_latency_increase_plus1;
       uint8_t                   vps_max_layer_id;
       uint32_t                  vps_num_layer_sets_minus1;
-      std::vector<std::vector<uint8_t> > 
+      std::vector<std::vector<uint8_t> >
                                 layer_id_included_flag;
       uint8_t                   vps_timing_info_present_flag;
       uint32_t                  vps_num_units_in_tick;
@@ -701,7 +701,7 @@ namespace HEVC
       bool operator == (const VPS &) const;
   };
 
-  
+
   class SPS: public NALUnit
   {
     public:
@@ -762,7 +762,7 @@ namespace HEVC
       bool operator == (const SPS &) const;
   };
 
-  
+
   class PPS: public NALUnit
   {
     public:
@@ -777,7 +777,7 @@ namespace HEVC
     uint8_t      cabac_init_present_flag;
     uint32_t     num_ref_idx_l0_default_active_minus1;
     uint32_t     num_ref_idx_l1_default_active_minus1;
-    int32_t      init_qp_minus26;   
+    int32_t      init_qp_minus26;
     uint8_t      constrained_intra_pred_flag;
     uint8_t      transform_skip_enabled_flag;
     uint8_t      cu_qp_delta_enabled_flag;
@@ -793,9 +793,9 @@ namespace HEVC
     uint32_t     num_tile_columns_minus1;
     uint32_t     num_tile_rows_minus1;
     uint8_t      uniform_spacing_flag;
-    std::vector<uint32_t>  
+    std::vector<uint32_t>
                  column_width_minus1;
-    std::vector<uint32_t>  
+    std::vector<uint32_t>
                  row_height_minus1;
     uint8_t      loop_filter_across_tiles_enabled_flag;
     uint8_t      pps_loop_filter_across_slices_enabled_flag;
@@ -822,7 +822,7 @@ namespace HEVC
   class Slice: public NALUnit
   {
     public:
-      enum SliceType 
+      enum SliceType
       {
         B_SLICE = 0,
         P_SLICE = 1,
