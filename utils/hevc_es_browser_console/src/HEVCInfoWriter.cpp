@@ -23,7 +23,7 @@ void HEVCInfoWriter::write(std::ostream &out)
   {
     writeNALHeader(m_nalus[i], out);
 
-    switch(m_nalus[i].m_pNALUnit -> m_nalUnitType)
+    switch(m_nalus[i].m_pNALUnit -> m_nalHeader.type)
     {
       case NAL_VPS:
       {
@@ -93,7 +93,7 @@ void HEVCInfoWriter::write(std::ostream &out)
 void HEVCInfoWriter::writeNALHeader(const NALUInfo& naluInfo, std::ostream &out)
 {
   out << std::hex << "0x" << naluInfo.m_info.m_position << std::dec << ": ";
-  out << ConvToString::NALUnitType(naluInfo.m_pNALUnit -> m_nalUnitType) << std::endl;
+  out << ConvToString::NALUnitType(naluInfo.m_pNALUnit -> m_nalHeader.type) << std::endl;
 }
 
 void HEVCInfoWriter::writeVPS(std::shared_ptr<HEVC::VPS> pVPS, std::ostream &out)
@@ -373,7 +373,7 @@ void HEVCInfoWriter::writeSlice(std::shared_ptr<HEVC::Slice> pSlice, std::ostrea
 
 
   out << "\t" << "first_slice_segment_in_pic_flag = " << (int) pSlice -> first_slice_segment_in_pic_flag << std::endl;
-  if(pSlice -> m_nalUnitType >= HEVC::NAL_BLA_W_LP && pSlice -> m_nalUnitType <= HEVC::NAL_IRAP_VCL23)
+  if(pSlice -> m_nalHeader.type >= HEVC::NAL_BLA_W_LP && pSlice -> m_nalHeader.type <= HEVC::NAL_IRAP_VCL23)
   {
     out << "\t" << "if( nal_unit_type >= BLA_W_LP && nal_unit_type <= RSV_IRAP_VCL23 )" << std::endl;
     out << "\t\t" << "no_output_of_prior_pics_flag = " << (int) pSlice -> no_output_of_prior_pics_flag << std::endl;
@@ -425,7 +425,7 @@ void HEVCInfoWriter::writeSlice(std::shared_ptr<HEVC::Slice> pSlice, std::ostrea
       out << "\t\t" << "colour_plane_id = " << (int) pSlice -> colour_plane_id << std::endl;
     }
 
-    bool IdrPicFlag = pSlice -> m_nalUnitType == NAL_IDR_W_RADL || pSlice -> m_nalUnitType == NAL_IDR_N_LP;
+    bool IdrPicFlag = pSlice -> m_nalHeader.type == NAL_IDR_W_RADL || pSlice -> m_nalHeader.type == NAL_IDR_N_LP;
     if(!IdrPicFlag)
     {
       out << "\t" << "if( nal_unit_type != IDR_W_RADL && nal_unit_type != IDR_N_LP )" << std::endl;

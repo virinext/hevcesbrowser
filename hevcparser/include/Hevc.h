@@ -40,6 +40,16 @@ namespace HEVC
     NAL_SEI_SUFFIX = 40,
   };
 
+  class NALHeader
+  {
+  public:
+    NALUnitType           type;
+    uint8_t               layer_id;
+    uint8_t               temporal_id_plus1;
+
+    bool operator == (const NALHeader &) const;
+  };
+
   class ProfileTierLevel
   {
   public:
@@ -645,7 +655,7 @@ namespace HEVC
   class NALUnit
   {
     public:
-      NALUnit(NALUnitType type);
+      NALUnit(NALHeader header);
       virtual ~NALUnit();
       virtual NALUnitType getType() const;
       
@@ -653,7 +663,7 @@ namespace HEVC
 
       bool            m_processFailed;
 
-      NALUnitType     m_nalUnitType;
+      NALHeader     m_nalHeader;
   };
 
 
@@ -820,7 +830,7 @@ namespace HEVC
         NONE_SLICE = 3
       };
 
-      Slice(NALUnitType type);
+      Slice(NALHeader header);
       uint8_t                  first_slice_segment_in_pic_flag;
       uint8_t                  no_output_of_prior_pics_flag;
       uint32_t                 slice_pic_parameter_set_id;
@@ -887,7 +897,7 @@ namespace HEVC
   class SEI: public NALUnit
   {
   public:
-    SEI(NALUnitType);
+    SEI(NALHeader header);
     std::vector<SeiMessage>     sei_message;
 
     void toDefault();

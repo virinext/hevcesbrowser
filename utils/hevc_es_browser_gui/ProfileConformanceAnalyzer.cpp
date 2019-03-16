@@ -140,7 +140,7 @@ void ProfileConformanceAnalyzer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUn
   if(pNALUnit -> m_processFailed)
     return;
 
-  switch(pNALUnit -> m_nalUnitType)
+  switch(pNALUnit -> m_nalHeader.type)
   {
     case HEVC::NAL_VPS:
     {

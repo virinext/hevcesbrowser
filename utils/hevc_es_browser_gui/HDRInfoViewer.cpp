@@ -20,7 +20,7 @@ HDRInfoViewer::HDRInfoViewer(QWidget *pwgt):
 
 void HDRInfoViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const HEVC::Parser::Info *pInfo)
 {
-  switch(pNALUnit -> m_nalUnitType)
+  switch(pNALUnit -> m_nalHeader.type)
   {
     case HEVC::NAL_SPS:
     {

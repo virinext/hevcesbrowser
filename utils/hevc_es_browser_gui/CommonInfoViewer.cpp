@@ -45,11 +45,11 @@ void CommonInfoViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const 
   if(row > 0)
     item(row - 1, 1) -> setText(QString::number(pInfo -> m_position - m_nalus[m_nalus.size() - 2].m_info.m_position));
 
-  setItem(row, 2, new QTableWidgetItem(QString((ConvToString::NALUnitType(pNALUnit -> m_nalUnitType)).c_str())));
+  setItem(row, 2, new QTableWidgetItem(QString((ConvToString::NALUnitType(pNALUnit -> m_nalHeader.type)).c_str())));
 
   using namespace HEVC;
 
-  switch(pNALUnit -> m_nalUnitType)
+  switch(pNALUnit -> m_nalHeader.type)
   {
     case NAL_VPS:
     {

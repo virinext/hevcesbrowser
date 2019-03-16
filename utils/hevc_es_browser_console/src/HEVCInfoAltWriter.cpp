@@ -11,7 +11,9 @@ void HEVCInfoAltWriter::writeNALHeader(const NALUInfo& naluInfo, std::ostream &o
 {
   out << "offset: " << std::hex << "0x" << naluInfo.m_info.m_position << std::dec << " ";
   out << "nal_unit_header { ";
-  out << "type: " << ConvToString::NALUnitType(naluInfo.m_pNALUnit -> m_nalUnitType) << " ";
+  out << "type: " << ConvToString::NALUnitType(naluInfo.m_pNALUnit -> m_nalHeader.type) << " ";
+  out << "layer_id: " << std::hex << "0x" << unsigned(naluInfo.m_pNALUnit -> m_nalHeader.layer_id) << std::dec << " ";
+  out << "temporal_id_plus1: " << std::hex << "0x" << unsigned(naluInfo.m_pNALUnit -> m_nalHeader.temporal_id_plus1) << std::dec << " ";
   out << "} ";
 }
 
@@ -296,7 +298,7 @@ void HEVCInfoAltWriter::writeSlice(std::shared_ptr<HEVC::Slice> pSlice, std::ost
 
 
   out << "first_slice_segment_in_pic_flag: " << (int) pSlice -> first_slice_segment_in_pic_flag << " ";
-  if(pSlice -> m_nalUnitType >= HEVC::NAL_BLA_W_LP && pSlice -> m_nalUnitType <= HEVC::NAL_IRAP_VCL23)
+  if(pSlice -> m_nalHeader.type >= HEVC::NAL_BLA_W_LP && pSlice -> m_nalHeader.type <= HEVC::NAL_IRAP_VCL23)
   {
     out << "no_output_of_prior_pics_flag: " << (int) pSlice -> no_output_of_prior_pics_flag << " ";
   }
@@ -351,7 +353,7 @@ void HEVCInfoAltWriter::writeSlice(std::shared_ptr<HEVC::Slice> pSlice, std::ost
       out << "} ";
     }
 
-    bool IdrPicFlag = pSlice -> m_nalUnitType == NAL_IDR_W_RADL || pSlice -> m_nalUnitType == NAL_IDR_N_LP;
+    bool IdrPicFlag = pSlice -> m_nalHeader.type == NAL_IDR_W_RADL || pSlice -> m_nalHeader.type == NAL_IDR_N_LP;
     if(!IdrPicFlag)
     {
       out << "slice_pic_order_cnt_lsb: " << pSlice -> slice_pic_order_cnt_lsb << " ";

@@ -4,8 +4,8 @@
 
 using namespace HEVC;
 
-NALUnit::NALUnit(NALUnitType type):
-  m_nalUnitType(type)
+NALUnit::NALUnit(NALHeader header):
+  m_nalHeader(header)
   ,m_processFailed(false)
 {
 }
@@ -18,7 +18,7 @@ NALUnit::~NALUnit()
 
 NALUnitType NALUnit::getType() const
 {
-  return m_nalUnitType;
+  return m_nalHeader.type;
 }
  
  
@@ -26,7 +26,7 @@ std::shared_ptr<NALUnit> NALUnit::copy() const
 {
   std::shared_ptr<NALUnit> res;
 
-  switch(m_nalUnitType)
+  switch(m_nalHeader.type)
   {
     case NAL_VPS:
     {
@@ -75,37 +75,37 @@ std::shared_ptr<NALUnit> NALUnit::copy() const
   return res;
 }
 
-HEVC::VPS::VPS(): NALUnit(HEVC::NAL_VPS) 
+HEVC::VPS::VPS(): NALUnit({HEVC::NAL_VPS, 0, 0})
 { 
   toDefault();
 }
 
 
-HEVC::SPS::SPS(): NALUnit(NAL_SPS) 
+HEVC::SPS::SPS(): NALUnit({HEVC::NAL_SPS, 0, 0})
 {
   toDefault();
 }
 
 
-HEVC::PPS::PPS(): NALUnit(NAL_PPS) 
+HEVC::PPS::PPS(): NALUnit({HEVC::NAL_PPS, 0, 0})
 {
   toDefault();
 };
 
 
-HEVC::AUD::AUD(): NALUnit(NAL_AUD) 
+HEVC::AUD::AUD(): NALUnit({HEVC::NAL_AUD, 0, 0})
 {
   toDefault();
 };
 
 
-HEVC::SEI::SEI(NALUnitType type): NALUnit(type) 
+HEVC::SEI::SEI(NALHeader header): NALUnit(header)
 {
   toDefault();
 };
 
 
-HEVC::Slice::Slice(NALUnitType type): NALUnit(type) 
+HEVC::Slice::Slice(NALHeader header): NALUnit(header)
 {
   toDefault();
 };

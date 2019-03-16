@@ -35,7 +35,7 @@ void SyntaxViewer::onNalUChanged(std::shared_ptr<HEVC::NALUnit> pNalU, ParserInf
 {
   clear();
   using namespace HEVC;
-  switch(pNalU -> m_nalUnitType)
+  switch(pNalU -> m_nalHeader.type)
   {
     case NAL_VPS:
     {
@@ -510,7 +510,7 @@ void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
   QTreeWidgetItem *pitem;
   psliceItem -> addChild(new QTreeWidgetItem(QStringList("first_slice_segment_in_pic_flag = " + QString::number(pSlice -> first_slice_segment_in_pic_flag))));
 
-  if(pSlice -> m_nalUnitType >= HEVC::NAL_BLA_W_LP && pSlice -> m_nalUnitType <= HEVC::NAL_IRAP_VCL23)
+  if(pSlice -> m_nalHeader.type >= HEVC::NAL_BLA_W_LP && pSlice -> m_nalHeader.type <= HEVC::NAL_IRAP_VCL23)
   {
     pitem = new QTreeWidgetItem(QStringList("if ( nal_unit_type >= BLA_W_LP && nal_unit_type <= RSV_IRAP_VCL23)"));
     psliceItem -> addChild(pitem);
@@ -578,7 +578,7 @@ void SyntaxViewer::createSlice(std::shared_ptr<HEVC::Slice> pSlice)
       pitem -> addChild(pitemDepend);
       pitemDepend -> addChild(new QTreeWidgetItem(QStringList("colour_plane_id = " + QString::number(pSlice -> colour_plane_id))));
     }    
-    bool IdrPicFlag = pSlice -> m_nalUnitType == HEVC::NAL_IDR_W_RADL || pSlice -> m_nalUnitType == HEVC::NAL_IDR_N_LP;
+    bool IdrPicFlag = pSlice -> m_nalHeader.type == HEVC::NAL_IDR_W_RADL || pSlice -> m_nalHeader.type == HEVC::NAL_IDR_N_LP;
 
     if(!IdrPicFlag)
     {

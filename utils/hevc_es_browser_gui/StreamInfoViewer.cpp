@@ -21,7 +21,7 @@ void StreamInfoViewer::onNALUnit(std::shared_ptr<HEVC::NALUnit> pNALUnit, const 
 {
   m_nalusNumber++;
 
-  switch(pNALUnit -> m_nalUnitType)
+  switch(pNALUnit -> m_nalHeader.type)
   {
     case HEVC::NAL_VPS:
     {

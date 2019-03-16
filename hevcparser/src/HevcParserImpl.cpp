@@ -99,11 +99,12 @@ void HevcParserImpl::processNALUnit(const uint8_t *pdata, std::size_t size, cons
 {
   BitstreamReader bs(pdata, size);
 
-  NALUnitType type = processNALUnitHeader(bs);
+  NALHeader header;
+  processNALUnitHeader(bs, &header);
 
   std::shared_ptr<NALUnit> pnalU;
 
-  switch(type)
+  switch(header.type)
   {
     case NAL_VPS:
     {
@@ -150,7 +151,7 @@ void HevcParserImpl::processNALUnit(const uint8_t *pdata, std::size_t size, cons
     case NAL_RASL_N:
     case NAL_RASL_R:
     {
-      std::shared_ptr<Slice> pslice(new Slice(type));
+      std::shared_ptr<Slice> pslice(new Slice(header));
       processSlice(pslice, bs, info);
       pnalU = pslice;
       m_lastSlice = pslice;
@@ -168,14 +169,14 @@ void HevcParserImpl::processNALUnit(const uint8_t *pdata, std::size_t size, cons
     case NAL_SEI_SUFFIX:
     case NAL_SEI_PREFIX:
     {
-      std::shared_ptr<SEI> psei(new SEI(type));
+      std::shared_ptr<SEI> psei(new SEI(header));
       processSEI(psei, bs, info);
       pnalU = psei;
       break;
     }
 
     default:
-      pnalU = std::shared_ptr<NALUnit>(new NALUnit(type));
+      pnalU = std::shared_ptr<NALUnit>(new NALUnit(header));
   };
 
   std::list<Consumer *>::const_iterator itr = m_consumers.begin();
@@ -185,19 +186,18 @@ void HevcParserImpl::processNALUnit(const uint8_t *pdata, std::size_t size, cons
 }
 
 
-NALUnitType HevcParserImpl::processNALUnitHeader(BitstreamReader &bs)
+void HevcParserImpl::processNALUnitHeader(BitstreamReader &bs, NALHeader *header)
 {
   //forbidden_zero_bit
   bs.getBit();
 
-  NALUnitType type = (NALUnitType)bs.getBits(6);
+  header->type = (NALUnitType)bs.getBits(6);
 
   //nuh_layer_id
-  bs.getBits(6);
+  header->layer_id = bs.getBits(6);
 
   //nuh_temporal_id_plus1
-  bs.getBits(3);
-  return type;
+  header->temporal_id_plus1 = bs.getBits(3);
 }
 
 
@@ -213,7 +213,7 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
 {
   pslice -> first_slice_segment_in_pic_flag = bs.getBits(1);
 
-  if(pslice -> m_nalUnitType >= NAL_BLA_W_LP && pslice -> m_nalUnitType <= NAL_IRAP_VCL23)
+  if(pslice -> m_nalHeader.type >= NAL_BLA_W_LP && pslice -> m_nalHeader.type <= NAL_IRAP_VCL23)
     pslice -> no_output_of_prior_pics_flag = bs.getBits(1);
 
   pslice -> slice_pic_parameter_set_id = bs.getGolombU();
@@ -288,7 +288,7 @@ void HevcParserImpl::processSliceHeader(std::shared_ptr<Slice> pslice, Bitstream
     if(m_spsMap[spsId] -> separate_colour_plane_flag)
       pslice -> colour_plane_id = bs.getBits(2);
 
-    bool IdrPicFlag = pslice -> m_nalUnitType == NAL_IDR_W_RADL || pslice -> m_nalUnitType == NAL_IDR_N_LP;
+    bool IdrPicFlag = pslice -> m_nalHeader.type == NAL_IDR_W_RADL || pslice -> m_nalHeader.type == NAL_IDR_N_LP;
     if(!IdrPicFlag)
     {
       if(m_spsMap[spsId] -> log2_max_pic_order_cnt_lsb_minus4 + 4 >= 32)
