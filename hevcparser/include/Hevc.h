@@ -268,6 +268,7 @@ namespace HEVC
         KNEE_FUNCTION_INFO                   = 141,
         COLOUR_REMAPPING_INFO                = 142,
         CONTENT_LIGHT_LEVEL_INFO             = 144,
+        ALTERNATIVE_TRANSFER_CHARACTERISTICS = 147,
     };
 
     uint32_t           num_payload_type_ff_bytes;
@@ -626,6 +627,13 @@ namespace HEVC
     void toDefault() {};
   };
 
+  class AlternativeTransferCharacteristics: public SeiPayload
+  {
+  public:
+    uint16_t      alternative_transfer_characteristics;
+
+    void toDefault() {};
+  };
 
   class PredWeightTable
   {

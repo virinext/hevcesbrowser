@@ -73,6 +73,7 @@ private:
     void createChromaResamplingFilterHint(std::shared_ptr<HEVC::ChromaResamplingFilterHint> pSeiPayload, QTreeWidgetItem *pItem);
     void createColourRemappingInfo(std::shared_ptr<HEVC::ColourRemappingInfo> pSeiPayload, QTreeWidgetItem *pItem);
     void createContentLightLevelInfo(std::shared_ptr<HEVC::ContentLightLevelInfo> pSeiPayload, QTreeWidgetItem *pItem);
+    void createAlternativeTransferCharacteristics(std::shared_ptr<HEVC::AlternativeTransferCharacteristics> pSeiPayload, QTreeWidgetItem *pItem);
 
     std::map<uint32_t, std::shared_ptr<HEVC::VPS> >          m_vpsMap;
     std::map<uint32_t, std::shared_ptr<HEVC::SPS> >          m_spsMap;
