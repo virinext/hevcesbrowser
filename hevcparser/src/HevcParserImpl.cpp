@@ -944,6 +944,14 @@ void HevcParserImpl::processSEI(std::shared_ptr<SEI> psei, BitstreamReader &bs, 
         msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
         break;
       }
+      case SeiMessage::ALTERNATIVE_TRANSFER_CHARACTERISTICS:
+      {
+        std::shared_ptr<AlternativeTransferCharacteristics> pseiPayload(new AlternativeTransferCharacteristics);
+        BitstreamReader tmpBs = bs;
+        processAlternativeTransferCharacteristics(pseiPayload, tmpBs);
+        msg.sei_payload = std::dynamic_pointer_cast<SeiPayload>(pseiPayload);
+        break;
+      }
     }
 
     bs.skipBits(payloadSize * 8);
@@ -1852,6 +1860,11 @@ void HevcParserImpl::processContentLightLevelInfo(std::shared_ptr<ContentLightLe
 {
   pSeiPayload -> max_content_light_level = bs.getBits(16);
   pSeiPayload -> max_pic_average_light_level = bs.getBits(16);
+}
+
+void HevcParserImpl::processAlternativeTransferCharacteristics(std::shared_ptr<AlternativeTransferCharacteristics> pSeiPayload, BitstreamReader &bs)
+{
+  pSeiPayload -> alternative_transfer_characteristics = bs.getBits(8);
 }
 
 void HevcParserImpl::processFramePacking(std::shared_ptr<FramePacking> pSeiPayload, BitstreamReader &bs)

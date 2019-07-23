@@ -1132,6 +1132,16 @@ void SyntaxViewer::createSEI(std::shared_ptr<HEVC::SEI> pSEI)
         break;
       }
 
+      case HEVC::SeiMessage::ALTERNATIVE_TRANSFER_CHARACTERISTICS:
+      {
+        std::shared_ptr<HEVC::AlternativeTransferCharacteristics> pSeiMessage = std::dynamic_pointer_cast<HEVC::AlternativeTransferCharacteristics>(pSEI -> sei_message[i].sei_payload);
+
+        QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("alternative_transfer_characteristics(" + QString::number(payloadSize) + ")"));
+        pitem -> addChild(pitemSei);
+        createAlternativeTransferCharacteristics(pSeiMessage, pitemSei);
+        break;
+      }
+
       default:
         pitem -> addChild(new QTreeWidgetItem(QStringList("sei_payload(" + QString::number(payloadType) + ", " + QString::number(payloadSize) + ")")));
     }
@@ -2072,6 +2082,11 @@ void SyntaxViewer::createContentLightLevelInfo(std::shared_ptr<HEVC::ContentLigh
 {
   pItem -> addChild(new QTreeWidgetItem(QStringList("max_content_light_level = " + QString::number(pSeiPayload->max_content_light_level))));
   pItem -> addChild(new QTreeWidgetItem(QStringList("max_pic_average_light_level = " + QString::number(pSeiPayload->max_pic_average_light_level))));
+}
+
+void SyntaxViewer::createAlternativeTransferCharacteristics(std::shared_ptr<HEVC::AlternativeTransferCharacteristics> pSeiPayload, QTreeWidgetItem *pItem)
+{
+  pItem -> addChild(new QTreeWidgetItem(QStringList("alternative_transfer_characteristics = " + QString::number(pSeiPayload->alternative_transfer_characteristics))));
 }
 
 

@@ -63,6 +63,7 @@ namespace HEVC
       void processChromaResamplingFilterHint(std::shared_ptr<ChromaResamplingFilterHint> pSeiPayload, BitstreamReader &bs);
       void processColourRemappingInfo(std::shared_ptr<ColourRemappingInfo> pSeiPayload, BitstreamReader &bs);
       void processContentLightLevelInfo(std::shared_ptr<ContentLightLevelInfo> pSeiPayload, BitstreamReader &bs);
+      void processAlternativeTransferCharacteristics(std::shared_ptr<AlternativeTransferCharacteristics> pSeiPayload, BitstreamReader &bs);
 
       void onWarning(const std::string &warning, const Info *pInfo, WarningType type);
 
