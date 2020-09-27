@@ -17,7 +17,8 @@
 #include <QMenuBar>
 #include <QProgressBar>
 #include <QCoreApplication>
-
+#include <QInputDialog>
+#include <QLineEdit>
 
 #include "CentralWidget.h"
 #include "WarningsViewer.h"
@@ -62,6 +63,12 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags):
 
   pmenu -> addSeparator();
   pmenu -> addAction("Exit", this, SLOT(close()));
+
+  pmenu = menuBar() -> addMenu("&Edit");
+  QAction *search = pmenu->addAction("查找大小",this,SLOT(findSize()));
+  search->setShortcutContext(Qt::ApplicationShortcut);
+  search->setShortcut(QKeySequence::Find);
+  addAction(search);
 
   pmenu = menuBar() -> addMenu("&Help");
   pmenu -> addAction ("About HEVCESBrowser...", this, SLOT(slotAbout()));
@@ -234,6 +241,21 @@ void MainWindow::readCustomData()
 {
   QSettings settings("HEVCESBrowser", "HEVCESBrowser");
   restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
+}
+
+void MainWindow::findSize(){
+    bool isOK;
+    QString text = QInputDialog::getText(NULL, "搜索",
+                                                       "文本搜索",
+                                                       QLineEdit::Normal,
+                                                       "",
+                                                       &isOK);
+
+    if(isOK) {
+        CentralWidget *pcntwgt = dynamic_cast<CentralWidget *>(centralWidget());
+        pcntwgt->m_pcomInfoViewer->findSize(text,true);
+    }
+
 }
 
 void MainWindow::slotAbout()
