@@ -546,7 +546,7 @@ void HevcParserImpl::processVPS(std::shared_ptr<VPS> pvps, BitstreamReader &bs, 
 
     if(pvps -> vps_poc_proportional_to_timing_flag)
     {
-      pvps -> vps_num_ticks_poc_diff_one_minus1 = bs.getBits(1);
+      pvps -> vps_num_ticks_poc_diff_one_minus1 = bs.getGolombU();
     }
     pvps -> vps_num_hrd_parameters = bs.getGolombU();
 

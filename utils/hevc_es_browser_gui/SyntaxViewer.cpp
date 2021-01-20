@@ -200,7 +200,7 @@ void SyntaxViewer::createVPS(std::shared_ptr<HEVC::VPS> pVPS)
         QTreeWidgetItem *pitemThird = new QTreeWidgetItem(QStringList("hrd_parameters(" + QString::number(i) + ", " + QString::number(pVPS -> vps_max_sub_layers_minus1) + ")"));
         ploop -> addChild(pitemThird);
 
-        createHrdParameters(pVPS -> hrd_parameters[i], i, pitemThird);
+        createHrdParameters(pVPS -> hrd_parameters[i], pVPS -> cprms_present_flag[i], pitemThird);
       }
     }
   }
@@ -1478,7 +1478,7 @@ void SyntaxViewer::createHrdParameters(const HEVC::HrdParameters &hrd, uint8_t c
         QTreeWidgetItem *pitemThird = new QTreeWidgetItem(QStringList("sub_layer_hrd_parameters(" + QString::number(i) + ")"));
         pitemSecond -> addChild(pitemThird);
 
-        createSubLayerHrdParameters(hrd.nal_sub_layer_hrd_parameters[i], i, pitemThird);
+        createSubLayerHrdParameters(hrd.nal_sub_layer_hrd_parameters[i], hrd.sub_pic_hrd_params_present_flag, pitemThird);
       }
       if(hrd.vcl_hrd_parameters_present_flag)
       {
@@ -1488,7 +1488,7 @@ void SyntaxViewer::createHrdParameters(const HEVC::HrdParameters &hrd, uint8_t c
         QTreeWidgetItem *pitemThird = new QTreeWidgetItem(QStringList("sub_layer_hrd_parameters(" + QString::number(i) + ")"));
         pitemSecond -> addChild(pitemThird);
 
-        createSubLayerHrdParameters(hrd.nal_sub_layer_hrd_parameters[i], i, pitemThird);
+        createSubLayerHrdParameters(hrd.vcl_sub_layer_hrd_parameters[i], hrd.sub_pic_hrd_params_present_flag, pitemThird);
       }
     }
   }
@@ -2655,14 +2655,7 @@ void SyntaxViewer::updateItemsState()
 
 bool SyntaxViewer::SyntaxViewerState::isActive(const QTreeWidgetItem *pitem) const
 {
-  std::map<QString, bool>::const_iterator itr = m_state.begin();
-
-  for(;itr != m_state.end(); itr++)
-  {
-    if(itr -> first == name(pitem))
-      break;
-  }
-
+  std::map<QString, bool>::const_iterator itr = m_state.find(name(pitem));
   if(itr != m_state.end())
     return itr -> second;
 
