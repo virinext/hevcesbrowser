@@ -187,6 +187,25 @@ void CommonInfoViewer::onSelectionChanged(const QItemSelection & selected, const
 }
 
 
+void CommonInfoViewer::findSize(const QString text,bool next){
+    QList<QTableWidgetItem*>list = this->findItems(text,Qt::MatchContains);
+    int offsetRow = -1;
+    if(next){
+        offsetRow = this->currentRow();
+    }
+    if(list.size()>0){
+        for (int i=0;i<list.count();i++) {
+            QTableWidgetItem*item = list.at(i);
+            qDebug()<<item<<" current:"<< (item->row()) <<" offset:"<<offsetRow;
+            if(item->row()>offsetRow){
+                this->scrollToItem(item,QAbstractItemView::PositionAtCenter);
+                this->setCurrentItem(item);
+                break;
+            }
+        }
+    }
+}
+
 void CommonInfoViewer::clear()
 {
   setRowCount(0);
