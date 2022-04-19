@@ -981,7 +981,7 @@ void SyntaxViewer::createSEI(std::shared_ptr<HEVC::SEI> pSEI)
       case HEVC::SeiMessage::PICTURE_TIMING:
       {
         std::shared_ptr<HEVC::PicTiming> pSeiMessage = std::dynamic_pointer_cast<HEVC::PicTiming>(pSEI -> sei_message[i].sei_payload);
-        QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("pic_timitng(" + QString::number(payloadSize) + ")"));
+        QTreeWidgetItem *pitemSei = new QTreeWidgetItem(QStringList("pic_timing(" + QString::number(payloadSize) + ")"));
         pitem -> addChild(pitemSei);
         createPicTiming(pSeiMessage, pitemSei);
         break;
