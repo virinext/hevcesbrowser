@@ -106,7 +106,7 @@ void BitstreamReader::skipBits(std::size_t num)
     }
   }
 
-  if(m_posInBase > num % 8)
+  if(m_posInBase >= num % 8)
     m_posInBase -= num % 8;
   else
   {
