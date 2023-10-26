@@ -27,15 +27,15 @@ std::size_t BitstreamReader::availableInNalU()
     pos++;
   for(; pos<(m_size - 3); pos++)
   {
-    bool naluFinded = m_ptr[pos] == 0 && m_ptr[pos+1] == 0 && m_ptr[pos+2] == 1;
+    bool naluFound = m_ptr[pos] == 0 && m_ptr[pos+1] == 0 && m_ptr[pos+2] == 1;
 
-    if(!naluFinded)
+    if(!naluFound)
     {
       if(m_size - pos >= 4 && m_ptr[pos] == 0 && m_ptr[pos+1] == 0 && m_ptr[pos+2] == 0 && m_ptr[pos+3] == 1)
-        naluFinded = true;
+        naluFound = true;
     }
 
-    if(naluFinded)
+    if(naluFound)
     {
       return (pos - m_posBase - 1) * CHAR_BIT + m_posInBase + 1;
     }
