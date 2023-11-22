@@ -20,7 +20,7 @@ class MainWindow: public QMainWindow
     void slotShowInfoViewer();
     void slotShowHDRInfoViewer();
     void slotAbout();
-
+    void findSize();
 
 private:
     void process(const QString &fileName);

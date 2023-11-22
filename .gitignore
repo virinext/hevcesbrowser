@@ -8,3 +8,5 @@ utils/hevc_es_browser_gui/Makefile*
 utils/hevc_es_browser_gui/version_info.h
 utils/hevc_es_browser_gui/object_script.hevcesbrowser.Debug
 utils/hevc_es_browser_gui/object_script.hevcesbrowser.Release
+utils/hevc_es_browser_gui/.qmake.stash
+utils/hevc_es_browser_gui/hevc_es_browser_gui.pro.user
